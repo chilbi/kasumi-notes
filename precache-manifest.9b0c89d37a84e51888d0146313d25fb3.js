@@ -1,6 +1,6 @@
 self.__precacheManifest = (self.__precacheManifest || []).concat([
   {
-    "revision": "90d0fb585838eb542553be4101add0c4",
+    "revision": "f70117acee902f15afdbf506f8491044",
     "url": "/kasumi-notes/index.html"
   },
   {
@@ -16,8 +16,8 @@ self.__precacheManifest = (self.__precacheManifest || []).concat([
     "url": "/kasumi-notes/static/js/data.00903c28.chunk.js"
   },
   {
-    "revision": "339ef8fd0b6d2c80efdc",
-    "url": "/kasumi-notes/static/js/main.0cf61023.chunk.js"
+    "revision": "1057516beea383429b6e",
+    "url": "/kasumi-notes/static/js/main.22cc0c60.chunk.js"
   },
   {
     "revision": "3762caefa79941136d31",

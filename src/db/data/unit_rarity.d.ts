@@ -1,0 +1,44 @@
+export interface UnitRarity {
+  unit_id: number;
+  rarity: number;
+  hp: number;
+  hp_growth: number;
+  atk: number;
+  atk_growth: number;
+  magic_str: number;
+  magic_str_growth: number;
+  def: number;
+  def_growth: number;
+  magic_def: number;
+  magic_def_growth: number;
+  physical_critical: number;
+  physical_critical_growth: number;
+  magic_critical: number;
+  magic_critical_growth: number;
+  wave_hp_recovery: number;
+  wave_hp_recovery_growth: number;
+  wave_energy_recovery: number;
+  wave_energy_recovery_growth: number;
+  dodge: number;
+  dodge_growth: number;
+  physical_penetrate: number;
+  physical_penetrate_growth: number;
+  magic_penetrate: number;
+  magic_penetrate_growth: number;
+  life_steal: number;
+  life_steal_growth: number;
+  hp_recovery_rate: number;
+  hp_recovery_rate_growth: number;
+  energy_recovery_rate: number;
+  energy_recovery_rate_growth: number;
+  energy_reduce_rate: number;
+  energy_reduce_rate_growth: number;
+  unit_material_id: number;
+  consume_num: number;
+  consume_gold: number;
+  accuracy: number;
+  accuracy_growth: number;
+}
+
+declare const data: UnitRarity[];
+export default data;

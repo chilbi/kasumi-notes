@@ -132,7 +132,6 @@ class DBHelper extends ImageData {
   }
 
   protected setAllCharaData(allCharaData: PCRStoreValue<'chara_data'>[]): Promise<void> {
-    console.log('1 chi setAllCharaData')
     const tx = this.db.transaction('chara_data', 'readwrite');
     const promiseArr = [];
     allCharaData.forEach(record => promiseArr.push(tx.store.put(record)));

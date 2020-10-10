@@ -140,7 +140,7 @@ function CharaSkill(props: CharaSkillProps) {
   const styles = useStyles();
 
   if (!charaSkill || !atkType || !property) return null;
-  console.log(charaSkill);
+  // console.log(charaSkill);
 
   const getPatternItem = ({ label, data, atkType, pattern }: PatternItemProps) => {
     const getItemData = (atkItem: number, index: number) => {

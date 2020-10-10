@@ -1,7 +1,7 @@
 import React from 'react';
 import { ThemeProvider } from '@material-ui/core/styles'
 import CssBaseline from '@material-ui/core/CssBaseline';
-import { BrowserRouter } from 'react-router-dom';
+import { HashRouter as Router } from 'react-router-dom';
 import PCRDBProvider from './components/PCRDBProvider';
 import Main from './components/Main';
 import theme from './theme';
@@ -11,9 +11,9 @@ function App() {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <PCRDBProvider>
-        <BrowserRouter>
+        <Router>
           <Main />
-        </BrowserRouter>
+        </Router>
       </PCRDBProvider>
     </ThemeProvider>
   );

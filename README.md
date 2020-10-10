@@ -1,5 +1,5 @@
-# Kasumi Notes（香澄笔记）
-《Princess Connect Re:Dive》WebApp辅助工具
+# [Kasumi Notes（香澄笔记）](https://chilbi.github.io/kasumi-notes/)
+《Princess Connect Re:Dive》WebApp辅助工具。
 
 ## 构建项目
 1. 下载 [redive_master_db_diff](https://github.com/esterTion/redive_master_db_diff) 到项目根目录

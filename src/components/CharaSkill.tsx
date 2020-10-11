@@ -22,6 +22,10 @@ const useStyles = makeStyles((theme: Theme) => {
     item: {
       padding: '0.5em 0',
     },
+    flexBox: {
+      display: 'flex',
+      margin: '0.25em 0',
+    },
     label: {
       display: 'inline-block',
       padding: '0 0.5em',
@@ -29,6 +33,11 @@ const useStyles = makeStyles((theme: Theme) => {
       borderRadius: '0.25em',
       color: '#fff',
       backgroundColor: theme.palette.primary.dark,
+    },
+    level: {
+      display: 'inline-block',
+      marginLeft: 'auto',
+      color: theme.palette.secondary.light,
     },
     patternBox: {
       display: 'flex',
@@ -55,10 +64,6 @@ const useStyles = makeStyles((theme: Theme) => {
       height: '1rem',
       fontSize: '0.75rem',
       color: theme.palette.primary.dark,
-    },
-    infoBox: {
-      display: 'flex',
-      padding: '0.25em 0',
     },
     imgRoot: {
       width: iconSize + 'rem',
@@ -189,8 +194,11 @@ function CharaSkill(props: CharaSkillProps) {
 
   const getSkillItem = ({ label, data, skillLevel }: SkillItemProps) => (
     <div key={label} className={styles.item}>
-      <div className={styles.label}>{label}</div>
-      <div className={styles.infoBox}>
+      <div className={styles.flexBox}>
+        <span className={styles.label}>{label}</span>
+        <span className={styles.level}>Lv{skillLevel}</span>
+      </div>
+      <div className={styles.flexBox}>
         <SkeletonImage classes={{ root: styles.imgRoot }} src={getPublicImageURL('skill', data.icon_type)} save />
         <div className={styles.nameBox}>
           <span className={styles.name}>{data.name}</span>

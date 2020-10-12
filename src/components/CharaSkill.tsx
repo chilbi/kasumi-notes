@@ -59,13 +59,13 @@ const useStyles = makeStyles((theme: Theme) => {
     loopLabel: {
       width: iconSize + 'rem',
       height: '1rem',
-      fontSize: '0.75rem',
+      fontSize: '0.625rem',
       color: theme.palette.secondary.dark,
     },
     patternLabel: {
       width: iconSize + 'rem',
       height: '1rem',
-      fontSize: '0.75rem',
+      fontSize: '0.625rem',
       color: theme.palette.primary.dark,
     },
     imgRoot: {
@@ -144,8 +144,6 @@ const useStyles = makeStyles((theme: Theme) => {
 
 interface PatternItemProps {
   label: string;
-  charaSkill: UnitSkillData;
-  atkType: number;
   pattern: AttackPattern;
 }
 
@@ -165,19 +163,31 @@ interface CharaSkillProps {
 
 function CharaSkill(props: CharaSkillProps) {
   const { atkType, atkCastTime, property, charaSkill, userProfile = {} as Partial<PCRStoreValue<'user_profile'>> } = props;
-  const { skill_enhance_status = { ub: 1, 1: 1, 2: 1, ex: 1 } } = userProfile;
+  const { skill_enhance_status = { ub: 1, 1: 1, 2: 1, ex: 1 }, unique_enhance_level = 0 } = userProfile;
   const styles = useStyles();
 
   if (!charaSkill || !atkType || !atkCastTime || !property) return null;
   console.log(charaSkill);
 
-  const getPatternItem = ({ label, charaSkill, atkType, pattern }: PatternItemProps) => {
+  const atkData = atkType === 1
+    ? {
+      name: '物理',
+      src: getPublicImageURL('equipment', '101011'),
+      damege: property.atk,
+    }
+    : {
+      name: '魔法',
+      src: getPublicImageURL('equipment', '101251'),
+      damege: property.magic_str,
+    };
+
+  const getPatternItem = ({ label, pattern }: PatternItemProps) => {
     const getItemData = (atkItem: number, index: number) => {
       let loopLabel = index + 1 === pattern.loop_start ? 'START' : index + 1 === pattern.loop_end ? 'END' : '';
       let imgSrc = '';
       let patternLabel = '';
       if (atkItem === 1) {
-        imgSrc = getPublicImageURL('equipment', atkType === 1 ? '101011' : '101251');
+        imgSrc = atkData.src;
         patternLabel = 'A';
       } else {
         let iconType: number;
@@ -185,6 +195,9 @@ function CharaSkill(props: CharaSkillProps) {
         if (atkItem < 2000) {
           iconType = charaSkill.main_skill[i - 1].icon_type;
           patternLabel = 'Main' + i;
+          if (i === 1 && unique_enhance_level > 0) {
+            patternLabel += '+';
+          }
         } else {
           iconType = charaSkill.sp_skill[i - 1].icon_type;
           patternLabel = 'SP' + i;
@@ -308,19 +321,20 @@ function CharaSkill(props: CharaSkillProps) {
     <div className={styles.root}>
       {charaSkill.attack_pattern.map((item, i) => (
         <React.Fragment key={i}>
-          {getPatternItem({ label: '攻撃パターン' + (i + 1), charaSkill: charaSkill, atkType, pattern: item })}
+          {getPatternItem({ label: '攻撃パターン' + (i + 1), pattern: item })}
           <Divider />
         </React.Fragment>
       ))}
       <div key="A" className={styles.item}>
         <div className={styles.label}>A</div>
         <div className={styles.flexBox}>
-          <SkeletonImage classes={{ root: styles.imgRoot }} src={getPublicImageURL('equipment', atkType === 1 ? '101011' : '101251')} save />
+          <SkeletonImage classes={{ root: styles.imgRoot }} src={atkData.src} save />
           <div className={styles.nameBox}>
-            <span className={styles.name}>{atkType === 1 ? '物理' : '魔法'}通常攻撃</span>
+            <span className={styles.name}>{atkData.name}通常攻撃</span>
             <span className={styles.castTime}>待機時間：{atkCastTime}s</span>
           </div>
         </div>
+        <div className={styles.skillDesc}>目の前の敵１キャラに{atkData.damege}{atkData.name}ダメージを与える。</div>
       </div>
       {skillList.map(item => (
         <React.Fragment key={item.label}>

@@ -3,9 +3,12 @@ import { makeStyles, Theme } from '@material-ui/core/styles';
 import Divider from '@material-ui/core/Divider';
 import SkeletonImage from './SkeletonImage';
 import { AttackPattern, SkillData, UnitSkillData, SkillEnhanceStatus } from '../DBHelper/skill';
+import { DescData } from '../DBHelper/skill_action';
 import { getPublicImageURL } from '../DBHelper/helper';
 import { Property } from '../DBHelper/property';
+import { state } from '../DBHelper/state';
 import { PCRStoreValue } from '../db';
+import clsx from 'clsx';
 
 const useStyles = makeStyles((theme: Theme) => {
   const
@@ -13,7 +16,7 @@ const useStyles = makeStyles((theme: Theme) => {
     scalage = 0.375,
     iconSize = 128 * scalage / rem,
     borderRadius = 12 * scalage / rem,
-    labelSize = 1.5;
+    descObjSize = 1.5;
 
   return {
     root: {
@@ -98,17 +101,14 @@ const useStyles = makeStyles((theme: Theme) => {
     actionItem: {
       position: 'relative',
       margin: '0.25em 0',
-      paddingLeft: (labelSize + 0.25) + 'em',
-      lineHeight: labelSize + 'em',
+      paddingLeft: (descObjSize + 0.25) + 'em',
+      lineHeight: descObjSize + 'em',
       wordBreak: 'break-all',
     },
-    actionItemLabel: {
+    actionNum: {
       display: 'inline-block',
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      width: labelSize + 'em',
-      height: labelSize + 'em',
+      width: descObjSize + 'em',
+      height: descObjSize + 'em',
       fontFamily: '"Arial","Microsoft YaHei",sans-serif',
       fontWeight: 700,
       textAlign: 'center',
@@ -116,19 +116,42 @@ const useStyles = makeStyles((theme: Theme) => {
       backgroundColor: theme.palette.grey[600],
       clipPath: 'polygon(50% 0, 100% 50%, 50% 100%, 0 50%)',
     },
+    stateRoot: {
+      position: 'relative',
+      display: 'inline-block',
+      width: descObjSize + 'em',
+      height: '1em',
+    },
+    stateImg: {
+      position: 'absolute',
+      top: (descObjSize - 1) / -2 + 'em',
+      left: 0,
+      width: descObjSize + 'em',
+      height: descObjSize + 'em',
+    },
+    formula: {
+      padding: '0 0.25em',
+      borderBottom: '2px dotted ' + theme.palette.primary.main,
+    },
+    absolute0: {
+      zIndex: 0,
+      position: 'absolute',
+      top: 0,
+      left: 0,
+    },
   };
 });
 
 interface PatternItemProps {
   label: string;
-  data: UnitSkillData;
+  charaSkill: UnitSkillData;
   atkType: number;
   pattern: AttackPattern;
 }
 
 interface SkillItemProps {
   label: string;
-  data: SkillData;
+  skillData: SkillData;
   skillLevel: number;
 }
 
@@ -145,9 +168,9 @@ function CharaSkill(props: CharaSkillProps) {
   const styles = useStyles();
 
   if (!charaSkill || !atkType || !property) return null;
-  // console.log(charaSkill);
+  console.log(charaSkill);
 
-  const getPatternItem = ({ label, data, atkType, pattern }: PatternItemProps) => {
+  const getPatternItem = ({ label, charaSkill, atkType, pattern }: PatternItemProps) => {
     const getItemData = (atkItem: number, index: number) => {
       let loopLabel = index + 1 === pattern.loop_start ? 'START' : index + 1 === pattern.loop_end ? 'END' : '';
       let imgSrc = '';
@@ -159,10 +182,10 @@ function CharaSkill(props: CharaSkillProps) {
         let iconType: number;
         const i = atkItem % 10;
         if (atkItem < 2000) {
-          iconType = data.main_skill[i - 1].icon_type;
+          iconType = charaSkill.main_skill[i - 1].icon_type;
           patternLabel = 'Main' + i;
         } else {
-          iconType = data.sp_skill[i - 1].icon_type;
+          iconType = charaSkill.sp_skill[i - 1].icon_type;
           patternLabel = 'SP' + i;
         }
         imgSrc = getPublicImageURL('skill', iconType);
@@ -192,35 +215,69 @@ function CharaSkill(props: CharaSkillProps) {
     );
   };
 
-  const getSkillItem = ({ label, data, skillLevel }: SkillItemProps) => (
+  const renderDesc = (descData: DescData, key: number): React.ReactNode => {
+    if (Array.isArray(descData)) {
+      return descData.map((item, i) => renderDesc(item, i));
+    } else {
+      if (typeof descData === 'object') {
+        switch (descData.type) {
+          case 'formula':
+            return (
+              <span key={key} className={styles.formula}>[{descData.value}]</span>
+            );
+          case 'action':
+            return (
+              <React.Fragment key={key}>
+                {'「アクション'}
+                <span className={styles.actionNum}>{descData.value}</span>
+                {'」'}
+              </React.Fragment>
+            );
+          case 'state':
+            return (
+              <React.Fragment key={key}>
+                {'ステータス【' + state[descData.value as number].name}
+                <span className={styles.stateRoot}>
+                  <SkeletonImage classes={{ img: styles.stateImg }} src={getPublicImageURL('state', descData.value)} save onlyImg />
+                </span>
+                {'】'}
+              </React.Fragment>
+            );
+        }
+      }
+      return descData;
+    }
+  };
+
+  const getSkillItem = ({ label, skillData, skillLevel }: SkillItemProps) => (
     <div key={label} className={styles.item}>
       <div className={styles.flexBox}>
         <span className={styles.label}>{label}</span>
         <span className={styles.level}>Lv{skillLevel}</span>
       </div>
       <div className={styles.flexBox}>
-        <SkeletonImage classes={{ root: styles.imgRoot }} src={getPublicImageURL('skill', data.icon_type)} save />
+        <SkeletonImage classes={{ root: styles.imgRoot }} src={getPublicImageURL('skill', skillData.icon_type)} save />
         <div className={styles.nameBox}>
-          <span className={styles.name}>{data.name}</span>
-          <span className={styles.castTime}>待機時間：{data.skill_cast_time}s</span>
+          <span className={styles.name}>{skillData.name}</span>
+          <span className={styles.castTime}>待機時間：{skillData.skill_cast_time}s</span>
         </div>
       </div>
-      <div className={styles.skillDesc}>{data.description}</div>
+      <div className={styles.skillDesc}>{skillData.description}</div>
       <div className={styles.actionLabel}>スキルアクション</div>
       <ol className={styles.actionList}>
-        {data.action.map((item, i) => (
+        {skillData.action.map((item, i) => (
           <li key={item.action_id} className={styles.actionItem}>
-            <span className={styles.actionItemLabel}>{i + 1}</span>
-            {item.getDescription(skillLevel, property)}
+            <span className={clsx(styles.actionNum, styles.absolute0)}>{i + 1}</span>
+            {renderDesc(item.getDescData(skillLevel, property, skillData.action), item.action_id)}
           </li>
         ))}
       </ol>
     </div>
   );
   const skillList: SkillItemProps[] = [];
-  skillList.push({ label: 'UB', data: charaSkill.union_burst, skillLevel: skill_enhance_status['ub'] });
+  skillList.push({ label: 'UB', skillData: charaSkill.union_burst, skillLevel: skill_enhance_status['ub'] });
   if (charaSkill.union_burst_evolution) {
-    skillList.push({ label: 'UB+', data: charaSkill.union_burst_evolution, skillLevel: skill_enhance_status['ub'] });
+    skillList.push({ label: 'UB+', skillData: charaSkill.union_burst_evolution, skillLevel: skill_enhance_status['ub'] });
   }
   const pushItem = (label: string, normal: SkillData[], evolution: SkillData[], ex?: boolean) => {
     const len = normal.length;
@@ -229,14 +286,14 @@ function CharaSkill(props: CharaSkillProps) {
       const skillLevel = ex ? skill_enhance_status['ex'] : (skill_enhance_status[n as keyof SkillEnhanceStatus] || skill_enhance_status['ub']);
       skillList.push({
         label: label + n,
-        data: normal[i],
+        skillData: normal[i],
         skillLevel,
       });
       const evItem = evolution[i];
       if (evItem) {
         skillList.push({
           label: label + n + '+',
-          data: evItem,
+          skillData: evItem,
           skillLevel,
         });
       }
@@ -249,7 +306,7 @@ function CharaSkill(props: CharaSkillProps) {
   return (
     <div className={styles.root}>
       {charaSkill.attack_pattern.map((item, i) => (
-        getPatternItem({ label: '攻撃パターン' + (i + 1), data: charaSkill, atkType, pattern: item })
+        getPatternItem({ label: '攻撃パターン' + (i + 1), charaSkill: charaSkill, atkType, pattern: item })
       ))}
       {skillList.map(item => (
         <React.Fragment key={item.label}>

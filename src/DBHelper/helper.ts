@@ -90,7 +90,7 @@ export function getImageUrl(type: ImagePathType, imageName: string) {
   return 'https://redive.estertion.win/' + path;
 }
 
-type PublicImagePathType = /*'common' | */'icon_unit' | 'unit_plate' | 'still_unit' | 'skill' | 'equipment' | 'thumb_story'/* | 'item'*/;
+type PublicImagePathType = /*'common' | */'icon_unit' | 'unit_plate' | 'still_unit' | 'skill' | 'equipment' | 'state' | 'thumb_story'/* | 'item'*/;
 
 export function getPublicImageURL(type: PublicImagePathType, name: string | number): string {
   let path = '';
@@ -103,6 +103,9 @@ export function getPublicImageURL(type: PublicImagePathType, name: string | numb
       break;
     case 'equipment':
       path = 'icon/equipment/icon_equipment_' + name;
+      break;
+    case 'state':
+      path = 'icon/state/' + name;
       break;
     // case 'item':
     //   path = 'icon/item/icon_item_' + name;

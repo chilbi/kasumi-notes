@@ -54,14 +54,13 @@ const useStyles = makeStyles((theme: Theme) => {
       flexWrap: 'wrap',
     },
     thumbRoot: {
+      position: 'relative',
       flexBasis: thumbWidth + 'rem',
       flexGrow: 0,
       flexShrink: 0,
       margin: '0 -0.5em',
       width: thumbWidth + 'rem',
       height: thumbHeight + 'rem',
-    },
-    thumbImgBox: {
       '&::before': {
         zIndex: 2,
         content: '""',
@@ -71,7 +70,7 @@ const useStyles = makeStyles((theme: Theme) => {
         bottom: 0,
         left: 0,
         backgroundImage: 'linear-gradient(to right, rgba(255,255,255,0) 30%, rgba(255,255,255,1))',
-      },
+      }
     },
     tabs: {
       backgroundColor: '#fff',
@@ -106,7 +105,7 @@ function CharaStory(props: CharaStoryProps) {
         </div>
         <div className={styles.contentBox}>
           <SkeletonImage
-            classes={{ root: styles.thumbRoot, imgBox: styles.thumbImgBox }}
+            classes={{ root: styles.thumbRoot }}
             src={getPublicImageURL('thumb_story', storyStatus.chara_id + story.story_id.toString().padStart(3, '0'))}
             save
           />

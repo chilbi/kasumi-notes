@@ -29,7 +29,6 @@ const useStyles = makeStyles((theme: Theme) => ({
   fixedBar: {
     zIndex: theme.zIndex.appBar,
     position: 'absolute',
-    maxWidth: '40rem',
     width: '100%',
     height: '3.5rem',
   },

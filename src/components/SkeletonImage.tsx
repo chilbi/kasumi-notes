@@ -13,10 +13,6 @@ const useStyles = makeStyles((theme: Theme) => ({
     height: '100%',
   },
   img: {
-    zIndex: 1,
-    position: 'absolute',
-    left: 0,
-    top: 0,
     width: '100%',
     height: 'auto',
     userSelect: 'none',
@@ -24,24 +20,43 @@ const useStyles = makeStyles((theme: Theme) => ({
   hidden: {
     opacity: 0,
   },
+  absolute0: {
+    zIndex: 0,
+    position: 'absolute',
+    top: 0,
+    left: 0,
+  },
 }));
 
 interface SkeletonImageProps {
-  classes?: Partial<Record<'root' | 'imgBox' | 'img', string>>;
+  classes?: Partial<Record<'root' | 'img', string>>;
   src?: string;
   save?: boolean;
+  onlyImg?: boolean;
   children?: React.ReactNode;
 }
 
 function SkeletonImage(props: SkeletonImageProps) {
-  const { classes = {}, src, save, children } = props;
+  const { classes = {}, src, save, onlyImg, children } = props;
   const styles = useStyles();
   const url = useImage(src, save);
 
+  const hiddenClassName = url === undefined && styles.hidden;
+
+  const imgEle = (
+    <img
+      className={clsx(styles.img, !onlyImg && styles.absolute0, classes.img, hiddenClassName)}
+      src={url}
+      alt=""
+    />
+  );
+
+  if (onlyImg) return imgEle;
+
   return (
     <div className={clsx(styles.root, classes.root)}>
-      <div className={clsx(styles.imgBox, classes.imgBox, url === undefined && styles.hidden)}>
-        <img className={clsx(styles.img, classes.img)} src={url} alt="" />
+      <div className={clsx(styles.imgBox, hiddenClassName)}>
+        {imgEle}
         {children}
       </div>
     </div>

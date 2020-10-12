@@ -25,7 +25,7 @@ const theme = createMuiTheme({
     secondary: { main: '#f85090' },
   },
   typography: {
-    fontFamily: 'Marugo',
+    fontFamily: '"Marugo", "Arial","Microsoft YaHei","黑体","宋体",sans-serif',
     fontSize: 14,
   },
   components: {

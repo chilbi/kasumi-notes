@@ -157,17 +157,18 @@ interface SkillItemProps {
 
 interface CharaSkillProps {
   atkType?: number;
+  atkCastTime?: number;
   property?: Property;
   charaSkill?: UnitSkillData;
   userProfile?: PCRStoreValue<'user_profile'>;
 }
 
 function CharaSkill(props: CharaSkillProps) {
-  const { atkType, property, charaSkill, userProfile = {} as Partial<PCRStoreValue<'user_profile'>> } = props;
+  const { atkType, atkCastTime, property, charaSkill, userProfile = {} as Partial<PCRStoreValue<'user_profile'>> } = props;
   const { skill_enhance_status = { ub: 1, 1: 1, 2: 1, ex: 1 } } = userProfile;
   const styles = useStyles();
 
-  if (!charaSkill || !atkType || !property) return null;
+  if (!charaSkill || !atkType || !atkCastTime || !property) return null;
   console.log(charaSkill);
 
   const getPatternItem = ({ label, charaSkill, atkType, pattern }: PatternItemProps) => {
@@ -306,8 +307,21 @@ function CharaSkill(props: CharaSkillProps) {
   return (
     <div className={styles.root}>
       {charaSkill.attack_pattern.map((item, i) => (
-        getPatternItem({ label: '攻撃パターン' + (i + 1), charaSkill: charaSkill, atkType, pattern: item })
+        <React.Fragment key={i}>
+          {getPatternItem({ label: '攻撃パターン' + (i + 1), charaSkill: charaSkill, atkType, pattern: item })}
+          <Divider />
+        </React.Fragment>
       ))}
+      <div key="A" className={styles.item}>
+        <div className={styles.label}>A</div>
+        <div className={styles.flexBox}>
+          <SkeletonImage classes={{ root: styles.imgRoot }} src={getPublicImageURL('equipment', atkType === 1 ? '101011' : '101251')} save />
+          <div className={styles.nameBox}>
+            <span className={styles.name}>{atkType === 1 ? '物理' : '魔法'}通常攻撃</span>
+            <span className={styles.castTime}>待機時間：{atkCastTime}s</span>
+          </div>
+        </div>
+      </div>
       {skillList.map(item => (
         <React.Fragment key={item.label}>
           <Divider />

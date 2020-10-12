@@ -110,6 +110,7 @@ function CharaDetail(props: CharaDetailProps) {
     skill: (
       <CharaSkill
         atkType={detail && detail.charaData.atk_type}
+        atkCastTime={detail && detail.charaData.normal_atk_cast_time}
         property={property}
         charaSkill={detail && detail.charaSkillData}
         userProfile={detail && detail.userProfile}

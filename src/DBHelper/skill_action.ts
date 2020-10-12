@@ -139,6 +139,10 @@ const actionMap: Record</*action_type*/number, /*getDescription*/(this: SkillAct
     const formula = getFormula(this.action_value_1, this.action_value_2, skillLevel);
     return insertFormula(this.description, formula, getEffectTime(this.action_value_3));
   },
+  //　ミソギ UB action1
+  7: function () {
+    return '自分から２番目に近い敵をターゲット範囲の中心にする。'
+  },
   // speed up
   8: function () {
     return this.description.replace('アップ', `を${this.action_value_1}倍にする`) + getEffectTime(this.action_value_3);
@@ -149,6 +153,15 @@ const actionMap: Record</*action_type*/number, /*getDescription*/(this: SkillAct
     let desc = this.description;
     desc = desc === '' ? getSameDesc(this.action_id, this.action_detail_1, actionList) : desc;
     return insertFormula(desc, formula, getEffectTime(this.action_value_4));
+  },
+  // 暗闇
+  12: function () {
+    const actionObj = getActionObj(getActionNum(this.action_id) - 1);
+    return [
+      `命中率${this.action_detail_1}%`,
+      actionObj,
+      `にダメージを与えられたターゲットを${this.action_value_3}%の確率で${this.description + getEffectTime(this.action_value_1)}`
+    ];
   },
   // レイ　構え中に受けたダメージ
   18: function () {

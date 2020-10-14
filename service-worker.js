@@ -14,7 +14,7 @@
 importScripts("https://storage.googleapis.com/workbox-cdn/releases/4.3.1/workbox-sw.js");
 
 importScripts(
-  "/kasumi-notes/precache-manifest.14932caffc0f78eb466fbed8cd4d24e5.js"
+  "/kasumi-notes/precache-manifest.06363082b22853239b474a1f18e66383.js"
 );
 
 self.addEventListener('message', (event) => {

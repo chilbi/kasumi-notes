@@ -250,11 +250,11 @@ function CharaSkill(props: CharaSkillProps) {
           case 'state':
             return (
               <React.Fragment key={key}>
-                {'ステータス【' + state[descData.value as number].name}
+                {'【' + state[descData.value as number].name}
                 <span className={styles.stateRoot}>
                   <SkeletonImage classes={{ img: styles.stateImg }} src={getPublicImageURL('state', descData.value)} save onlyImg />
                 </span>
-                {'】'}
+                {'】状態'}
               </React.Fragment>
             );
         }
@@ -334,7 +334,7 @@ function CharaSkill(props: CharaSkillProps) {
             <span className={styles.castTime}>待機時間：{atkCastTime}s</span>
           </div>
         </div>
-        <div className={styles.skillDesc}>目の前の敵１キャラに{atkData.damege}{atkData.name}ダメージを与える。</div>
+        <div className={styles.skillDesc}>敵単体に{atkData.damege}の{atkData.name}ダメージを与える。</div>
       </div>
       {skillList.map(item => (
         <React.Fragment key={item.label}>

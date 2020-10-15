@@ -129,7 +129,7 @@ const actionMap: Record</*action_type*/number, /*getDescription*/(this: SkillAct
     const formula = getFormula(this.action_value_1, this.action_value_2, skillLevel, this.action_value_3, this.action_detail_1, property);
     let desc = this.description;
     desc = desc === '' ? getBranchDesc(this.action_id, actionList) : desc;
-    if (this.target_range > -1 && this.target_count > 1) {
+    if (this.target_range > -1 && this.target_range < 2160 && this.target_count > 1) {
       desc = desc.replace('範囲内', this.target_range + '範囲内');
     }
     if (this.action_value_6 !== 0) {
@@ -147,12 +147,20 @@ const actionMap: Record</*action_type*/number, /*getDescription*/(this: SkillAct
   },
   // knockback
   3: function () {
-    return `敵単体を${this.action_value_1}距離ノックバックする。`;
+    let target = this.target_range > -1 && this.target_range < 2160 && this.target_count > 1
+      ? this.target_range + '範囲内の敵'
+      : '敵単体';
+    let direction = this.action_detail_1 === 3 ? '距離ノックバック' :/*this.action_detail_1 === 3 ?*/ '高度ノックアップ';
+    return target + 'を' + this.action_value_1 + direction + 'する。';
   },
   // heal
   4: function (skillLevel, property) {
     const formula = getFormula(this.action_value_2, this.action_value_3, skillLevel, this.action_value_4, this.action_detail_1, property);
-    return insertFormula(this.description, formula);
+    let desc = this.description;
+    if (this.target_range > -1 && this.target_range < 2160 && this.target_count > 1) {
+      desc = desc.replace('範囲内', this.target_range + '範囲内');
+    }
+    return insertFormula(desc, formula);
   },
   // barrier
   6: function (skillLevel) {
@@ -239,10 +247,10 @@ const actionMap: Record</*action_type*/number, /*getDescription*/(this: SkillAct
   },
   // イオ Main1+
   23: function () {
-    const actionA = getActionNum(this.action_detail_2);
-    const actionB = getActionNum(this.action_detail_3);
+    const actionA = getActionObj(getActionNum(this.action_detail_2));
+    const actionB = getActionObj(getActionNum(this.action_detail_3));
     // action_detail_1: 300, action_value_2: 1
-    return [this.target_range + '範囲内の敵に、誘惑状態を持っている場合', getActionObj(actionA), 'を使う、持っていない場合', getActionObj(actionB), 'を使う。'];
+    return [this.target_range + '範囲内の敵に、誘惑状態を持っている場合', actionA, 'を使う、持っていない場合', actionB, 'を使う。'];
   },
   // カスミ Main+
   26: function () {
@@ -251,17 +259,18 @@ const actionMap: Record</*action_type*/number, /*getDescription*/(this: SkillAct
     return [getActionObj(actionNum), 'の効果時間を', getFormulaObj(formula), 'アップする。']; // this.action_detail_2: 3, targetAction.action_value_3: 効果時間
   },
   28: function () {
-    let descData: DescData;
-    const stateID = parseInt(this.action_detail_1.toString().substr(1)); // 77 レイ 風の刃
-    const stateData = state[stateID];
-    if (stateData) {
-      const actionA = getActionNum(this.action_detail_2);
-      const actionB = getActionNum(this.action_detail_3);
-      descData = ['自分に', getStateObj(stateID), 'を持っていない場合', getActionObj(actionB), 'を使う、持っている場合', getActionObj(actionA), 'を使う。'];
+    const actionA = getActionObj(getActionNum(this.action_detail_2));
+    const actionB = getActionObj(getActionNum(this.action_detail_3));
+    if (this.action_detail_1 > 100) {
+      const stateID = parseInt(this.action_detail_1.toString().substr(1)); // 77 レイ 風の刃
+      const stateData = state[stateID];
+      if (stateData) {
+        return ['自分に', getStateObj(stateID), 'を持っていない場合', actionB, 'を使う、持っている場合', actionA, 'を使う。'];
+      }
     } else {
-      descData = this.description + '。';
+      return [`${this.action_detail_1}%確率で`, actionA, `を使う、${100 - this.action_detail_1}%確率で`, actionB, 'を使う。'];
     }
-    return descData;
+    return this.description;
   },
   // アンナ Main2 action3
   30: function () {

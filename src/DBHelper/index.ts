@@ -54,15 +54,15 @@ class DBHelper extends ImageData {
       this.db.transaction('unit_profile', 'readonly').store.get(unit_id),
       this.getCharaPromotions(unit_id),
       getUnitSkillData(this.db, unit_id),
-    ]);
+    ]).catch(() => []);
     if (!userProfile || !charaData) {
       const count = await this.db.transaction('chara_data', 'readonly').store.count();
       if (count > 0) return undefined;
       return this.getAllCharaBaseData().then(list => ({
         ...list.find(item => item.charaData.unit_id === unit_id)!,
         charaProfile: unitProfile!,
-        charaPromotions,
-        charaSkillData,
+        charaPromotions: charaPromotions!,
+        charaSkillData: charaSkillData!,
       }));
     }
     const propertyData = await this.getCharaPropertyData(userProfile);
@@ -71,8 +71,8 @@ class DBHelper extends ImageData {
     data.userProfile = userProfile;
     data.propertyData = propertyData;
     data.charaProfile = unitProfile!;
-    data.charaPromotions = charaPromotions;
-    data.charaSkillData = charaSkillData;
+    data.charaPromotions = charaPromotions!;
+    data.charaSkillData = charaSkillData!;
     data.getProperty = getCharaProperty.bind(data);
     return data;
   }

@@ -45,11 +45,11 @@ function getFormula(
   property?: Property,
   cb = (v: number) => Math.ceil(v)
 ): [/*calc*/number, /*formula*/string?] {
-  let calc = constant;
   let formula = constant.toString();
+  let calc = constant;
   if (skillLevelFactor && skillLevel) {
+    formula = (calc !== 0 ? `${formula}+` : '') + `${skillLevelFactor}*skill_level`;
     calc = cb(calc + skillLevelFactor * skillLevel);
-    formula += `+${skillLevelFactor}*skill_level`;
   }
   if (propertyFactor && atkType && property) {
     // if(atkType === 2) {
@@ -60,8 +60,8 @@ function getFormula(
       // atkStr = '物理攻撃力';
       atkKey = 'atk';
     }
+    formula = (calc !== 0 ? `${formula}+` : '') +  `${propertyFactor}*${atkKey}`;
     calc += cb(propertyFactor * property[atkKey as keyof typeof property]);
-    formula += `+${propertyFactor}*${atkKey}`;
   }
   return calc.toString() === formula ? [calc] : [calc, formula];
 }
@@ -132,10 +132,18 @@ const actionMap: Record</*action_type*/number, /*getDescription*/(this: SkillAct
     if (this.target_range > -1 && this.target_count > 1) {
       desc = desc.replace('範囲内', this.target_range + '範囲内');
     }
+    if (this.action_value_6 !== 0) {
+      desc += `、クリティカル時のダメージが2倍から${this.action_value_6 * 2}倍になる`;
+    }
+    if (this.action_value_5 !== 0) {
+      desc += '、ダメージは必ずクリティカルする';
+    }
     return insertFormula(desc, formula);
   },
+  // マツリ UB、ミミ UB
   2: function () {
-    return this.target_count + this.target_number + '番目の敵の目の前に飛び込み。';
+    let desc = this.target_count + this.target_number + '番目に近い敵の目の前に移動する。';
+    return desc;
   },
   // knockback
   3: function () {
@@ -151,9 +159,9 @@ const actionMap: Record</*action_type*/number, /*getDescription*/(this: SkillAct
     const formula = getFormula(this.action_value_1, this.action_value_2, skillLevel);
     return insertFormula(this.description, formula, getEffectTime(this.action_value_3));
   },
-  //　ミソギ UB action1
+  // target_range_center ミソギ UB action1
   7: function () {
-    return this.target_count + this.target_number + '番目の敵をターゲットの範囲中心にする。';
+    return this.target_count + this.target_number + '番目に近い敵を範囲の中心にする。';
   },
   // フィールド buff debuff
   8: function () {
@@ -195,7 +203,7 @@ const actionMap: Record</*action_type*/number, /*getDescription*/(this: SkillAct
       // カスミ Main2
       desc = desc.replace('混乱させる', this.action_value_3 * 100 + '%確率で混乱状態にする');
     } else {
-      // ユキ Main+
+      // ユキ Main+、イオ UB
       desc = desc.replace('誘惑する', this.action_value_3 + '%確率で誘惑状態にする');
     }
     return desc + getEffectTime(this.action_value_1);
@@ -229,6 +237,13 @@ const actionMap: Record</*action_type*/number, /*getDescription*/(this: SkillAct
     const formula = getFormula(this.action_value_1, this.action_value_2, skillLevel, undefined, undefined, undefined, v => v);
     return insertFormula('自分を無敵状態にする、効果時間{0}秒', formula);
   },
+  // イオ Main1+
+  23: function () {
+    const actionA = getActionNum(this.action_detail_2);
+    const actionB = getActionNum(this.action_detail_3);
+    // action_detail_1: 300, action_value_2: 1
+    return [this.target_range + '範囲内の敵に、誘惑状態を持っている場合', getActionObj(actionA), 'を使う、持っていない場合', getActionObj(actionB), 'を使う。'];
+  },
   // カスミ Main+
   26: function () {
     const actionNum = getActionNum(this.action_detail_1);
@@ -242,7 +257,7 @@ const actionMap: Record</*action_type*/number, /*getDescription*/(this: SkillAct
     if (stateData) {
       const actionA = getActionNum(this.action_detail_2);
       const actionB = getActionNum(this.action_detail_3);
-      descData = [getStateObj(stateID), 'を持っていない場合', getActionObj(actionB), 'を使う。持っている場合', getActionObj(actionA), 'を使う。'];
+      descData = ['自分に', getStateObj(stateID), 'を持っていない場合', getActionObj(actionB), 'を使う、持っている場合', getActionObj(actionA), 'を使う。'];
     } else {
       descData = this.description + '。';
     }
@@ -257,12 +272,17 @@ const actionMap: Record</*action_type*/number, /*getDescription*/(this: SkillAct
     const formula = getFormula(this.action_value_1, this.action_value_2, skillLevel);
     return ['味方全体の次の攻撃に' + formula[0], getFormulaObj(formula[1]!), 'HP吸収効果を付与する。'];
   },
+  // カオリ Main2
+  34: function (skillLevel) {
+    const formula = getFormula(this.action_value_2, this.action_value_3, skillLevel);
+    return insertFormula(this.description, formula, '、効果は最大' + this.action_value_4 + '回まで累積する。');
+  },
   // レイ UB+
   35: function () {
     const stateData = state[this.action_value_2];
     if (stateData) {
       const stateObj = getStateObj(this.action_value_2);
-      return ['自分に', stateObj, 'を付与する。', stateObj , 'を持っている間、' + stateData.effect + getEffectTime(this.action_value_3)];
+      return ['自分に', stateObj, 'を付与し、'/*, stateObj , 'を持っている間、'*/ + stateData.effect + getEffectTime(this.action_value_3)];
     }
     return this.description + '。';
   },

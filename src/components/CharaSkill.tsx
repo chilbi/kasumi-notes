@@ -319,9 +319,9 @@ function CharaSkill(props: CharaSkillProps) {
 
   return (
     <div className={styles.root}>
-      {charaSkill.attack_pattern.map((item, i) => (
+      {charaSkill.attack_pattern.map((item, i, arr) => (
         <React.Fragment key={i}>
-          {getPatternItem({ label: '攻撃パターン' + (i + 1), pattern: item })}
+          {getPatternItem({ label: '行動パターン' + (arr.length > 1 ? (i + 1) : ''), pattern: item })}
           <Divider />
         </React.Fragment>
       ))}

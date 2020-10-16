@@ -192,6 +192,14 @@ const actionMap: Record</*action_type*/number, /*getDescription*/(this: SkillAct
     }
     return desc + getEffectTime(this.action_value_3);
   },
+  9: function (skillLevel) {
+    const fromula = getFormula(this.action_value_1, this.action_value_2, skillLevel);
+    let target = this.target_range > -1 && this.target_range < 2160 && this.target_count > 1
+      ? this.target_range + '範囲内の敵'
+      : '敵単体';
+    let desc = target + 'を毒状態にし、毎秒' + this.description;
+    return insertFormula(desc, fromula, getEffectTime(this.action_value_3));
+  },
   // buff debuff
   10: function (skillLevel, property, actionList) {
     const formula = getFormula(this.action_value_2, this.action_value_3, skillLevel);
@@ -240,6 +248,12 @@ const actionMap: Record</*action_type*/number, /*getDescription*/(this: SkillAct
     const actionNum = getActionNum(this.action_detail_2);
     return [`攻撃前の${this.action_value_3}秒構え中に受けたダメージに応じて、`, getActionObj(actionNum), '与えるダメージが', getFormulaObj(formula), 'アップする。'];
   },
+  // 挑発
+  20: function () {
+    let target = '自分';
+    if (this.target_type === 35) target = '対象の味方'; // ヨリ（エンジェル）
+    return target + 'を挑発状態にする' + getEffectTime(this.action_value_1);
+  },
   // ミヤコ　無敵状態
   21: function (skillLevel) {
     const formula = getFormula(this.action_value_1, this.action_value_2, skillLevel, undefined, undefined, undefined, v => v);
@@ -252,22 +266,50 @@ const actionMap: Record</*action_type*/number, /*getDescription*/(this: SkillAct
     // action_detail_1: 300, action_value_2: 1
     return [this.target_range + '範囲内の敵に、誘惑状態を持っている場合', actionA, 'を使う、持っていない場合', actionB, 'を使う。'];
   },
-  // カスミ Main+
-  26: function () {
+  26: function (skillLevel, property, actionList) {
     const actionNum = getActionNum(this.action_detail_1);
-    const formula = this.action_value_2 + '*範囲内の敵の数';
-    return [getActionObj(actionNum), 'の効果時間を', getFormulaObj(formula), 'アップする。']; // this.action_detail_2: 3, targetAction.action_value_3: 効果時間
+    const targetAction = actionList.find(item => item.action_id === this.action_detail_1)!;
+    const actionValueMap: Record</*action_type*/number, /*effect*/string> = {
+      1: 'ダメージ',
+      8: '効果時間',
+      // 10: '効果数値',
+    };
+    const effect = actionValueMap[targetAction.action_type] || '効果数値';
+    const coefficient: Record</*this.action_value_1*/number, /*coefficient*/string> = {
+      1: '損失したHP', // サレン UB
+      4: '範囲内の敵の数', // カスミ Main+
+    };
+    const formula = `${this.action_value_2}*${coefficient[this.action_value_1] || ''}`;
+    return [getActionObj(actionNum), `の${effect}を`, getFormulaObj(formula), 'アップする。'];
+  },
+  27: function (skillLevel, property, actionList) {
+    const actionNum = getActionNum(this.action_detail_1);
+    const targetAction = actionList.find(item => item.action_id === this.action_detail_1)!;
+    const actionValueMap: Record</*action_type*/number, /*effect*/string> = {
+      // 16: '効果数値',
+    };
+    const effect = actionValueMap[targetAction.action_type] || '効果数値';
+    const coefficient: Record</*this.action_value_1*/number, /*coefficient*/string> = {
+      2: '倒した敵の数', // 二ノン
+    };
+    const formula = `${this.action_value_2}*${coefficient[this.action_value_1] || ''}`;
+    return [getActionObj(actionNum), `の${effect}を`, getFormulaObj(formula), 'で乗じる。'];
   },
   28: function () {
     const actionA = getActionObj(getActionNum(this.action_detail_2));
     const actionB = getActionObj(getActionNum(this.action_detail_3));
-    if (this.action_detail_1 > 100) {
+    if (this.action_detail_1 === 1000) {
+      // エリコ UB
+      return ['敵を倒した場合', actionA, 'を使う。']
+    } else if (this.action_detail_1 > 100) {
       const stateID = parseInt(this.action_detail_1.toString().substr(1)); // 77 レイ 風の刃
       const stateData = state[stateID];
       if (stateData) {
+        // レイ Main1 Main2
         return ['自分に', getStateObj(stateID), 'を持っていない場合', actionB, 'を使う、持っている場合', actionA, 'を使う。'];
       }
     } else {
+      // スズメ UB
       return [`${this.action_detail_1}%確率で`, actionA, `を使う、${100 - this.action_detail_1}%確率で`, actionB, 'を使う。'];
     }
     return this.description;

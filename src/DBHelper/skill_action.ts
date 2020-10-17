@@ -77,7 +77,7 @@ function getEffectTime(time: number): string {
 
 function getBranchDesc(actionID: number, actionList: SkillAction[]): string {
   let desc = '';
-  const action = actionList.find(item =>
+  let action = actionList.find(item =>
     (item.action_detail_2 === actionID && item.action_detail_3 !== 0)
     ||
     (item.action_detail_3 === actionID && item.action_detail_2 !== 0)
@@ -92,9 +92,14 @@ function getBranchDesc(actionID: number, actionList: SkillAction[]): string {
   return desc;
 }
 
-function getSameDesc(actionID: number, actionDetail1: number, actionList: SkillAction[]): string {
+function getSameDesc(action: SkillAction, actionList: SkillAction[]): string {
   let desc = '';
-  const sameAction = actionList.find(item => item.action_id !== actionID && item.action_detail_1 === actionDetail1);
+  const sameAction = actionList.find(item =>
+    item.description !== '' &&
+    item.action_id !== action.action_id &&
+    item.action_type === action.action_type &&
+    item.action_detail_1 === action.action_detail_1
+  );
   if (sameAction) {
     desc = sameAction.description;
   }
@@ -159,7 +164,16 @@ const actionMap: Record</*action_type*/number, /*getDescription*/(this: SkillAct
   1: function (skillLevel, property, actionList) {
     const formula = getFormula(this.action_value_1, this.action_value_2, skillLevel, this.action_value_3, this.action_detail_1, property);
     let desc = this.description;
-    desc = desc === '' ? getBranchDesc(this.action_id, actionList) : desc;
+    if (desc === '') {
+      desc = getBranchDesc(this.action_id, actionList);
+      if (desc === '') {
+        desc = getSameDesc(this, actionList);
+      }
+    }
+    const str = '最大３キャラに各'; // シオリ Main1
+    if (desc.indexOf(str) > -1) {
+      desc = desc.replace(str, this.target_count + this.target_number + '番目に近い敵単体に');
+    }
     if (this.target_range > -1 && this.target_range < 2160 && this.target_count > 1) {
       desc = desc.replace('範囲内', this.target_range + '範囲内');
     }
@@ -210,6 +224,7 @@ const actionMap: Record</*action_type*/number, /*getDescription*/(this: SkillAct
   // フィールド buff debuff
   8: function () {
     let desc = '';
+    const akinesia = '一定時間行動不能';
     switch (this.action_detail_1) {
       case 1: // カスミ UB
         desc = this.description.replace('一定時間低下させる', `${this.action_value_1}倍にする`).replace('範囲内', this.target_range + '範囲内');
@@ -217,11 +232,14 @@ const actionMap: Record</*action_type*/number, /*getDescription*/(this: SkillAct
       case 2: // ユイ UB+
         desc = this.description.replace(/*行動速度*/'アップ', /*行動速度*/`を${this.action_value_1}倍にする`);
         break;
+      case 3: // アオイ Main2
+        desc = this.description.replace(akinesia, '麻痺状態').replace('範囲内', this.target_range + '範囲内');
+        break;
       case 5: // カスミ Main1
-        desc = this.description.replace('一定時間行動不能', '束縛状態').replace('範囲内', this.target_range + '範囲内');
+        desc = this.description.replace(akinesia, '束縛状態').replace('範囲内', this.target_range + '範囲内');
         break;
       case 7: // マツリ Main1
-        desc = this.description.replace('一定時間行動不能', 'スタン状態').replace('範囲内', this.target_range + '範囲内');
+        desc = this.description.replace(akinesia, 'スタン状態').replace('範囲内', this.target_range + '範囲内');
         break;
       default:
         desc = this.description;
@@ -230,10 +248,12 @@ const actionMap: Record</*action_type*/number, /*getDescription*/(this: SkillAct
   },
   9: function (skillLevel) {
     const fromula = getFormula(this.action_value_1, this.action_value_2, skillLevel);
-    let target = this.target_range > -1 && this.target_range < 2160 && this.target_count > 1
-      ? this.target_range + '範囲内の敵'
-      : '敵単体';
-    let desc = target + 'を毒状態にし、毎秒' + this.description;
+    let target = '敵単体';
+    if (this.target_range > -1 && this.target_range < 2160 && this.target_count > 1) {
+      target = this.target_range + '範囲内の敵';
+    }
+    let state = this.action_detail_1 === 1 ? '毒' :/*this.action_detail_1 === 4*/ '猛毒';
+    let desc = this.description.replace('{0}', `${target}を${state}状態にし、毎秒{0}`);
     return insertFormula(desc, fromula, getEffectTime(this.action_value_3));
   },
   // buff debuff
@@ -241,9 +261,9 @@ const actionMap: Record</*action_type*/number, /*getDescription*/(this: SkillAct
     const formula = getFormula(this.action_value_2, this.action_value_3, skillLevel);
     let desc = this.description;
     if (desc === '') {
-      desc = getSameDesc(this.action_id, this.action_detail_1, actionList);
+      desc = getSameDesc(this, actionList);
     }
-    if (this.target_range > -1 && this.target_count > 1) {
+    if (this.target_range > -1 && this.target_range < 2160 && this.target_count > 1) {
       desc = desc.replace('範囲内', this.target_range + '範囲内');
     }
     return insertFormula(desc, formula, getEffectTime(this.action_value_4));
@@ -272,7 +292,21 @@ const actionMap: Record</*action_type*/number, /*getDescription*/(this: SkillAct
   },
   // 召喚物 summoned
   15: function () {
-    return '自分の前' + this.action_value_7 + '距離に' + this.description + '。';
+    let target = '';
+    // シノブ Main1
+    if (this.target_type === 7) {
+      target = '自分';
+    }
+    // チカ UB
+    if (this.target_type === 10) {
+      target = this.target_count + this.target_number + '番目前の味方';
+    }
+    if (this.action_value_7 > 0) {
+      target += `の前${this.action_value_7}距離に`;
+    } else {
+      target += 'のそばに';
+    }
+    return target + this.description + '。';
   },
   16: function (skillLevel) {
     const formula = getFormula(this.action_value_1, this.action_value_2, skillLevel);
@@ -289,22 +323,37 @@ const actionMap: Record</*action_type*/number, /*getDescription*/(this: SkillAct
     return [`攻撃前の${this.action_value_3}秒構え中に受けたダメージに応じて、`, getActionObj(actionNum), '与えるダメージが', getFormulaObj(formula), 'アップする。'];
   },
   // 挑発
-  20: function () {
+  20: function (skillLevel) {
+    const formula = getFormula(this.action_value_1, this.action_value_2, skillLevel, undefined, undefined, undefined, v => v);
     let target = '自分';
     if (this.target_type === 35) target = '対象の味方'; // ヨリ（エンジェル）
-    return target + 'を挑発状態にする' + getEffectTime(this.action_value_1);
+    const desc = target + 'を挑発状態にする、効果時間{0}秒';
+    return insertFormula(desc, formula);
   },
   // ミヤコ　無敵状態
   21: function (skillLevel) {
     const formula = getFormula(this.action_value_1, this.action_value_2, skillLevel, undefined, undefined, undefined, v => v);
     return insertFormula('自分を無敵状態にする、効果時間{0}秒', formula);
   },
-  // イオ Main1+
   23: function () {
-    const actionA = getActionObj(getActionNum(this.action_detail_2));
-    const actionB = getActionObj(getActionNum(this.action_detail_3));
-    // action_detail_1: 300, action_value_2: 1
-    return [this.target_range + '範囲内の敵に、誘惑状態を持っている場合', actionA, 'を使う、持っていない場合', actionB, 'を使う。'];
+    let actionA = getActionObj(getActionNum(this.action_detail_2));
+    let actionB = getActionObj(getActionNum(this.action_detail_3));
+    let target = '対象の';
+    if (this.target_range > -1 && this.target_range < 2160 && this.target_count > 1) {
+      target = this.target_range + '範囲内の';
+    }
+    target = target + (this.target_assignment === 1 ? '敵' : '味方');
+    let state = '';
+    // イオ Main1+ action_detail_1: 300, action_value_1: 0, action_value_2: 1
+    if (this.action_detail_1 === 300) {
+      state = '誘惑';
+    }
+    // アオイ Main1+ action_detail_1: 502, action_value_1: 1, action_value_2: 2
+    if (this.action_detail_1 === 502) {
+      state = '毒';
+      [actionA, actionB] = [actionB, actionA];
+    }
+    return [`${target}に${state}状態を持っている場合`, actionA, 'を使う、持っていない場合', actionB, 'を使う。'];
   },
   26: function (skillLevel, property, actionList) {
     const actionNum = getActionNum(this.action_detail_1);
@@ -313,7 +362,7 @@ const actionMap: Record</*action_type*/number, /*getDescription*/(this: SkillAct
     switch (this.action_value_1) {
       case 1:
         coefficient = '損失したHP'; // サレン UB
-          break;
+        break;
       case 4:
         coefficient = '範囲内の敵の数'; // カスミ Main+、トモ Main+
         break;

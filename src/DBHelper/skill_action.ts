@@ -36,6 +36,18 @@ export interface SkillAction {
   getDescData(skillLevel: number, property: Property, actionList: SkillAction[]): DescData;
 }
 
+function getAtkKey(atkType: number) {
+  // if(atkType === 2) {
+  // let atkStr = '魔法攻撃力';
+  let atkKey = 'magic_str';
+  // }
+  if (atkType === 1 || atkType === 3/*アキノ UB+ action_detail_1: 3*/) {
+    // atkStr = '物理攻撃力';
+    atkKey = 'atk';
+  }
+  return atkKey;
+}
+
 function getFormula(
   constant: number,
   skillLevelFactor?: number,
@@ -52,14 +64,7 @@ function getFormula(
     calc = cb(calc + skillLevelFactor * skillLevel);
   }
   if (propertyFactor && atkType && property) {
-    // if(atkType === 2) {
-    // let atkStr = '魔法攻撃力';
-    let atkKey = 'magic_str';
-    // }
-    if (atkType === 1) {
-      // atkStr = '物理攻撃力';
-      atkKey = 'atk';
-    }
+    const atkKey = getAtkKey(atkType);
     formula = (calc !== 0 ? `${formula}+` : '') +  `${propertyFactor}*${atkKey}`;
     calc += cb(propertyFactor * property[atkKey as keyof typeof property]);
   }
@@ -122,6 +127,32 @@ function insertFormula(desc: string, formula: [/*calc*/number, /*formula*/string
   return part1 + part2;
 }
 
+function getActionUp(action: SkillAction, actionValueN: number, factor: number, coefficient: string): [/*effect*/string, /*formula*/string] {
+  let effect = '効果値';
+  let formula = `${factor}*${coefficient}`;
+  switch (action.action_type) {
+    case 1:
+      effect = 'ダメージ';
+      if (actionValueN === 2) {
+        formula += '*skill_level';
+      } else if (actionValueN === 3) {
+        formula += `*${getAtkKey(action.action_detail_1)}`;
+      }
+      break;
+    case 8:
+      // if(actionValueN === 3)
+      effect = '効果時間'; // only action_value_3
+      break;
+    case 10:
+      if (actionValueN === 3) {
+        formula += '*skill_level';
+      } else if (actionValueN === 4) {
+        effect = '効果時間';
+      }
+  }
+  return [effect, formula];
+}
+
 // TODO 实现所有SkillAction
 const actionMap: Record</*action_type*/number, /*getDescription*/(this: SkillAction, skillLevel: number, property: Property, actionList: SkillAction[]) => DescData> = {
   // damage
@@ -165,11 +196,16 @@ const actionMap: Record</*action_type*/number, /*getDescription*/(this: SkillAct
   // barrier
   6: function (skillLevel) {
     const formula = getFormula(this.action_value_1, this.action_value_2, skillLevel);
-    return insertFormula(this.description, formula, getEffectTime(this.action_value_3));
+    let target = '味方単体に';
+    if (this.target_count === 99 && this.target_range === 2160) target = '味方全体に';
+    else if (this.target_type === 7 && this.target_count === 1) target = '自分に';
+    return insertFormula(target + this.description, formula, getEffectTime(this.action_value_3));
   },
   // target_range_center ミソギ UB action1
   7: function () {
-    return this.target_count + this.target_number + '番目に近い敵を範囲の中心にする。';
+    let modifier = this.target_count + this.target_number + '番目';
+    let target = this.target_assignment === 1 ? 'に近い敵' :/* this.target_assignment === 2*/ '前の味方';
+    return modifier + target + 'を範囲の中心にする。';
   },
   // フィールド buff debuff
   8: function () {
@@ -234,6 +270,10 @@ const actionMap: Record</*action_type*/number, /*getDescription*/(this: SkillAct
     //   `物理攻撃は${100 - this.action_detail_1}%確率でミスする。`
     // ];
   },
+  // 召喚物 summoned
+  15: function () {
+    return '自分の前' + this.action_value_7 + '距離に' + this.description + '。';
+  },
   16: function (skillLevel) {
     const formula = getFormula(this.action_value_1, this.action_value_2, skillLevel);
     return insertFormula(this.description, formula);
@@ -269,30 +309,32 @@ const actionMap: Record</*action_type*/number, /*getDescription*/(this: SkillAct
   26: function (skillLevel, property, actionList) {
     const actionNum = getActionNum(this.action_detail_1);
     const targetAction = actionList.find(item => item.action_id === this.action_detail_1)!;
-    const actionValueMap: Record</*action_type*/number, /*effect*/string> = {
-      1: 'ダメージ',
-      8: '効果時間',
-      // 10: '効果数値',
-    };
-    const effect = actionValueMap[targetAction.action_type] || '効果数値';
-    const coefficient: Record</*this.action_value_1*/number, /*coefficient*/string> = {
-      1: '損失したHP', // サレン UB
-      4: '範囲内の敵の数', // カスミ Main+
-    };
-    const formula = `${this.action_value_2}*${coefficient[this.action_value_1] || ''}`;
+    let coefficient: string;
+    switch (this.action_value_1) {
+      case 1:
+        coefficient = '損失したHP'; // サレン UB
+          break;
+      case 4:
+        coefficient = '範囲内の敵の数'; // カスミ Main+、トモ Main+
+        break;
+      default:
+        coefficient = '???';
+    }
+    const [effect, formula] = getActionUp(targetAction, this.action_detail_2, this.action_value_2, coefficient);
     return [getActionObj(actionNum), `の${effect}を`, getFormulaObj(formula), 'アップする。'];
   },
   27: function (skillLevel, property, actionList) {
     const actionNum = getActionNum(this.action_detail_1);
     const targetAction = actionList.find(item => item.action_id === this.action_detail_1)!;
-    const actionValueMap: Record</*action_type*/number, /*effect*/string> = {
-      // 16: '効果数値',
-    };
-    const effect = actionValueMap[targetAction.action_type] || '効果数値';
-    const coefficient: Record</*this.action_value_1*/number, /*coefficient*/string> = {
-      2: '倒した敵の数', // 二ノン
-    };
-    const formula = `${this.action_value_2}*${coefficient[this.action_value_1] || ''}`;
+    let coefficient: string;
+    switch (this.action_value_1) {
+      case 2:
+        coefficient = '倒した敵の数'; // 二ノン Main1
+        break;
+      default:
+        coefficient = '???';
+    }
+    const [effect, formula] = getActionUp(targetAction, this.action_detail_2, this.action_value_2, coefficient);
     return [getActionObj(actionNum), `の${effect}を`, getFormulaObj(formula), 'で乗じる。'];
   },
   28: function () {
@@ -337,11 +379,26 @@ const actionMap: Record</*action_type*/number, /*getDescription*/(this: SkillAct
     }
     return this.description + '。';
   },
+  // アキノ UB+
+  36: function (skillLevel, property) {
+    const formula = getFormula(this.action_value_1, this.action_value_2, skillLevel, this.action_value_3, this.action_detail_1, property);
+    return insertFormula('半径' + this.action_value_7 + this.description, formula, getEffectTime(this.action_value_5));
+  },
+  // アキノ Main2
+  37: function (skillLevel, property) {
+    const formula = getFormula(this.action_value_1, this.action_value_2, skillLevel, this.action_value_3, this.action_detail_1, property);
+    return insertFormula('半径' + this.action_value_7 + this.description, formula, getEffectTime(this.action_value_5));
+  },
   // カスミ UB
   38: function (skillLevel) {
     const formula = getFormula(this.action_value_1, this.action_value_2, skillLevel);
     const desc = `半径${this.action_value_5}のフィールドを展開し、${this.description}`;
     return insertFormula(desc, formula, getEffectTime(this.action_value_3));
+  },
+  // アキノ Main1
+  42: function () {
+    const actionNum = getActionNum(this.action_detail_2);
+    return [`${this.action_value_4}秒内ダメージを受けた場合、${this.action_value_1}%確率で`, getActionObj(actionNum), 'を使う。'];
   },
   // HP/TP継続回復状態付与
   48: function (skillLevel, property) {

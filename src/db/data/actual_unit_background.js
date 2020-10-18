@@ -117,6 +117,9 @@ export default [
   { "unit_id": 113601, "unit_name": "白銀 純", "bg_id": 510250, "face_type": 2 },
   { "unit_id": 113701, "unit_name": "風宮 あかり", "bg_id": 510350, "face_type": 4 },
   { "unit_id": 113801, "unit_name": "風宮 より", "bg_id": 510350, "face_type": 2 },
+  { "unit_id": 113901, "unit_name": "繭宮 つむぎ", "bg_id": 510124, "face_type": 4 },
+  { "unit_id": 114001, "unit_name": "士条 怜", "bg_id": 510280, "face_type": 2 },
+  { "unit_id": 114101, "unit_name": "織原 茉莉", "bg_id": 510290, "face_type": 4 },
   { "unit_id": 180201, "unit_name": "草野 優衣", "bg_id": 510350, "face_type": 2 },
   { "unit_id": 180401, "unit_name": "ユースティアナ・フォン・アストライア", "bg_id": 510350, "face_type": 4 },
   { "unit_id": 180501, "unit_name": "棗 こころ", "bg_id": 510100, "face_type": 2 }

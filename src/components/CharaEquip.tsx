@@ -156,7 +156,7 @@ function CharaEquip(props: CharaEquipProps) {
         }
       }
     }
-    const imgSrc = getPublicImageURL('equipment', srcName)
+    const imgSrc = getPublicImageURL('icon_equipment', srcName)
     return { imgSrc, maxRarity, rarity };
   };
 
@@ -178,7 +178,7 @@ function CharaEquip(props: CharaEquipProps) {
       <div key="unique" className={clsx(styles.item, styles.unique)}>
         <div className="equip-label">専用装備</div>
         <div className={styles.equipBox}>
-          <SkeletonImage classes={{ root: styles.iconRoot }} src={getPublicImageURL('equipment', uniqueImgName)} save />
+          <SkeletonImage classes={{ root: styles.iconRoot }} src={getPublicImageURL('icon_equipment', uniqueImgName)} save />
           <div className={styles.uniqueInfo}>
             <span className={clsx(styles.uniqueName, invalidUnique && styles.invalidUniqueName)}>{uniqueName}</span>
             {!invalidUnique && <span className={styles.uniqueLevel}>Lv{unique_enhance_level}</span>}

@@ -19,7 +19,7 @@ interface InfoheadProps {
   imageName?: string;
   unitName?: string;
   actualName?: string;
-  variant: 'icon' | 'plate';
+  variant: 'icon_unit' | 'unit_plate';
   rarity: number;
   maxRarity: number;
   promotionLevel: number;
@@ -33,7 +33,7 @@ function Infohead(props: InfoheadProps) {
   return (
     <div className={clsx(styles.root)}>
       <CharaImage
-        src={imageName && getPublicImageURL(other.variant === 'icon' ? 'icon_unit' : 'unit_plate', imageName)}
+        src={imageName && getPublicImageURL(other.variant, imageName)}
         {...other}
       />
       <CharaName

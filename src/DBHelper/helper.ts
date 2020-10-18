@@ -69,7 +69,7 @@ type ImagePathType =
   | 'plate' | 'unit' | 'unit_shadow' | 'equipment' | 'item' | 'skill'
   | 'full' | 'profile' | 'actual_profile' | 'story';
 
-export function getImageUrl(type: ImagePathType, imageName: string) {
+export function getImageUrl(type: ImagePathType, name: string) {
   let path = '';
   switch (type) {
     case 'plate':
@@ -78,50 +78,20 @@ export function getImageUrl(type: ImagePathType, imageName: string) {
     case 'equipment':
     case 'item':
     case 'skill':
-      path = `icon/${type}/${imageName}.webp`;
+      path = `icon/${type}/${name}.webp`;
       break;
     case 'full':
     case 'profile':
     case 'actual_profile':
     case 'story':
-      path = `/card/${type}/${imageName}.webp`;
+      path = `/card/${type}/${name}.webp`;
       break;
   }
   return 'https://redive.estertion.win/' + path;
 }
 
-type PublicImagePathType = /*'common' | */'icon_unit' | 'unit_plate' | 'still_unit' | 'skill' | 'equipment' | 'state' | 'thumb_story'/* | 'item'*/;
+type PublicImagePathType = 'icon_equipment' | 'icon_skill' | 'icon_state' | 'icon_unit' | 'still_unit' | 'thumb_story' | 'unit_plate';
 
 export function getPublicImageURL(type: PublicImagePathType, name: string | number): string {
-  let path = '';
-  switch (type) {
-    case 'icon_unit':
-      path = 'icon/unit/icon_unit_' + name;
-      break;
-    case 'skill':
-      path = 'icon/skill/icon_skill_' + name;
-      break;
-    case 'equipment':
-      path = 'icon/equipment/icon_equipment_' + name;
-      break;
-    case 'state':
-      path = 'icon/state/' + name;
-      break;
-    // case 'item':
-    //   path = 'icon/item/icon_item_' + name;
-    //   break;
-    // case 'common':
-    //   path = 'common/' + name;
-    //   break;
-    case 'unit_plate':
-      path = 'unit_plate/unit_plate_' + name;
-      break;
-    case 'still_unit':
-      path = 'still_unit/still_unit_' + name;
-      break;
-    case 'thumb_story':
-      path = 'thumb/story/thumb_story_' + name;
-      break;
-  }
-  return `${process.env.PUBLIC_URL}/images/${path}.png`;
+  return `${process.env.PUBLIC_URL}/images/${type}/${type}_${name}.png`;
 }

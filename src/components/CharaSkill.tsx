@@ -172,12 +172,12 @@ function CharaSkill(props: CharaSkillProps) {
   const atkData = atkType === 1
     ? {
       name: '物理',
-      src: getPublicImageURL('equipment', '101011'),
+      src: getPublicImageURL('icon_equipment', '101011'),
       damege: property.atk,
     }
     : {
       name: '魔法',
-      src: getPublicImageURL('equipment', '101251'),
+      src: getPublicImageURL('icon_equipment', '101251'),
       damege: property.magic_str,
     };
 
@@ -202,7 +202,7 @@ function CharaSkill(props: CharaSkillProps) {
           iconType = charaSkill.sp_skill[i - 1].icon_type;
           patternLabel = 'SP' + i;
         }
-        imgSrc = getPublicImageURL('skill', iconType);
+        imgSrc = getPublicImageURL('icon_skill', iconType);
       }
       return {
         loopLabel,
@@ -252,7 +252,7 @@ function CharaSkill(props: CharaSkillProps) {
               <React.Fragment key={key}>
                 {'【' + state[descData.value as number].name}
                 <span className={styles.stateRoot}>
-                  <SkeletonImage classes={{ img: styles.stateImg }} src={getPublicImageURL('state', descData.value)} save onlyImg />
+                  <SkeletonImage classes={{ img: styles.stateImg }} src={getPublicImageURL('icon_state', descData.value)} save onlyImg />
                 </span>
                 {'】状態'}
               </React.Fragment>
@@ -270,7 +270,7 @@ function CharaSkill(props: CharaSkillProps) {
         <span className={styles.level}>Lv{skillLevel}</span>
       </div>
       <div className={styles.flexBox}>
-        <SkeletonImage classes={{ root: styles.imgRoot }} src={getPublicImageURL('skill', skillData.icon_type)} save />
+        <SkeletonImage classes={{ root: styles.imgRoot }} src={getPublicImageURL('icon_skill', skillData.icon_type)} save />
         <div className={styles.nameBox}>
           <span className={styles.name}>{skillData.name}</span>
           <span className={styles.castTime}>待機時間：{skillData.skill_cast_time}s</span>

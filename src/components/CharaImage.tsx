@@ -241,7 +241,7 @@ const useStyles = makeStyles((theme: Theme) => {
 
 interface CharaImageProps {
   src?: string;
-  variant: 'icon' | 'plate';
+  variant: 'icon_unit' | 'unit_plate';
   promotionLevel: number;
   rarity: number;
   maxRarity: number;
@@ -262,7 +262,7 @@ function CharaImage(props: CharaImageProps) {
     positionClassName = '',
     uniqueClassName = '';
 
-  if (variant === 'icon') {
+  if (variant === 'icon_unit') {
     rootClassName = styles.icon;
     imgClassName = styles.iconImg;
     borderClassName = clsx(styles.iconBorder, styles['iconBorder' + getRankPoint(promotionLevel) as keyof typeof styles]);

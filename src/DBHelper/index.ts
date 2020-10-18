@@ -38,7 +38,7 @@ export function getCharaProperty(this: CharaBaseData): Property {
 
 class DBHelper extends ImageData {
   readonly default_user = 'MAX';
-  readonly max_level = 175;
+  readonly max_level = 178;
   readonly max_promotion_level = 18;
   readonly max_unique_enhance_level = 180;
 

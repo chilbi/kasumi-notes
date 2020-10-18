@@ -295,18 +295,20 @@ function CharaSkill(props: CharaSkillProps) {
   }
   const pushItem = (label: string, normal: SkillData[], evolution: SkillData[], ex?: boolean) => {
     const len = normal.length;
+    const isOneEX = ex && len === 1 && evolution.length === 1;
     for (let i = 0; i < len; i++) {
       const n = i + 1;
       const skillLevel = ex ? skill_enhance_status['ex'] : (skill_enhance_status[n as keyof SkillEnhanceStatus] || skill_enhance_status['ub']);
+      const renameLabel = label + (isOneEX ? '' : n);
       skillList.push({
-        label: label + n,
+        label: renameLabel,
         skillData: normal[i],
         skillLevel,
       });
       const evItem = evolution[i];
       if (evItem) {
         skillList.push({
-          label: label + n + '+',
+          label: renameLabel + '+',
           skillData: evItem,
           skillLevel,
         });

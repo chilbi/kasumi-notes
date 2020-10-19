@@ -250,11 +250,10 @@ function CharaSkill(props: CharaSkillProps) {
           case 'state':
             return (
               <React.Fragment key={key}>
-                {'【' + state[descData.value as number].name}
+                {state[descData.value as number].name}
                 <span className={styles.stateRoot}>
                   <SkeletonImage classes={{ img: styles.stateImg }} src={getPublicImageURL('icon_state', descData.value)} save onlyImg />
                 </span>
-                {'】状態'}
               </React.Fragment>
             );
         }

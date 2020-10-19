@@ -4,6 +4,10 @@ export interface StateData {
 }
 
 export const state: Record<number, StateData> = {
+  50: {
+    name: '英霊の加護',
+    effect: '',
+  },
   77: {
     name: '風の刃',
     effect: 'スキルの効果値が2倍になる',

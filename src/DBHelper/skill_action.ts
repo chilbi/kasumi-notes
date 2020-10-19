@@ -132,28 +132,50 @@ function insertFormula(desc: string, formula: [/*calc*/number, /*formula*/string
   return part1 + part2;
 }
 
-function getActionUp(action: SkillAction, actionValueN: number, factor: number, coefficient: string): [/*effect*/string, /*formula*/string] {
+function getCoefficient(actionValue1: number) {
+  switch (actionValue1) {
+    case 0:
+      return '残りHP'; // ぺコリーヌ UB+
+    case 1:
+      return '損失したHP'; // サレン UB
+    case 2:
+      return '倒した敵の数'; // 二ノン UB+ Main1
+    case 4:
+      return '範囲内の敵の数'; // カスミ Main+、トモ Main+
+    default:
+      return '???';
+  }
+}
+
+function getActionUp(thisAction: SkillAction, targetAction: SkillAction): [/*effect*/string, /*formula*/string] {
+  const coefficient = getCoefficient(thisAction.action_value_1);
+  const actionValueN = thisAction.action_detail_2;
+  let factor = thisAction.action_value_2.toString();
+  if (thisAction.action_value_3 !== 0) {
+    factor += `+${thisAction.action_value_3}*skill_level`;
+  }
   let effect = '効果値';
   let formula = `${factor}*${coefficient}`;
-  switch (action.action_type) {
+  switch (targetAction.action_type) {
     case 1:
       effect = 'ダメージ';
-      if (actionValueN === 2) {
+      if (actionValueN === 2)
         formula += '*skill_level';
-      } else if (actionValueN === 3) {
-        formula += `*${getAtkKey(action.action_detail_1)}`;
-      }
+      else if (actionValueN === 3)
+        formula += `*${getAtkKey(targetAction.action_detail_1)}`;
       break;
     case 8:
       // if(actionValueN === 3)
       effect = '効果時間'; // only action_value_3
       break;
     case 10:
-      if (actionValueN === 3) {
+      if (actionValueN === 3)
         formula += '*skill_level';
-      } else if (actionValueN === 4) {
+      else if (actionValueN === 4)
         effect = '効果時間';
-      }
+    //   break;
+    // case 16: // only action_value_1
+    //   break;
   }
   return [effect, formula];
 }
@@ -183,8 +205,13 @@ const actionMap: Record</*action_type*/number, /*getDescription*/(this: SkillAct
     if (this.action_value_6 !== 0) {
       desc += `、クリティカル時のダメージが2倍から${this.action_value_6 * 2}倍になる`;
     }
-    if (this.action_value_5 !== 0) {
-      desc += '、ダメージは必ずクリティカルする';
+    if (this.action_detail_2 === 1 && this.action_value_5 === 1) {
+      desc += '、攻撃は必ず命中し、クリティカルする'
+    } else {
+      if (this.action_detail_2 === 1)
+        desc += '、攻撃は必ず命中する';
+      if (this.action_value_5 === 1)
+        desc += '、ダメージは必ずクリティカルする';
     }
     return insertFormula(desc, formula);
   },
@@ -308,8 +335,10 @@ const actionMap: Record</*action_type*/number, /*getDescription*/(this: SkillAct
     }
     let state = '';
     if (this.action_detail_1 === 1) state = '毒';
+    else if (this.action_detail_1 === 2) state = '火傷';
     else if (this.action_detail_1 === 3) state = '呪い';
     else if (this.action_detail_1 === 4) state = '猛毒';
+    else state = '???';
     let desc = `${target}を${state}状態にし、毎秒{0}${state}ダメージを与える`; //this.description.replace('{0}', `${target}を${state}状態にし、毎秒{0}`);
     return insertFormula(desc, fromula, getEffectTime(this.action_value_3));
   },
@@ -361,11 +390,15 @@ const actionMap: Record</*action_type*/number, /*getDescription*/(this: SkillAct
   },
   // ムイミ UB
   14: function () {
-    if (this.action_detail_1 === 2) {
-      return 'TPが無くなるまでの間天楼覇断剣を装備し、行動パターンを2に変化させ、TPを毎秒' + this.action_value_1 + '消耗する。';
-    } else { // this.action_detail_1 === 3
-      return 'TPが無くなると、行動パターンを1に戻る。';
+    const pattern = this.action_detail_2 % 10;
+    let desc = '';
+    if (pattern === 1) {
+      desc = 'TPが無くなると、';
+    } else {
+      desc = `TPを毎秒${this.action_value_1}消耗し、TPが無くなるまでの間天楼覇断剣を装備し、`;
     }
+    desc += `行動パターンを${pattern}に変化させる。`;
+    return desc;
   },
   // 召喚物 summoned
   15: function () {
@@ -410,7 +443,20 @@ const actionMap: Record</*action_type*/number, /*getDescription*/(this: SkillAct
   // ミヤコ　無敵状態
   21: function (skillLevel) {
     const formula = getFormula(this.action_value_1, this.action_value_2, skillLevel, undefined, undefined, undefined, v => v);
-    return insertFormula('自分を無敵状態にする、効果時間{0}秒', formula);
+    let state = '';
+    if (this.action_detail_1 === 1) state = '無敵';
+    else if (this.action_detail_1 === 2) state = '物理無効';
+    return insertFormula(`自分を${state}状態にする、効果時間{0}秒`, formula);
+  },
+  // ラビリスタ UB
+  22: function () {
+    const pattern = this.action_detail_2 % 10;
+    let desc = '七冠の権能を解放し、';
+    if (pattern === 1) {
+      desc = 'オブジェクトクリエイションを解除し、'
+    }
+    desc += `行動パターンを${pattern}に変化させる。`;
+    return desc;
   },
   23: function () {
     let actionA = getActionObj(getActionNum(this.action_detail_2));
@@ -440,43 +486,30 @@ const actionMap: Record</*action_type*/number, /*getDescription*/(this: SkillAct
   26: function (skillLevel, property, actionList) {
     const actionNum = getActionNum(this.action_detail_1);
     const targetAction = actionList.find(item => item.action_id === this.action_detail_1)!;
-    let coefficient: string;
-    switch (this.action_value_1) {
-      case 0:
-        coefficient = '残りHP'; // ぺコリーヌ UB+
-        break;
-      case 1:
-        coefficient = '損失したHP'; // サレン UB
-        break;
-      case 4:
-        coefficient = '範囲内の敵の数'; // カスミ Main+、トモ Main+
-        break;
-      default:
-        coefficient = '???';
-    }
-    const [effect, formula] = getActionUp(targetAction, this.action_detail_2, this.action_value_2, coefficient);
+    const [effect, formula] = getActionUp(this, targetAction);
     return [getActionObj(actionNum), `の${effect}を`, getFormulaObj(formula), 'アップする。'];
   },
   27: function (skillLevel, property, actionList) {
     const actionNum = getActionNum(this.action_detail_1);
     const targetAction = actionList.find(item => item.action_id === this.action_detail_1)!;
-    let coefficient: string;
-    switch (this.action_value_1) {
-      case 2:
-        coefficient = '倒した敵の数'; // 二ノン Main1
-        break;
-      default:
-        coefficient = '???';
-    }
-    const [effect, formula] = getActionUp(targetAction, this.action_detail_2, this.action_value_2, coefficient);
+    const [effect, formula] = getActionUp(this, targetAction);
     return [getActionObj(actionNum), `の${effect}を`, getFormulaObj(formula), 'で乗じる。'];
   },
   28: function () {
     const actionA = getActionObj(getActionNum(this.action_detail_2));
     const actionB = getActionObj(getActionNum(this.action_detail_3));
-    if (this.action_detail_1 === 1211) {
-      // アリサ UB、カヤ UB
-      return ['UBの使用回数が' + this.action_value_1 + '回以上の場合', actionA, 'を使う、でないと', actionB, 'を使う。'];
+    if (this.action_detail_1 > 1200) {
+      // アリサ UB、カヤ UB action_detail_1: 1211
+      // カヤ Main1+ action_detail_1: 1221
+      const n = parseInt(this.action_detail_1.toString().substr(-2, 1));
+      const skill = n === 1 ? 'ユニオンバースト' : n === 2 ? 'スキル1' : 'スキル2';
+      if (this.action_detail_2 === 0) {
+        return [skill + 'の使用回数が' + this.action_value_1 + '回未満の場合', actionB, 'を使う。'];
+      }
+      if (this.action_detail_3 === 0) {
+        return [skill + 'の使用回数が' + this.action_value_1 + '回以上の場合', actionA, 'を使う。'];
+      }
+      return [skill + 'の使用回数が' + this.action_value_1 + '回以上の場合', actionA, 'を使う、でないと', actionB, 'を使う。'];
     } else if (this.action_detail_1 === 1000) {
       // エリコ UB
       return ['敵を倒した場合', actionA, 'を使う。'];
@@ -550,7 +583,7 @@ const actionMap: Record</*action_type*/number, /*getDescription*/(this: SkillAct
   // カスミ UB、ミツキ Main2
   38: function (skillLevel) {
     const formula = getFormula(this.action_value_1, this.action_value_2, skillLevel);
-    const desc = `半径${this.action_value_5}のフィールドを展開し、${this.description}`;
+    const desc = `半径${this.action_value_5}のフィールドを展開し、${this.description.replace('フィールドを展開する', '')}`;
     return insertFormula(desc, formula, getEffectTime(this.action_value_3));
   },
   // アキノ Main1
@@ -562,9 +595,11 @@ const actionMap: Record</*action_type*/number, /*getDescription*/(this: SkillAct
   44: function () {
     return 'バトル' + this.action_value_1 + '秒後入場する。';
   },
-  // アリサ UB、カヤ UB
+  // アリサ UB、カヤ UB Main1+
   45: function () {
-    return 'UBの使用回数を' + this.action_value_1 + '回増やせる。';
+    const n = parseInt(this.action_id.toString().substr(-3, 1));
+    const skill = n === 1 ? 'ユニオンバースト' : n === 2 ? 'スキル1' : 'スキル2';
+    return skill + 'の使用回数を' + this.action_value_1 + '回増やせる。';
   },
   // HP/継続回復状態付与
   48: function (skillLevel, property) {
@@ -580,6 +615,13 @@ const actionMap: Record</*action_type*/number, /*getDescription*/(this: SkillAct
       target = '味方単体';
     }
     return insertFormula(target + this.description.replace('毎秒ＨＰを', 'のＨＰを毎秒'), formula, getEffectTime(this.action_value_5));
+  },
+  // ラビリスタ SP3
+  58: function () {
+    const n = parseInt(this.action_detail_1.toString().substr(-3, 1));
+    const skill = n === 1 ? 'ユニオンバースト' : n === 2 ? 'スキル1' : 'スキル2';
+    const actionObj = getActionObj(getActionNum(this.action_detail_1));
+    return [`七冠の権能を解除し、${skill}の`, actionObj, 'のスキル効果を失わせる。'];
   },
   // 恐慌
   61: function () {

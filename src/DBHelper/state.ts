@@ -1,15 +1,8 @@
-export interface StateData {
-  name: string;
-  effect: string;
-}
-
-export const state: Record<number, StateData> = {
-  50: {
-    name: '英霊の加護',
-    effect: '',
-  },
-  77: {
-    name: '風の刃',
-    effect: 'スキルの効果値が2倍になる',
-  },
+export const state: Record<number, string> = {
+  50: '英霊の加護',
+  57: '畏縮',
+  60: 'おともだち',
+  61: 'コイン',
+  76: 'ちぇる',
+  77: '風の刃',
 };

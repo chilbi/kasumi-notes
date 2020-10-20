@@ -236,8 +236,24 @@ function CharaSkill(props: CharaSkillProps) {
       if (typeof descData === 'object') {
         switch (descData.type) {
           case 'formula':
+            let desc: React.ReactNode ;
+            const _value = descData.value.toString();
+            const match = _value.match(/{(\d+)}/);
+            if (match) {
+              const stateID = parseInt(match[1]);
+              const arr = _value.split(match[0]);
+              desc = (
+                <React.Fragment key={stateID}>
+                  {arr[0]}
+                  {renderDesc({ type: 'state', value: stateID }, stateID)}
+                  {arr[1]}
+                </React.Fragment>
+              );
+            } else {
+              desc = _value;
+            }
             return (
-              <span key={key} className={styles.formula}>[{descData.value}]</span>
+              <span key={key} className={styles.formula}>[{desc}]</span>
             );
           case 'action':
             return (
@@ -250,7 +266,7 @@ function CharaSkill(props: CharaSkillProps) {
           case 'state':
             return (
               <React.Fragment key={key}>
-                {state[descData.value as number].name}
+                {state[descData.value as number]}
                 <span className={styles.stateRoot}>
                   <SkeletonImage classes={{ img: styles.stateImg }} src={getPublicImageURL('icon_state', descData.value)} save onlyImg />
                 </span>

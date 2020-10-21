@@ -145,9 +145,9 @@ function getCoefficient(thisAction: SkillAction): string {
   if (actionValue1 > 200 && actionValue1 < 290) return `{${actionValue1.toString().substr(1)}}の数`; //　クロエ Main2
   switch (actionValue1) {
     case 0:
-      return '残りHP'; // ぺコリーヌ UB+
+      return '残りＨＰ'; // ぺコリーヌ UB+
     case 1:
-      return '損失したHP'; // サレン UB
+      return '損失したＨＰ'; // サレン UB
     case 2:
       return '倒した敵の数'; // 二ノン UB+ Main1
     case 4:
@@ -487,9 +487,9 @@ const actionMap: Record</*action_type*/number, /*getDescription*/(this: SkillAct
     const pattern = this.action_detail_2 % 10;
     let desc = '';
     if (pattern === 1) {
-      desc = 'TPが無くなると、';
+      desc = 'ＴＰが無くなると、';
     } else {
-      desc = `TPを毎秒${this.action_value_1}消耗し、TPが無くなるまでの間天楼覇断剣を装備し、`;
+      desc = `ＴＰを毎秒${this.action_value_1}消耗し、ＴＰが無くなるまでの間天楼覇断剣を装備し、`;
     }
     desc += `行動パターンを${pattern}に変化させる。`;
     return desc;
@@ -539,7 +539,7 @@ const actionMap: Record</*action_type*/number, /*getDescription*/(this: SkillAct
   },
   // アンナ Main2 action1
   17: function () {
-    return '自分のHPが最大HPの' + this.action_value_3 + '%以下になった時に発動する。';
+    return '自分のＨＰが最大ＨＰの' + this.action_value_3 + '%以下になった時に発動する。';
   },
   // レイ　構え中に受けたダメージ
   18: function () {
@@ -700,10 +700,10 @@ const actionMap: Record</*action_type*/number, /*getDescription*/(this: SkillAct
   30: function () {
     return '自分を戦闘不能状態にする。';
   },
-  // アカリ UB HP吸収付与
+  // アカリ UB ＨＰ吸収付与
   32: function (skillLevel) {
     const formula = getFormula(this.action_value_1, this.action_value_2, skillLevel);
-    return ['味方全体の次の攻撃に' + formula[0], getFormulaObj(formula[1]!), 'HP吸収効果を付与する。'];
+    return ['味方全体の次の攻撃に' + formula[0], getFormulaObj(formula[1]!), 'ＨＰ吸収効果を付与する。'];
   },
   //ルゥ Main1
   33: function (skillLevel) {
@@ -809,7 +809,7 @@ const actionMap: Record</*action_type*/number, /*getDescription*/(this: SkillAct
     // return this.description + '。';
     return `自分の残りＨＰの${this.action_value_1}%を消費する。`;
   },
-  // HP/TP継続回復状態付与
+  // ＨＰ/ＴＰ継続回復状態付与
   48: function (skillLevel, property) {
     const formula = getFormula(this.action_value_1, this.action_value_2, skillLevel, this.action_value_3, this.action_detail_1, property);
     let target = '';

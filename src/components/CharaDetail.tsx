@@ -172,13 +172,13 @@ function CharaDetail(props: CharaDetailProps) {
         {userProfileMemo.story}
       </div>
       <div className={styles.tabpanel} role="tabpanel" hidden={tabsValue !== 3}>
-        {detailMemo.comment}
         {userProfileMemo.status}
+        {detailMemo.comment}
       </div>
       <div className={styles.tabpanel} role="tabpanel" hidden={tabsValue !== 4}>
+        {detailMemo.profile}
         {detailMemo.catchCopy}
         {detailMemo.selfText}
-        {detailMemo.profile}
       </div>
     </div>
   );

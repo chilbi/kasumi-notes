@@ -140,8 +140,9 @@ function insertFormula(desc: string, formula: [/*calc*/number | string, /*formul
   return part1 + part2;
 }
 
-function getCoefficient(actionValue1: number): string {
-  if (actionValue1 > 200) return `{${actionValue1.toString().substr(1)}}の数`; //　クロエ Main2
+function getCoefficient(thisAction: SkillAction): string {
+  const actionValue1 = thisAction.action_value_1;
+  if (actionValue1 > 200 && actionValue1 < 290) return `{${actionValue1.toString().substr(1)}}の数`; //　クロエ Main2
   switch (actionValue1) {
     case 0:
       return '残りHP'; // ぺコリーヌ UB+
@@ -150,20 +151,28 @@ function getCoefficient(actionValue1: number): string {
     case 2:
       return '倒した敵の数'; // 二ノン UB+ Main1
     case 4:
-      return '範囲内の敵の数'; // カスミ Main+、トモ Main+
+      let range = thisAction.target_range === 2160 && thisAction.target_count === 99 ? '全体' : '範囲内';
+      let target = thisAction.target_assignment === 1 ? '敵' : '味方';
+      return `${range}の${target}の数`; // カスミ Main+、トモ Main+、リノ（ワンダー）
+    case 6: // キャル（ニューイヤー）
+      return 'ダメージの量';
+    case 7: // ジュン（サマー）
+      return '自分の物理攻撃力';
     case 8:
       return '自分の魔法攻撃力'; // チカ（クリスマス） Main1+
     case 12:
       return '後方にいる味方の数'; // ノゾミ（クリスマス）
     case 102:
       return 'オメメちゃんの数';
+    case 290:
+      return 'UBの使用回数';
     default:
       return '???';
   }
 }
 
 function getEffectModified(thisAction: SkillAction, targetAction: SkillAction): [/*effect*/string, /*formula*/string] {
-  const coefficient = getCoefficient(thisAction.action_value_1);
+  const coefficient = getCoefficient(thisAction);
   const action_value_ = thisAction.action_detail_2;
   let factor = thisAction.action_value_2.toString();
   if (thisAction.action_value_3 !== 0) {
@@ -180,8 +189,8 @@ function getEffectModified(thisAction: SkillAction, targetAction: SkillAction): 
         formula += `*${getAtkKey(targetAction.action_detail_1)}`;
       break;
     case 8:
-      // if(actionValueN === 3)
-      effect = '効果時間'; // only action_value_3
+      if (action_value_ === 3)
+        effect = '効果時間';
       break;
     case 10:
       if (action_value_ === 3)
@@ -224,8 +233,8 @@ const actionMap: Record</*action_type*/number, /*getDescription*/(this: SkillAct
         else
           desc = desc.replace('範囲内', this.target_range + '範囲内');
       }
-      if (this.action_value_6 !== 0) {
-        desc += `、クリティカル時のダメージが2倍から${this.action_value_6 * 2}倍になる`;
+      if (this.action_value_6 !== 0 && this.action_value_6 !== 1) {
+        desc += `、クリティカル時のダメージは2倍ではなく${this.action_value_6 * 2}倍になる`;
       }
       if (this.action_detail_1 === 3 && this.action_detail_2 === 1 && this.action_value_5 === 1) {
         desc += '、攻撃は必ず命中し、クリティカルする'
@@ -320,7 +329,13 @@ const actionMap: Record</*action_type*/number, /*getDescription*/(this: SkillAct
     if (this.target_type === 7) {
       target = '自分に';
     } else if (this.target_range === 2160 && this.target_count === 99) {
-      target = '味方全体に';
+      // ミサト（サマー） UB
+      if (this.target_type === 20)
+        target = '物理攻撃を行うすべての味方に';
+      else if (this.target_type === 21)
+        target = '魔法攻撃を行うすべての味方に';
+      else
+        target = '味方全体に';
     } else if (this.target_range > 0/* && this.target_range < 2160*/ && this.target_count > 1) {
       target = this.target_range + '範囲内の味方に';
     } else {
@@ -333,42 +348,59 @@ const actionMap: Record</*action_type*/number, /*getDescription*/(this: SkillAct
     if (this.action_value_1 > 0) { // マツリ UB、ミツキ Main2
       target = '自分の前' + this.action_value_1 + '距離の位置';
     } else {
-      target = this.target_count + this.target_number + '番目';
-      if (this.target_assignment === 1) {
-        target += 'に近い敵';
-      } else { /*this.target_assignment === 2*/
-        target += '前の味方';
+      if (this.target_type === 5) {
+        target = `最もＨＰが低い${this.target_assignment === 1 ? '敵' : '味方'}`;
+      } else if (this.target_type === 7) {
+        target = '自分';
+      } else {
+        target = this.target_count + this.target_number + '番目';
+        if (this.target_assignment === 1) {
+          target += `に${this.target_type === 4 ? '遠い' : '近い'}敵`;
+        } else { /*this.target_assignment === 2*/
+          target += '前の味方';
+        }
       }
     }
     return target + 'を範囲の中心にする。';
   },
   // フィールド buff debuff
   8: function () {
-    let desc = '';
+    let desc = this.description;
+    let remarks = '';
     const akinesia = '一定時間行動不能';
     switch (this.action_detail_1) {
       case 1: // カスミ UB
-        desc = this.description.replace('一定時間低下させる', `${this.action_value_1}倍にする`);
+        const str = `${this.action_value_1}倍にする`;
+        if (desc.indexOf('一定時間低下させる') > -1) {
+          desc = desc.replace('一定時間低下させる', str);
+        } else {
+          desc = desc.replace('ダウン', 'を' + str);
+        }
         break;
       case 2: // ユイ UB+、アン Main2
-        desc = this.description.replace(/*行動速度*/'アップ', /*行動速度*/`を${this.action_value_1}倍にする`);
+        desc = desc.replace(/*行動速度*/'アップ', /*行動速度*/`を${this.action_value_1}倍にする`);
         break;
       case 3: // アオイ Main2
-        desc = this.description.replace(akinesia, '麻痺状態');
+        desc = desc.replace(akinesia, '麻痺状態');
         break;
       case 4: // レム Main1
-        desc = this.description.replace(akinesia, '凍結状態');
+        desc = desc.replace(akinesia, '凍結状態');
         break;
       case 5: // カスミ Main1
-        desc = this.description.replace(akinesia, '束縛状態');
+        desc = desc.replace(akinesia, '束縛状態');
+        break;
+      case 6: // ハツネ（サマー） UB
+        desc = desc.replace('行動不能', '睡眠状態');
+        remarks = '攻撃を受けたときにのみ解除される。';
         break;
       case 7: // マツリ Main1
-        desc = this.description.replace(akinesia, 'スタン状態');
+        desc = desc.replace(akinesia, 'スタン状態');
         break;
-      default:
-        desc = this.description;
+      case 11: // アユミ（ワンダー） Main2
+        desc = desc.replace(akinesia, '時停状態');
+        break;
     }
-    return desc.replace('範囲内', this.target_range + '範囲内') + getEffectTime(this.action_value_3);
+    return desc.replace('範囲内', this.target_range + '範囲内') + getEffectTime(this.action_value_3) + remarks;
   },
   9: function (skillLevel) {
     const fromula = getFormula(this.action_value_1, this.action_value_2, skillLevel);
@@ -398,6 +430,17 @@ const actionMap: Record</*action_type*/number, /*getDescription*/(this: SkillAct
     } else {
       if (desc === '') {
         desc = getSameDesc(this, actionList);
+        if (desc === '') { // コッコロ（プリンセス）
+          const prevAction = actionList.find(item => item.action_id === this.action_id - 1);
+          if (prevAction)
+            desc = prevAction.description;
+        }
+      }
+      // コッコロ（プリンセス）
+      if ((this.action_detail_1 === 21 || this.action_detail_1 === 110) && desc.indexOf('・魔法') > -1) {
+        desc = desc.replace('・魔法', '');
+      } else if ((this.action_detail_1 === 41 || this.action_detail_1 === 120) && desc.indexOf('物理・') > -1) {
+        desc = desc.replace('物理・', '');
       }
       if (this.action_detail_1 === 101) { // ツムギ Main2
         desc = desc.replace('一定時間低下させる', '{0}ダウン');
@@ -487,7 +530,7 @@ const actionMap: Record</*action_type*/number, /*getDescription*/(this: SkillAct
     } else {
       if (this.target_range > 0 && this.target_range < 2160/* && this.target_count > 1*/) {
         if (this.target_type === 5) // シズル（バレンタイン）
-          desc = this.target_range + '範囲内最もＨＰが低い味方のＨＰを{0}回復';
+          desc = this.target_range + '範囲内最もＨＰが低い味方のＴＰを{0}回復';
         else
           desc = desc.replace('範囲内', this.target_range + '範囲内');
       }
@@ -507,8 +550,11 @@ const actionMap: Record</*action_type*/number, /*getDescription*/(this: SkillAct
   // 挑発
   20: function (skillLevel) {
     const formula = getFormula(this.action_value_1, this.action_value_2, skillLevel, undefined, undefined, undefined, v => v);
-    let target = '自分';
-    if (this.target_type === 35) target = '対象の味方'; // ヨリ（エンジェル）
+    let target = '';
+    if (this.target_type === 7)
+      target = '自分';
+    else // this.target_type === 35 背後にいないキャラの内、最も残りＨＰの値が多い味方１キャラ
+      target = '対象の味方'; // ヨリ（エンジェル）
     const desc = target + 'を挑発状態にする、効果時間{0}秒';
     return insertFormula(desc, formula);
   },
@@ -531,6 +577,7 @@ const actionMap: Record</*action_type*/number, /*getDescription*/(this: SkillAct
     return desc;
   },
   23: function () {
+    const detail1 = this.action_detail_1;
     let actionA = getActionObj(getActionNum(this.action_detail_2));
     let actionB = getActionObj(getActionNum(this.action_detail_3));
     let target = '対象の';
@@ -539,26 +586,41 @@ const actionMap: Record</*action_type*/number, /*getDescription*/(this: SkillAct
     }
     target = target + (this.target_assignment === 1 ? '敵' : '味方');
     let condition = '';
-    if (this.action_detail_1 === 100) { // レム UB
+    if (detail1 === 100) { // レム UB
       condition = '行動不能状態'
-    } else if (this.action_detail_1 === 300) { // イオ Main1+ action_detail_1: 300, action_value_1: 0, action_value_2: 1
+    } else if (detail1 === 300) { // イオ Main1+ action_detail_1: 300, action_value_1: 0, action_value_2: 1
       condition = '誘惑状態';
-    } else if (this.action_detail_1 === 502) { // アオイ Main1+ action_detail_1: 502, action_value_1: 1, action_value_2: 2
+    } else if (detail1 === 502) { // アオイ Main1+ action_detail_1: 502, action_value_1: 1, action_value_2: 2
       condition = '毒状態';
       [actionA, actionB] = [actionB, actionA];
-    } else if (this.action_detail_1 === 512) { // アオイ（編入生） Main1
+    } else if (detail1 === 512) { // アオイ（編入生） Main1
       condition = '毒か猛毒';
-    } else if (this.action_detail_1 === 700) { // マコト（サマー） UB Main1
-      condition = '残りの攻撃対象が一つの場合';
+    } else if (detail1 === 700) { // マコト（サマー） UB Main1
+      condition = '残りの攻撃対象が1つの場合';
       if (this.action_detail_3 !== 0)
         return [condition, actionA, 'を使う、でないと', actionB, 'を使う。'];
       else
         return [condition, actionA, 'を使う。'];
-    } else if (this.action_detail_1 === 1300) { // タマキ UB+ action_detail_1: 1300, action_value_1: 0, action_value_2: 0
+    } else if (detail1 === 1300) { // タマキ UB+ action_detail_1: 1300, action_value_1: 0, action_value_2: 0
       condition = '魔法攻撃をする敵';
       [actionA, actionB] = [actionB, actionA];
-    } else if (this.action_detail_1 > 600) {
-      const stateID = getState(this.action_detail_1);
+    } else if (detail1 > 900 && detail1 < 1000) { // レイ（ハロウィン） UB
+      const persent = detail1.toString().substr(1);
+      let target = this.target_assignment === 1 ? '敵' : '味方';
+      let desc = '';
+      if (this.target_type === 7) {
+        desc = '自分';
+      } else if (this.target_range > 0 && this.target_range < 2160/* && this.target_count > 1*/) {
+        desc = `${this.target_range}範囲内の${target}`;
+      } else {
+        desc = '対象';
+      }
+      desc += `の残りＨＰが最大ＨＰの${persent}%未満だった場合`
+      if (this.action_detail_3 === 0)
+        return [desc, actionA, 'を使う。'];
+      return [desc, actionA, 'を使う、でないと', actionB, 'を使う。'];
+    } else if (detail1 > 600 && detail1 < 700) {
+      const stateID = getState(detail1);
       const stateObj = getStateObj(stateID);
       if (stateID === 50) { // アン 英霊の加護
         return [stateObj, 'を受けているキャラが', actionA, 'の対象になる。'];
@@ -591,16 +653,18 @@ const actionMap: Record</*action_type*/number, /*getDescription*/(this: SkillAct
       // カヤ UB            (ub)     detail_1: 1211, value_1: 1, value_2: 2
       // カヤ Main1+        (skill1) detail_1: 1221, value_1: 1, value_2: 2
       // スズナ（サマー） UB (skill2) detail_1: 1211, value_1: 1, value_2: 2
+      // ルカ（サマー） UB   (ub)     detail_1: 1211, value_1: 0, value_2: 0
       const counter = 'カウンター' + this.action_detail_1.toString().substr(-2, 1);
+      const count = this.action_value_1;
       if (this.action_detail_2 === 0) {
-        return [counter + 'の数が' + this.action_value_1 + '未満の場合', actionB, 'を使う。'];
+        return [counter + `の数が${count > 0 ? count + '以下' : count}の場合`, actionB, 'を使う。'];
       }
       if (this.action_detail_3 === 0) {
-        return [counter + 'の数が' + this.action_value_1 + '以上の場合', actionA, 'を使う。'];
+        return [counter + `の数が${count}以上の場合`, actionA, 'を使う。'];
       }
-      return [counter + 'の数が' + this.action_value_1 + '以上の場合', actionA, 'を使う、でないと', actionB, 'を使う。'];
+      return [counter + `の数が${count}以上の場合`, actionA, 'を使う、でないと', actionB, 'を使う。'];
     } else if (this.action_detail_1 === 700) { // マコト（サマー） Main1+ Main2
-      const condition = '残りの攻撃対象が一つの場合';
+      const condition = '残りの攻撃対象が1つの場合';
       if (this.action_detail_3 !== 0)
         return [condition, actionA, 'を使う、でないと', actionB, 'を使う。'];
       else
@@ -675,6 +739,8 @@ const actionMap: Record</*action_type*/number, /*getDescription*/(this: SkillAct
         return [stateObj, 'を持っている場合、', stateObj, 'を消耗する。'];
     } else if (stateID === 77) { // レイ UB+
       return [stateObj, 'を纏う。纏っている間、スキルの効果値が２倍になる' + getEffectTime(this.action_value_3)];
+    } else if (stateID === 90) { // マツリ（ハロウィン） UB
+      return [`UBの使用回数を${this.action_value_4}回増やす。最大${this.action_value_1}回まで増やせる。`];
     }
     return this.description;
   },
@@ -743,7 +809,7 @@ const actionMap: Record</*action_type*/number, /*getDescription*/(this: SkillAct
     // return this.description + '。';
     return `自分の残りＨＰの${this.action_value_1}%を消費する。`;
   },
-  // HP/継続回復状態付与
+  // HP/TP継続回復状態付与
   48: function (skillLevel, property) {
     const formula = getFormula(this.action_value_1, this.action_value_2, skillLevel, this.action_value_3, this.action_detail_1, property);
     let target = '';
@@ -756,7 +822,13 @@ const actionMap: Record</*action_type*/number, /*getDescription*/(this: SkillAct
     } else {
       target = '味方単体';
     }
-    return insertFormula(target + this.description.replace('毎秒ＨＰを', 'のＨＰを毎秒'), formula, getEffectTime(this.action_value_5));
+    let desc = this.description;
+    if (this.action_detail_1 === 1 && this.action_detail_2 === 2) {
+      desc = desc.replace('毎秒ＴＰを', 'のＴＰを毎秒')
+    } else { // this.action_detail_1 === 2 && this.action_detail_2 === 1
+      desc = desc.replace('毎秒ＨＰを', 'のＨＰを毎秒')
+    }
+    return insertFormula(target + desc, formula, getEffectTime(this.action_value_5));
   },
   // クルミ（クリスマス） Main1
   50: function (skillLevel) {
@@ -809,6 +881,16 @@ const actionMap: Record</*action_type*/number, /*getDescription*/(this: SkillAct
   // 恐慌
   61: function () {
     return this.action_value_3 + '%確率で' + this.description + getEffectTime(this.action_value_1);
+  },
+  // ぺコリーヌ（プリンセス）
+  71: function (skillLevel) {
+    const formula = getFormula(this.action_value_2, this.action_value_3, skillLevel);
+    return insertFormula('自分に騎士の加護を付与する' + getEffectTime(this.action_value_6) + this.description, formula);
+  },
+  // ルカ（サマー） UB
+  75: function () {
+    const actionObj = getActionObj(getActionNum(this.action_detail_2));
+    return [actionObj, `が${this.action_value_1}回ダメージを与えるたびに発動するようになる。`];
   },
   // ex
   90: function (skillLevel) {

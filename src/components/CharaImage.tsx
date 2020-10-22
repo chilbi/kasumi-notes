@@ -24,29 +24,30 @@ import unique from '../images/unique.png';
 const useStyles = makeStyles((theme: Theme) => {
   const
     rem = 16,
-    scalage = 0.5,
-    positionSize = 32 * scalage / rem,
-    starSize = 24 * scalage / rem,
-    uniqueSize = 24 * scalage / rem,
-    iconImageSize = 128 * scalage / rem,
-    iconBorderWidth = 8 * scalage / rem,
+    iScalage = 0.5,
+    positionSize = 32 * iScalage / rem,
+    starSize = 24 * iScalage / rem,
+    uniqueSize = 24 * iScalage / rem,
+    iconImageSize = 128 * iScalage / rem,
+    iconBorderWidth = 8 * iScalage / rem,
     iconBorderSlice = 12,
-    iconBorderRadius = iconBorderSlice * scalage / rem ,
+    iconBorderRadius = iconBorderSlice * iScalage / rem ,
     iconScalage = Math.round(iconImageSize / (starSize * 5 + positionSize) * 10) / 10,
     iconPositionSize = positionSize * iconScalage,
     iconStarSize = starSize * iconScalage,
     iconUniqueSize = uniqueSize * iconScalage,
     iconGup = (iconImageSize - (iconPositionSize + iconStarSize * 5)) / 3,
-    plateImageWidth = 512 * scalage / rem,
-    plateImageHeight = 256 * scalage / rem,
+    pScalage = 0.359375,
+    plateImageWidth = 512 * pScalage / rem,
+    plateImageHeight = 256 * pScalage / rem,
     plateBorderWidth = [8, 7, 11, 7].map(v => v/* * scalage*/ / rem),
     plateBorderSlice = [16, 16, 21, 16],
-    plateBorderRadius = 16 * scalage / rem,
+    plateBorderRadius = 32 * pScalage / rem,
     plateScalage = Math.round((plateImageWidth / 2) / (starSize * 6 + positionSize) * 10) / 10,
     platePositionSize = positionSize * plateScalage,
     plateStarSize = starSize * plateScalage,
     plateUniqueSize = uniqueSize * plateScalage,
-    plateGup = 7 * scalage / rem;
+    plateGup = 7 * pScalage / rem;
 
   return {
     '@keyframes fadeIn': {

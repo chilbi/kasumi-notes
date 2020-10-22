@@ -1,6 +1,5 @@
 import React from 'react';
 import { makeStyles, Theme } from '@material-ui/core/styles';
-import CharaName from './CharaName';
 import { getPublicImageURL, getValidID } from '../DBHelper/helper';
 import { PCRStoreValue } from '../db';
 import positionBorder1 from '../images/position_border_1.png';
@@ -76,6 +75,26 @@ const useStyles = makeStyles((theme: Theme) => {
     position3: {
       borderImageSource: `url(${positionBorder3})`,
     },
+    nameBox: {
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'space-around',
+      flexGrow: 1,
+      margin: '0.25em',
+    },
+    unitName: {
+      fontSize: '1.2em',
+      color: theme.palette.primary.dark,
+    },
+    actualName: {
+      color: theme.palette.secondary.light,
+    },
+    // skeleton: {
+    //   backgroundColor: theme.palette.grey[200], // '#ecebf0',
+    //   '&::before': {
+    //     content: '"\\00a0"',
+    //   }
+    // },
   };
 });
 
@@ -96,7 +115,10 @@ function CharaBaseInfo(props: CharaBaseInfoProps) {
       <SkeletonImage classes={{ root: styles.stillRoot }} src={stillImgSrc} />
       <div className={styles.infoBox}>
         <SkeletonImage classes={{ root: styles.iconRoot }} src={iconImgSrc} save />
-        <CharaName unitName={charaData.unit_name} actualName={charaData.actual_name} />
+        <div className={clsx(styles.nameBox)}>
+          <span className={styles.unitName}>{charaData.unit_name}</span>
+          <span className={styles.actualName}>{charaData.actual_name}</span>
+        </div>
         <div className={clsx(styles.position, styles['position' + charaData.position as keyof typeof styles])}>
           {PositionText[charaData.position - 1]}
         </div>

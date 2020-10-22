@@ -1,21 +1,31 @@
 import React from 'react';
 import IconButton from '@material-ui/core/IconButton';
 import ArrowBack from '@material-ui/icons/ArrowBack';
+import ViewModule from '@material-ui/icons/ViewModule';
+import ViewStream from '@material-ui/icons/ViewStream';
 
 interface HeaderProps {
   classes: Record<'bar' | 'subtitle', string>;
+  variant: 'icon_unit' | 'unit_plate';
   subtitle: string;
-  disabled: boolean;
-  onClick: (e: React.MouseEvent) => void;
+  disabledBack: boolean;
+  disabledVariant: boolean;
+  onBack: (e: React.MouseEvent) => void;
+  onChangeVariant: (e: React.MouseEvent) => void;
 }
 
 function Header(props: HeaderProps) {
-  const { classes, subtitle, disabled, onClick } = props;
+  const { classes, variant, subtitle, disabledBack, disabledVariant, onBack, onChangeVariant } = props;
 
   return (
     <div id="header" className={classes.bar}>
-      <IconButton disabled={disabled} color="primary" onClick={onClick}><ArrowBack /></IconButton>
-      <h5 className={classes.subtitle}>{subtitle}</h5>
+      <IconButton disabled={disabledBack} style={disabledBack ? { opacity: 0 } : undefined} color="primary" onClick={onBack}>
+        <ArrowBack />
+      </IconButton>
+      <h6 className={classes.subtitle}>{subtitle}</h6>
+      <IconButton disabled={disabledVariant} style={disabledVariant ? { opacity: 0 } : undefined} color="primary" onClick={onChangeVariant}>
+        {variant === 'icon_unit' ? <ViewModule /> : <ViewStream />}
+      </IconButton>
     </div>
   );
 }

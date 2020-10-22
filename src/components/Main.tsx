@@ -50,13 +50,9 @@ const useStyles = makeStyles((theme: Theme) => ({
     borderTop: '1px solid ' + theme.palette.grey[100],
   },
   subtitle: {
-    position: 'absolute',
-    top: '50%',
-    left: '50%',
-    transform: 'translate(-50%, -50%)',
-    margin: 0,
-    padding: 0,
-    fontSize: '1.5em',
+    flexGrow: 1,
+    textAlign: 'center',
+    ...theme.typography.h6,
   },
 }));
 
@@ -88,6 +84,10 @@ function Main() {
     setBottomNavigationValue(value);
   }, [history]);
 
+  const [variant, setVariant] = useState<'icon_unit' | 'unit_plate'>('unit_plate');
+  const handleChangeVariant = useCallback(() => {
+    setVariant(prevValue => prevValue === 'icon_unit' ? 'unit_plate' : 'icon_unit');
+  }, []);
   const handleBack = useCallback(() => {
     history.goBack();
   }, [history]);
@@ -107,9 +107,12 @@ function Main() {
   const header = useMemo(() => (
     <Header
       classes={{ bar: clsx(styles.fixedBar, styles.topBar), subtitle: styles.subtitle }}
-      disabled={!!rootMatch || !!questMatch || !!menuMatch}
+      variant={variant}
       subtitle={subtitle}
-      onClick={handleBack}
+      disabledBack={!!rootMatch || !!questMatch || !!menuMatch}
+      disabledVariant={!rootMatch}
+      onBack={handleBack}
+      onChangeVariant={handleChangeVariant}
     />
     // eslint-disable-next-line react-hooks/exhaustive-deps
   ), [handleBack, rootMatch, questMatch, menuMatch, subtitle]);
@@ -128,7 +131,7 @@ function Main() {
       {header}
       <div id="main" className={styles.main}>
         <div id="chara-list" hidden={!rootMatch}>
-          <CharaList />
+          <CharaList variant={variant} />
         </div>
         <div id="chara-detail" hidden={!charaDetailMatch}>
           {charaDetailMatch && <CharaDetail unitID={parseParamsUnitID(charaDetailMatch.params.unit_id)} />}

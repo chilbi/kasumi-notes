@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useMemo, useContext, useEffect, useRef } from 'react';
-import { makeStyles, Theme } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/core/styles';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import CharaBaseInfo from './CharaBaseInfo';
@@ -14,7 +14,7 @@ import { CharaDetailData } from '../DBHelper';
 import { PCRStoreValue } from '../db';
 import clsx from 'clsx';
 
-const useStyles = makeStyles((theme: Theme) => ({
+const useStyles = makeStyles({
   root: {
   },
   tabpanel: {
@@ -32,12 +32,11 @@ const useStyles = makeStyles((theme: Theme) => ({
     padding: '0.5em 0',
     lineHeight: 1.8,
     textAlign: 'center',
-    color: '#34627d',
   },
   comment: {},
   catchCopy: {},
   selfText: {},
-}));
+});
 
 interface CharaDetailProps {
   unitID: number;

@@ -1,35 +1,40 @@
 import React from 'react';
-import ButtonLink from './ButtonLink';
-import Infohead from './Infohead';
+import { makeStyles } from '@material-ui/core/styles';
+import CharaListItem from './CharaListItem';
 import useDBHelper from '../hooks/useDBHelper';
 import { CharaBaseData } from '../DBHelper';
-import { getValidID } from '../DBHelper/helper';
 
-function CharaList() {
+const useStyles = makeStyles({
+  root: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    justifyContent: 'space-evenly',
+  },
+});
+
+interface CharaListProps {
+  variant: 'icon_unit' | 'unit_plate';
+}
+
+function CharaList(props: CharaListProps) {
+  const styles = useStyles();
   const allBaseData = useDBHelper(dbHelper => dbHelper.getAllCharaBaseData(), []);
-
-  const nullableAllBaseData: (CharaBaseData | undefined)[] = allBaseData || Array.from(Array(10));
-
+  const nullableAllBaseData: (CharaBaseData | undefined)[] = allBaseData || Array.from(Array(130));
   return (
-    <div>
+    <div className={styles.root}>
       {nullableAllBaseData.map((base, i) => (
-        <ButtonLink
+        <CharaListItem
           key={i}
-          disabled={!base}
-          to={`/chara/detail/${base?.charaData.unit_id}`}
-        >
-          <Infohead
-            imageName={base && getValidID(base.charaData.unit_id, base.userProfile.rarity)}
-            unitName={base && base.charaData.unit_name}
-            actualName={base && base.charaData.actual_name}
-            variant="icon_unit"
-            rarity={base ? base.userProfile.rarity : 6}
-            maxRarity={base ? base.charaData.max_rarity : 6}
-            promotionLevel={base ? base.userProfile.promotion_level : 18}
-            position={base ? base.charaData.position : 1}
-            hasUnique={base ? base.userProfile.unique_enhance_level > 0 : true}
-          />
-        </ButtonLink>
+          variant={props.variant}
+          unitID={base && base.charaData.unit_id}
+          unitName={base && base.charaData.unit_name}
+          actualName={base && base.charaData.actual_name}
+          rarity={base ? base.userProfile.rarity : 6}
+          maxRarity={base ? base.charaData.max_rarity : 6}
+          promotionLevel={base ? base.userProfile.promotion_level : 18}
+          position={base ? base.charaData.position : 1}
+          hasUnique={base ? base.userProfile.unique_enhance_level > 0 : true}
+        />
       ))}
     </div>
   );

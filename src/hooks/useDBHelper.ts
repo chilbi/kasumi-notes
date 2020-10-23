@@ -5,6 +5,7 @@ import DBHelper from '../DBHelper';
 function useDBHelper<T>(getData: (dbHelper: DBHelper) => Promise<T | undefined>, deps: DependencyList): T | undefined {
   const dbHelper = useContext(DBHelperContext);
   const [data, setData] = useState<T>();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const callback = useCallback(getData, deps);
 
   useEffect(() => {

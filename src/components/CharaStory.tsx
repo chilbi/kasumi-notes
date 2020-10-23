@@ -7,13 +7,14 @@ import CharaStatus from './CharaStatus';
 import { StoryStatus, StoryStatusData } from '../DBHelper/story_status';
 import { getPublicImageURL } from '../DBHelper/helper';
 import { PCRStoreValue } from '../db';
+import Big from 'big.js';
 
 const useStyles = makeStyles((theme: Theme) => {
   const
     rem = 16,
-    scalage = 75 / 128,
-    thumbWidth = 256 * scalage / rem,
-    thumbHeight = 128 * scalage / rem;
+    scalage = Big(75).div(128),
+    thumbWidth = Big(256).times(scalage).div(rem),
+    thumbHeight = Big(128).times(scalage).div(rem);
 
   return {
     item: {

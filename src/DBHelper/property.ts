@@ -1,3 +1,5 @@
+import Big from 'big.js';
+
 export interface Property {
   hp: number; // 1
   atk: number; // 2
@@ -40,31 +42,30 @@ export const propertyKeys = [
 
 export function plus(
   properties: (Property | Partial<Property> | undefined)[],
-  valueCallback = (v: number) => v
+  valueCallback = (v: Big) => v
 ): Property {
   return propertyKeys.reduce((result, key) => {
-    result[key] = valueCallback(properties.reduce((value, property) => value + (property && property[key] ? property[key]! : 0), 0));
+    const value = properties.reduce(
+      (value, property) => value.plus(property && property[key] ? property[key]! : 0),
+      Big(0)
+    );
+    result[key] = valueCallback(value).toNumber();
     return result;
   }, {} as Property);
 }
-
-// export function multiply(property: Property, multiplier: number, valueCallback = (v: number) => v): Property {
-//   return propertyKeys.reduce((result, key) => {
-//     result[key] = valueCallback(property[key] * multiplier);
-//     return result;
-//   }, {} as Property);
-// }
 
 export function plusMultiply(
   plusProperty: Property,
   multiplyProperty: Property,
   multiplier: number,
-  valueCallback = (v: number) => v,
-  multiplyCallback = (v: number) => v,
+  valueCallback = (v: Big) => v,
+  multiplyCallback = (v: Big) => v,
   multiplyKeySuffix = ''
 ) {
   return propertyKeys.reduce((result, key) => {
-    result[key] = valueCallback(plusProperty[key] + multiplyCallback(multiplyProperty[key + multiplyKeySuffix as keyof Property] * multiplier));
+    const multiplyValue = multiplyCallback(Big(multiplyProperty[key + multiplyKeySuffix as keyof Property]).times(multiplier));
+    const value = multiplyValue.plus(plusProperty[key])
+    result[key] = valueCallback(value).toNumber();
     return result;
   }, {} as Property);
 }

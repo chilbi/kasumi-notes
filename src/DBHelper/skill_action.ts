@@ -1,5 +1,6 @@
 import { PCRDB } from '../db';
 import { Property } from './property';
+import Big from 'big.js';
 
 export interface DescObj {
   type: 'formula' | 'action' | 'state';
@@ -54,20 +55,20 @@ function getFormula(
   propertyFactor?: number,
   atkType?: number,
   property?: Property,
-  cb = (v: number) => Math.ceil(v)
+  cb = (v: Big) => v.round(0, 3/*ceil*/)
 ): [/*calc*/number, /*formula*/string?] {
   let formula = constant.toString();
-  let calc = constant;
+  let calc = Big(constant);
   if (skillLevelFactor && skillLevel) {
-    formula = (calc !== 0 ? `${formula}+` : '') + `${skillLevelFactor}*skill_level`;
-    calc = cb(calc + skillLevelFactor * skillLevel);
+    formula = (!calc.eq(0) ? `${formula}+` : '') + `${skillLevelFactor}*skill_level`;
+    calc = cb(Big(skillLevelFactor).times(skillLevel).plus(calc));
   }
   if (propertyFactor && atkType && property) {
     const atkKey = getAtkKey(atkType);
-    formula = (calc !== 0 ? `${formula}+` : '') +  `${propertyFactor}*${atkKey}`;
-    calc += cb(propertyFactor * property[atkKey as keyof typeof property]);
+    formula = (!calc.eq(0) ? `${formula}+` : '') +  `${propertyFactor}*${atkKey}`;
+    calc = calc.plus(cb(Big(propertyFactor).times(property[atkKey as keyof typeof property])));
   }
-  return calc.toString() === formula ? [calc] : [calc, formula];
+  return calc.toString() === formula ? [calc.toNumber()] : [calc.toNumber(), formula];
 }
 
 function getEffectTime(time: number): string {
@@ -403,7 +404,7 @@ const actionMap: Record</*action_type*/number, /*getDescription*/(this: SkillAct
     return desc.replace('範囲内', this.target_range + '範囲内') + getEffectTime(this.action_value_3) + remarks;
   },
   9: function (skillLevel) {
-    const fromula = getFormula(this.action_value_1, this.action_value_2, skillLevel);
+    const formula = getFormula(this.action_value_1, this.action_value_2, skillLevel);
     let target = '敵単体';
     if (this.target_range > 0 && this.target_range < 2160/* && this.target_count > 1*/) {
       target = this.target_range + '範囲内の敵';
@@ -415,7 +416,7 @@ const actionMap: Record</*action_type*/number, /*getDescription*/(this: SkillAct
     else if (this.action_detail_1 === 4) state = '猛毒';
     else state = '???';
     let desc = `${target}を${state}状態にし、毎秒{0}${state}ダメージを与える`; //this.description.replace('{0}', `${target}を${state}状態にし、毎秒{0}`);
-    return insertFormula(desc, fromula, getEffectTime(this.action_value_3));
+    return insertFormula(desc, formula, getEffectTime(this.action_value_3));
   },
   // buff debuff
   10: function (skillLevel, property, actionList) {

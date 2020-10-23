@@ -7,18 +7,19 @@ import { PromotionData } from '../DBHelper/promotion';
 import { UniqueEquipData } from '../DBHelper/unique_equip';
 import { getPublicImageURL, getRankPoint } from '../DBHelper/helper';
 import { PCRStoreValue } from '../db';
+import Big from 'big.js';
 import clsx from 'clsx';
 
 const useStyles = makeStyles((theme: Theme) => {
   const
-    labelLineHeight = 1.5,
-    itemMarginTop = labelLineHeight + 0.5,
     rem = 16,
     scalage = 0.375,
-    iconSize = 128 * scalage / rem,
-    starSize = 24 * scalage / rem,
-    iconRadius = 12 * scalage / rem,
-    iconGup = (iconSize - starSize * 5) / 2;
+    iconSize = Big(128).times(scalage).div(rem),
+    starSize = Big(24).times(scalage).div(rem),
+    iconRadius = Big(12).times(scalage).div(rem),
+    iconGup = iconSize.minus(starSize.times(5)).div(2),
+    labelLineHeight = 1.5,
+    itemMarginTop = Big(labelLineHeight).plus(0.5);
 
   return {
     root: {

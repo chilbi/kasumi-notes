@@ -276,7 +276,8 @@ function getStr(obj) {
   }
   schema += '  };\n';
 
-  let dataJS = 'export default [\n';
+  let dataJS = '// eslint-disable-next-line import/no-anonymous-default-export\n';
+  dataJS += 'export default [\n';
   dataJS += obj.records.map(record => '  ' + getRecordJSON(record, obj.fields)).join(',\n');
   dataJS += '\n];\n';
 

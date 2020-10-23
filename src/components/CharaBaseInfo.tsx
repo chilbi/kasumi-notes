@@ -1,12 +1,13 @@
 import React from 'react';
 import { makeStyles, Theme } from '@material-ui/core/styles';
+import SkeletonImage from './SkeletonImage';
 import { getPublicImageURL, getValidID } from '../DBHelper/helper';
 import { PCRStoreValue } from '../db';
+import Big from 'big.js';
+import clsx from 'clsx';
 import positionBorder1 from '../images/position_border_1.png';
 import positionBorder2 from '../images/position_border_2.png';
 import positionBorder3 from '../images/position_border_3.png';
-import clsx from 'clsx';
-import SkeletonImage from './SkeletonImage';
 
 const PositionText = ['前衛', '中衛', '後衛'];
 
@@ -21,8 +22,8 @@ const useStyles = makeStyles((theme: Theme) => {
   const
     rem = 16,
     scalage = 0.375,
-    imgSize = 128 * scalage / rem,
-    borderWidth = [2, 12, 2, 26].map(v => v * 0.75 / rem),
+    imgSize = Big(128).times(scalage).div(rem),
+    borderWidth = [2, 12, 2, 26].map(v => Big(v).times(0.75).div(rem)),
     borderSlice = [2, 12, 2, 26, 'fill'];
 
   return {
@@ -58,7 +59,7 @@ const useStyles = makeStyles((theme: Theme) => {
       alignSelf: 'center',
       marginLeft: 'auto',
       paddingLeft: '0.25em',
-      lineHeight: borderWidth[3] - borderWidth[0] + 'rem',
+      lineHeight: borderWidth[3].minus(borderWidth[0]) + 'rem',
       borderWidth: borderWidth.map(v => v + 'rem').join(' '),
       borderStyle: 'solid',
       borderImageSlice: borderSlice.join(' '),

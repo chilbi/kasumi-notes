@@ -8,15 +8,16 @@ import { getPublicImageURL } from '../DBHelper/helper';
 import { Property } from '../DBHelper/property';
 import { state } from '../DBHelper/state';
 import { PCRStoreValue } from '../db';
+import Big from 'big.js';
 import clsx from 'clsx';
 
 const useStyles = makeStyles((theme: Theme) => {
   const
     rem = 16,
     scalage = 0.375,
-    iconSize = 128 * scalage / rem,
-    borderRadius = 12 * scalage / rem,
-    descObjSize = 1.5;
+    iconSize = Big(128).times(scalage).div(rem),
+    borderRadius = Big(12).times(scalage).div(rem),
+    descObjSize = Big(1.5);
 
   return {
     root: {
@@ -101,7 +102,7 @@ const useStyles = makeStyles((theme: Theme) => {
     actionItem: {
       position: 'relative',
       margin: '0.25em 0',
-      paddingLeft: (descObjSize + 0.25) + 'em',
+      paddingLeft: descObjSize.plus(0.25) + 'em',
       lineHeight: descObjSize + 'em',
       wordBreak: 'break-all',
     },
@@ -124,7 +125,7 @@ const useStyles = makeStyles((theme: Theme) => {
     },
     stateImg: {
       position: 'absolute',
-      top: (descObjSize - 1) / -2 + 'em',
+      top: descObjSize.minus(1).div(-2) + 'em',
       left: 0,
       width: descObjSize + 'em',
       height: descObjSize + 'em',

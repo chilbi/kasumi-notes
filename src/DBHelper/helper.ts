@@ -1,36 +1,37 @@
-import { Property } from './property';
+// import { Property } from './property';
+// import Big from 'big.js';
 
-interface OtherProperty {
-  skill_lv: number; // 10.0
-  exskill_evolution: number; // 15.0
-  overall: number; // 1.0
-  skill1_evolution: number; // 10
-  skill1_evolution_slv: number; // 1.2
-  ub_evolution: number; // 200
-  ub_evolution_slv: number; // 1.5
-}
+// interface OtherProperty {
+//   skill_lv: number; // 10.0
+//   exskill_evolution: number; // 15.0
+//   overall: number; // 1.0
+//   skill1_evolution: number; // 10
+//   skill1_evolution_slv: number; // 1.2
+//   ub_evolution: number; // 200
+//   ub_evolution_slv: number; // 1.5
+// }
 
-export function getFightingCapacity(property: Property/*, other: OtherProperty*/) {
-  return Math.ceil(
-    property.hp * 0.1 +
-    property.atk * 1.0 +
-    property.magic_str * 1.0 +
-    property.def * 4.5 +
-    property.magic_def * 4.5 +
-    property.physical_critical * 0.5 +
-    property.magic_critical * 0.5 +
-    property.wave_hp_recovery * 0.1 +
-    property.wave_energy_recovery * 0.3 +
-    property.dodge * 6.0 +
-    property.physical_penetrate * 6.0 +
-    property.magic_penetrate * 6.0 +
-    property.life_steal * 4.5 +
-    property.hp_recovery_rate * 1.0 +
-    property.energy_recovery_rate * 1.5 +
-    property.energy_reduce_rate * 3.0 +
-    property.accuracy * 2.0 
-  );
-}
+// export function getFightingCapacity(property: Property/*, other: OtherProperty*/): number {
+//   return [
+//     [property.hp, 0.1],
+//     [property.atk, 1.0],
+//     [property.magic_str, 1.0],
+//     [property.def, 4.5],
+//     [property.magic_def, 4.5],
+//     [property.physical_critical, 0.5],
+//     [property.magic_critical, 0.5],
+//     [property.wave_hp_recovery, 0.1],
+//     [property.wave_energy_recovery, 0.3],
+//     [property.dodge, 6.0],
+//     [property.physical_penetrate, 6.0],
+//     [property.magic_penetrate, 6.0],
+//     [property.life_steal, 4.5],
+//     [property.hp_recovery_rate, 1.0],
+//     [property.energy_recovery_rate, 1.5],
+//     [property.energy_reduce_rate, 3.0],
+//     [property.accuracy, 2.0]
+//   ].reduce((calc, item) => calc.plus(Big(item[0]).times(item[1])), Big(0)).toNumber();
+// }
 
 export function getRankPoint(p: number) {
   if (p >= 18) {

@@ -1,3 +1,4 @@
+// eslint-disable-next-line import/no-anonymous-default-export
 export default [
   { "unit_id": 100101, "unit_name": "春咲 ひより", "bg_id": 510100, "face_type": 4 },
   { "unit_id": 100201, "unit_name": "草野 優衣", "bg_id": 510220, "face_type": 2 },

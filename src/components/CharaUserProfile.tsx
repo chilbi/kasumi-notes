@@ -4,6 +4,7 @@ import Infobar from './Infobar';
 import Rarities from './Rarities';
 import { getCharaID, getRankPoint } from '../DBHelper/helper';
 import { PCRStoreValue } from '../db';
+import Big from 'big.js';
 import clsx from 'clsx';
 import loveLevel from '../images/love_level.png';
 import unique from '../images/unique.png';
@@ -22,9 +23,9 @@ const useStyles = makeStyles((theme: Theme) => {
   const
     rem = 16,
     scalage = 0.625,
-    LoveLevelWidth = 28 * scalage / rem,
-    LoveLevelHeight = 24 * scalage / rem,
-    uniqueSize = 24 * scalage / rem;
+    LoveLevelWidth = Big(28).times(scalage).div(rem),
+    LoveLevelHeight = Big(24).times(scalage).div(rem),
+    uniqueSize = Big(24).times(scalage).div(rem);
 
   return {
     root: {

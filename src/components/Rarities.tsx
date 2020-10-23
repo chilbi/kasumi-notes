@@ -1,5 +1,6 @@
 import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
+import Big from 'big.js';
 import clsx from 'clsx';
 import star0 from '../images/star_0.png';
 import star1 from '../images/star_1.png';
@@ -9,7 +10,7 @@ const useStyles = makeStyles(() => {
   const
     rem = 16,
     scalage = 0.75,
-    starSize = 24 * scalage / rem;
+    starSize = Big(24).times(scalage).div(rem);
 
   return {
     root: {
@@ -34,6 +35,7 @@ const useStyles = makeStyles(() => {
 });
 
 interface RaritiesProps {
+  rootRef?: React.Ref<HTMLDivElement>;
   classes?: Partial<Record<'root' | 'star', string>>;
   maxRarity: number;
   rarity: number;
@@ -41,7 +43,7 @@ interface RaritiesProps {
 }
 
 function Rarities(props: RaritiesProps) {
-  const { classes = {}, maxRarity, rarity, onChange } = props;
+  const { classes = {}, rootRef, maxRarity, rarity, onChange } = props;
   const styles = useStyles();
 
   const starClassNames = Array<string>(maxRarity).fill(styles.star0);
@@ -53,7 +55,7 @@ function Rarities(props: RaritiesProps) {
   if (rarity === 6) starClassNames[5] = styles.star6;
 
   return (
-    <div className={clsx(styles.root, classes.root)}>
+    <div ref={rootRef} className={clsx(styles.root, classes.root)}>
       {starClassNames.map((name, i) => (
         <div key={i} className={clsx(styles.star, classes.star, name)} onClick={onChange && ((e: React.MouseEvent) => onChange(e, i)) } />
       ))}

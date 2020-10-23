@@ -4,6 +4,7 @@ import Backdrop from '@material-ui/core/Backdrop';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import openPCRDB, { PCRDB } from '../db';
 import DBHelper from '../DBHelper';
+import Big from 'big.js';
 
 export const DBHelperContext = React.createContext<DBHelper | null>(null);
 
@@ -25,17 +26,17 @@ function PCRDBConnect(props: PCRDBConnectProps) {
   const { onSuccess } = props;
   const styles = useStyles();
   const [status, setStatus] = useState<-1 | 0 | 1>(-1);
-  const [progress, setProgress] = useState(0);
+  const [progress, setProgress] = useState(Big(0));
 
   useEffect(() => {
     openPCRDB({
       onInserted: (db) => {
         onSuccess(db);
         setStatus(1);
-        setProgress(1);
+        setProgress(Big(1));
       },
       onProgress: (count, total) => {
-        setProgress(prevState => prevState + count / total);
+        setProgress(prevState => Big(count).div(total).plus(prevState));
       }
     }).then(db => {
       db.transaction('unit_unique_equip').store.count()
@@ -43,7 +44,7 @@ function PCRDBConnect(props: PCRDBConnectProps) {
           if (count > 0) {
             onSuccess(db);
             setStatus(1);
-            setProgress(1);
+            setProgress(Big(1));
           } else {
             setStatus(0);
           }
@@ -63,7 +64,7 @@ function PCRDBConnect(props: PCRDBConnectProps) {
         )}
         {status === 0 && (
           <React.Fragment>
-            <span key={1}>{Math.round(progress * 100)}%</span>
+            <span key={1}>{progress.times(100).round()}%</span>
             <span>updating...</span>
           </React.Fragment>
         )}

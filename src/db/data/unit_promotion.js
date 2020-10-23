@@ -1,3 +1,4 @@
+// eslint-disable-next-line import/no-anonymous-default-export
 export default [
   { "unit_id": 100101, "promotion_level": 1, "equip_slot_1": 101101, "equip_slot_2": 101101, "equip_slot_3": 101281, "equip_slot_4": 101431, "equip_slot_5": 101071, "equip_slot_6": 101581 },
   { "unit_id": 100101, "promotion_level": 2, "equip_slot_1": 102101, "equip_slot_2": 102071, "equip_slot_3": 102341, "equip_slot_4": 102431, "equip_slot_5": 101101, "equip_slot_6": 101581 },

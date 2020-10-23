@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useRef, useLayoutEffect } from 'react';
 import { makeStyles, Theme } from '@material-ui/core/styles';
 import SkeletonImage from './SkeletonImage';
 import Rarities from './Rarities';
 import { getRankPoint } from '../DBHelper/helper';
+import Big from 'big.js';
 import clsx from 'clsx';
 import borderIcon1 from '../images/border_icon_1.png';
 import borderIcon2 from '../images/border_icon_2.png';
@@ -25,30 +26,30 @@ const useStyles = makeStyles((theme: Theme) => {
   const
     rem = 16,
     iScalage = 0.5,
-    positionSize = 32 * iScalage / rem,
-    starSize = 24 * iScalage / rem,
-    uniqueSize = 24 * iScalage / rem,
-    iconImageSize = 128 * iScalage / rem,
-    iconBorderWidth = 8 * iScalage / rem,
+    positionSize = Big(32).times(iScalage).div(rem),
+    starSize = Big(24).times(iScalage).div(rem),
+    uniqueSize = Big(24).times(iScalage).div(rem),
+    iconImageSize = Big(128).times(iScalage).div(rem),
+    iconBorderWidth = Big(8).times(iScalage).div(rem),
     iconBorderSlice = 12,
-    iconBorderRadius = iconBorderSlice * iScalage / rem ,
-    iconScalage = Math.round(iconImageSize / (starSize * 5 + positionSize) * 10) / 10,
-    iconPositionSize = positionSize * iconScalage,
-    iconStarSize = starSize * iconScalage,
-    iconUniqueSize = uniqueSize * iconScalage,
-    iconGup = (iconImageSize - (iconPositionSize + iconStarSize * 5)) / 3,
+    iconBorderRadius = Big(iconBorderSlice).times(iScalage).div(rem),
+    iconScalage = iconImageSize.div(starSize.times(5).plus(positionSize)).round(1),
+    iconPositionSize = positionSize.times(iconScalage),
+    iconStarSize = starSize.times(iconScalage),
+    iconUniqueSize = uniqueSize.times(iconScalage),
+    iconGup = iconImageSize.minus(iconStarSize.times(5).plus(iconPositionSize)).div(2).round(2, 0),
     pScalage = 0.359375,
-    plateImageWidth = 512 * pScalage / rem,
-    plateImageHeight = 256 * pScalage / rem,
-    plateBorderWidth = [8, 7, 11, 7].map(v => v/* * scalage*/ / rem),
+    plateImageWidth = Big(512).times(pScalage).div(rem),
+    plateImageHeight = Big(256).times(pScalage).div(rem),
+    plateBorderWidth = [8, 7, 11, 7].map(v => Big(v).div(rem)),
     plateBorderSlice = [16, 16, 21, 16],
-    plateBorderRadius = 32 * pScalage / rem,
-    plateScalage = Math.round((plateImageWidth / 2) / (starSize * 6 + positionSize) * 10) / 10,
-    platePositionSize = positionSize * plateScalage,
-    plateStarSize = starSize * plateScalage,
-    plateUniqueSize = uniqueSize * plateScalage,
-    plateGup = 7 * pScalage / rem;
-
+    plateBorderRadius = Big(32).times(pScalage).div(rem),
+    plateScalage = plateImageWidth.div(1.5).div(starSize.times(6).plus(positionSize)).round(1),
+    platePositionSize = positionSize.times(plateScalage),
+    plateStarSize = starSize.times(plateScalage),
+    plateUniqueSize = uniqueSize.times(plateScalage),
+    plateGup = Big(7).times(pScalage).div(rem).round(2, 0);
+  
   return {
     '@keyframes fadeIn': {
       '0%': { opacity: 0 },
@@ -103,7 +104,7 @@ const useStyles = makeStyles((theme: Theme) => {
       position: 'absolute',
       top: 0,
       right: 0,
-      bottom: (plateBorderWidth[0] - plateBorderWidth[2]) + 'rem',
+      bottom: plateBorderWidth[0].minus(plateBorderWidth[2]) + 'rem',
       left: 0,
       borderWidth: plateBorderWidth.map(v => v + 'rem').join(' '),
       borderStyle: 'solid',
@@ -253,6 +254,33 @@ interface CharaImageProps {
 function CharaImage(props: CharaImageProps) {
   const { src, variant, promotionLevel, rarity, maxRarity, position, hasUnique } = props;
   const styles = useStyles();
+  const raritiesRef = useRef<HTMLDivElement>(null);
+  const positionRef = useRef<HTMLDivElement>(null);
+  const uniqueRef = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    let timer: number;
+    if (raritiesRef.current && positionRef.current && uniqueRef.current) {
+      raritiesRef.current.classList.remove(styles.fadeOut);
+      positionRef.current.classList.remove(styles.fadeIn);
+      uniqueRef.current.classList.remove(styles.fadeIn);
+      timer = window.setTimeout(() => {
+        if (raritiesRef.current && positionRef.current && uniqueRef.current) {
+          //[styles.fadeOut]: maxRarity === 6 || hasUnique
+          if (maxRarity === 6 || hasUnique)
+            raritiesRef.current.classList.add(styles.fadeOut);
+          //icon_unit { [styles.fadeIn]: maxRarity === 6 }
+          if (variant === 'icon_unit' && maxRarity === 6)
+            positionRef.current.classList.add(styles.fadeIn);
+          //[styles.fadeIn]: hasUnique
+          if (hasUnique)
+            uniqueRef.current.classList.add(styles.fadeIn);
+        }
+      }, 0);
+    }
+    return () => window.clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [variant]);
 
   let
     rootClassName = '',
@@ -267,18 +295,18 @@ function CharaImage(props: CharaImageProps) {
     rootClassName = styles.icon;
     imgClassName = styles.iconImg;
     borderClassName = clsx(styles.iconBorder, styles['iconBorder' + getRankPoint(promotionLevel) as keyof typeof styles]);
-    starsClassName = clsx(styles.iconStars, { [styles.fadeOut]: maxRarity === 6 || hasUnique });
+    starsClassName = styles.iconStars;
     starClassName = styles.iconStar;
-    positionClassName = clsx(styles.iconPosition, { [styles.fadeIn]: maxRarity === 6 });
-    uniqueClassName = clsx({ [styles.iconUnique]: hasUnique, [styles.fadeIn]: hasUnique });
+    positionClassName = styles.iconPosition;
+    uniqueClassName = clsx(hasUnique && styles.iconUnique);
   } else {
     rootClassName = styles.plate;
     imgClassName = styles.plateImg;
     borderClassName = clsx(styles.plateBorder, styles['plateBorder' + getRankPoint(promotionLevel) as keyof typeof styles]);
-    starsClassName = clsx(styles.plateStars, { [styles.fadeOut]: (maxRarity === 6 || hasUnique) });
+    starsClassName = styles.plateStars;
     starClassName = styles.plateStar;
-    positionClassName = clsx(styles.platePosition);
-    uniqueClassName = clsx({ [styles.plateUnique]: hasUnique, [styles.fadeIn]: hasUnique });
+    positionClassName = styles.platePosition;
+    uniqueClassName = clsx(hasUnique && styles.plateUnique);
   }
 
   positionClassName = clsx(positionClassName, styles['position' + position as keyof typeof styles]);
@@ -286,9 +314,9 @@ function CharaImage(props: CharaImageProps) {
   return (
     <SkeletonImage classes={{ root: rootClassName, img: imgClassName }} src={src} save>
       <div className={borderClassName} />
-      <Rarities classes={{ root: starsClassName, star: starClassName }} maxRarity={maxRarity} rarity={rarity} />
-      <div className={positionClassName} />
-      <div className={uniqueClassName} />
+      <Rarities rootRef={raritiesRef} classes={{ root: starsClassName, star: starClassName }} maxRarity={maxRarity} rarity={rarity} />
+      <div ref={positionRef} className={positionClassName} />
+      <div ref={uniqueRef} className={uniqueClassName} />
     </SkeletonImage>
   );
 }

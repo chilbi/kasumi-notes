@@ -1,3 +1,4 @@
+// eslint-disable-next-line import/no-anonymous-default-export
 export default [
   { "unit_id": 100101, "unit_name": "ヒヨリ", "age": "16", "guild": "トゥインクルウィッシュ", "race": "獣人族", "height": "155", "weight": "44", "birth_month": "8", "birth_day": "27", "blood_type": "A", "favorite": "人助け、応援", "voice": "東山奈央", "voice_id": 0, "catch_copy": "人助けが大好き！　前向き格闘娘", "self_text": "こんにちは！　ヒヨリでっす！\n困っている人がいたら助けにいくよ！\nよかったら一緒に来ない？", "guild_id": "2" },
   { "unit_id": 100201, "unit_name": "ユイ", "age": "17", "guild": "トゥインクルウィッシュ", "race": "ヒューマン", "height": "158", "weight": "47", "birth_month": "4", "birth_day": "5", "blood_type": "O", "favorite": "料理、人間観察", "voice": "種田梨沙", "voice_id": 0, "catch_copy": "戦闘のサポートが得意な、心優しい少女", "self_text": "あんまり役に立てるかはわからないけど…\nわたしも頑張って、\nみんなをサポートするね！", "guild_id": "2" },

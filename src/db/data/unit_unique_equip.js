@@ -1,3 +1,4 @@
+// eslint-disable-next-line import/no-anonymous-default-export
 export default [
   { "unit_id": 100101, "equip_slot": 1, "equip_id": 130011 },
   { "unit_id": 100201, "equip_slot": 1, "equip_id": 130021 },

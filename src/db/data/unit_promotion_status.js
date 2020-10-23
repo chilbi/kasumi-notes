@@ -1,3 +1,4 @@
+// eslint-disable-next-line import/no-anonymous-default-export
 export default [
   { "unit_id": 100101, "promotion_level": 2, "hp": 65.0, "atk": 16.0, "magic_str": 0.0, "def": 1.0, "magic_def": 0.0, "physical_critical": 0.0, "magic_critical": 0.0, "wave_hp_recovery": 75.0, "wave_energy_recovery": 10.0, "dodge": 1.0, "physical_penetrate": 0.0, "magic_penetrate": 0.0, "life_steal": 0.0, "hp_recovery_rate": 0.0, "energy_recovery_rate": 0.0, "energy_reduce_rate": 0.0, "accuracy": 0.0 },
   { "unit_id": 100101, "promotion_level": 3, "hp": 185.0, "atk": 68.0, "magic_str": 0.0, "def": 3.0, "magic_def": 0.0, "physical_critical": 0.0, "magic_critical": 0.0, "wave_hp_recovery": 125.0, "wave_energy_recovery": 30.0, "dodge": 2.0, "physical_penetrate": 0.0, "magic_penetrate": 0.0, "life_steal": 0.0, "hp_recovery_rate": 0.0, "energy_recovery_rate": 0.0, "energy_reduce_rate": 0.0, "accuracy": 0.0 },

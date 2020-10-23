@@ -9,7 +9,7 @@ export interface RarityData {
 }
 
 export function getRarityProperty(this: RarityData, level: number, promotion_level: number): Property {
-  return plusMultiply(this.unit_rarity, this.unit_rarity, level + promotion_level, v => Math.round(v), v => v, '_growth');
+  return plusMultiply(this.unit_rarity, this.unit_rarity, level + promotion_level, v => v.round(), v => v, '_growth');
 }
 
 export async function getRarityData(db: PCRDB, unit_id: number, rarity: number): Promise<RarityData> {

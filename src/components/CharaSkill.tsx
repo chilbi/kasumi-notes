@@ -168,7 +168,7 @@ function CharaSkill(props: CharaSkillProps) {
   const styles = useStyles();
 
   if (!charaSkill || !atkType || !atkCastTime || !property) return null;
-  console.log(charaSkill);
+  // console.log(charaSkill);
 
   const atkData = atkType === 1
     ? {

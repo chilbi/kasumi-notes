@@ -3,11 +3,15 @@ import { makeStyles } from '@material-ui/core/styles';
 import CharaListItem from './CharaListItem';
 import useDBHelper from '../hooks/useDBHelper';
 import { CharaBaseData } from '../DBHelper';
+import clsx from 'clsx';
 
 const useStyles = makeStyles({
   root: {
     display: 'flex',
     flexWrap: 'wrap',
+    justifyContent: 'space-around',
+  },
+  spaceEvenly: {
     justifyContent: 'space-evenly',
   },
 });
@@ -21,7 +25,7 @@ function CharaList(props: CharaListProps) {
   const allBaseData = useDBHelper(dbHelper => dbHelper.getAllCharaBaseData(), []);
   const nullableAllBaseData: (CharaBaseData | undefined)[] = allBaseData || Array.from(Array(130));
   return (
-    <div className={styles.root}>
+    <div className={clsx(styles.root, styles.spaceEvenly)}>
       {nullableAllBaseData.map((base, i) => (
         <CharaListItem
           key={i}

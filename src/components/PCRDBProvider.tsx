@@ -64,7 +64,7 @@ function PCRDBConnect(props: PCRDBConnectProps) {
         )}
         {status === 0 && (
           <React.Fragment>
-            <span key={1}>{progress.times(100).round()}%</span>
+            <span key={1}>{progress.times(100).round().toString()}%</span>
             <span>updating...</span>
           </React.Fragment>
         )}

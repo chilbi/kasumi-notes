@@ -14,8 +14,8 @@ export interface PromotionData {
 export function getPromotionProperty(this: PromotionData, equipEnhanceStatus: EquipEnhanceStatus): Property {
   return plus(this.equip_slots.map(equipData => {
     if (equipData) {
-      const enhance_level = equipEnhanceStatus[equipData.equipment_id] || 0;
-      if (enhance_level > -1) {
+      const enhance_level = equipEnhanceStatus[equipData.equipment_id];
+      if (enhance_level !== undefined && enhance_level > -1) {
         return equipData.getProperty(enhance_level);
       }
     }

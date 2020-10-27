@@ -133,6 +133,7 @@ const useStyles = makeStyles((theme: Theme) => {
     formula: {
       padding: '0 0.25em',
       borderBottom: '2px dotted ' + theme.palette.primary.main,
+      wordBreak: 'inherit',
     },
     absolute0: {
       zIndex: 0,
@@ -158,16 +159,16 @@ interface CharaSkillProps {
   atkType?: number;
   atkCastTime?: number;
   property?: Property;
-  charaSkill?: UnitSkillData;
+  unitSkillData?: UnitSkillData;
   userProfile?: PCRStoreValue<'user_profile'>;
 }
 
 function CharaSkill(props: CharaSkillProps) {
-  const { atkType, atkCastTime, property, charaSkill, userProfile = {} as Partial<PCRStoreValue<'user_profile'>> } = props;
+  const { atkType, atkCastTime, property, unitSkillData, userProfile = {} as Partial<PCRStoreValue<'user_profile'>> } = props;
   const { skill_enhance_status = { ub: 1, 1: 1, 2: 1, ex: 1 }, unique_enhance_level = 0 } = userProfile;
   const styles = useStyles();
 
-  if (!charaSkill || !atkType || !atkCastTime || !property) return null;
+  if (!unitSkillData || !atkType || !atkCastTime || !property) return null;
   // console.log(charaSkill);
 
   const atkData = atkType === 1
@@ -194,13 +195,13 @@ function CharaSkill(props: CharaSkillProps) {
         let iconType: number;
         const i = atkItem % 10;
         if (atkItem < 2000) {
-          iconType = charaSkill.main_skill[i - 1].icon_type;
+          iconType = unitSkillData.main_skill[i - 1].icon_type;
           patternLabel = 'Main' + i;
           if (i === 1 && unique_enhance_level > 0) {
             patternLabel += '+';
           }
         } else {
-          iconType = charaSkill.sp_skill[i - 1].icon_type;
+          iconType = unitSkillData.sp_skill[i - 1].icon_type;
           patternLabel = 'SP' + i;
         }
         imgSrc = getPublicImageURL('icon_skill', iconType);
@@ -305,9 +306,9 @@ function CharaSkill(props: CharaSkillProps) {
     </div>
   );
   const skillList: SkillItemProps[] = [];
-  skillList.push({ label: 'UB', skillData: charaSkill.union_burst, skillLevel: skill_enhance_status['ub'] });
-  if (charaSkill.union_burst_evolution) {
-    skillList.push({ label: 'UB+', skillData: charaSkill.union_burst_evolution, skillLevel: skill_enhance_status['ub'] });
+  skillList.push({ label: 'UB', skillData: unitSkillData.union_burst, skillLevel: skill_enhance_status['ub'] });
+  if (unitSkillData.union_burst_evolution) {
+    skillList.push({ label: 'UB+', skillData: unitSkillData.union_burst_evolution, skillLevel: skill_enhance_status['ub'] });
   }
   const pushItem = (label: string, normal: SkillData[], evolution: SkillData[], ex?: boolean) => {
     const len = normal.length;
@@ -331,13 +332,13 @@ function CharaSkill(props: CharaSkillProps) {
       }
     }
   };
-  pushItem('Main', charaSkill.main_skill, charaSkill.main_skill_evolution);
-  pushItem('SP', charaSkill.sp_skill, charaSkill.sp_skill_evolution);
-  pushItem('EX', charaSkill.ex_skill, charaSkill.ex_skill_evolution, true);
+  pushItem('Main', unitSkillData.main_skill, unitSkillData.main_skill_evolution);
+  pushItem('SP', unitSkillData.sp_skill, unitSkillData.sp_skill_evolution);
+  pushItem('EX', unitSkillData.ex_skill, unitSkillData.ex_skill_evolution, true);
 
   return (
     <div className={styles.root}>
-      {charaSkill.attack_pattern.map((item, i, arr) => (
+      {unitSkillData.attack_pattern.map((item, i, arr) => (
         <React.Fragment key={i}>
           {getPatternItem({ label: '行動パターン' + (arr.length > 1 ? (i + 1) : ''), pattern: item })}
           <Divider />

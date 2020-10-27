@@ -2,6 +2,7 @@
 《Princess Connect Re:Dive》WebApp辅助工具
 
 github-pages: [https://chilbi.github.io/kasumi-notes/](https://chilbi.github.io/kasumi-notes/)
+
 gitee-pages: [https://chilbi.gitee.io/kasumi-notes/](https://chilbi.gitee.io/kasumi-notes/)
 
 ## 构建项目

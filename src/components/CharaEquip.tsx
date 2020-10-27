@@ -6,6 +6,7 @@ import { EquipData } from '../DBHelper/equip';
 import { PromotionData } from '../DBHelper/promotion';
 import { UniqueEquipData } from '../DBHelper/unique_equip';
 import { getPublicImageURL, getRankPoint } from '../DBHelper/helper';
+import maxUserProfile from '../DBHelper/maxUserProfile';
 import { PCRStoreValue } from '../db';
 import Big from 'big.js';
 import clsx from 'clsx';
@@ -50,7 +51,7 @@ const useStyles = makeStyles((theme: Theme) => {
       padding: '0.25em',
     },
     iconRoot: {
-      margin: '0 0.25em',
+      margin: '0.25em',
       width: iconSize + 'rem',
       height: iconSize + 'rem',
       borderRadius: iconRadius + 'rem',
@@ -134,8 +135,8 @@ interface CharaEquipProps {
 }
 
 function CharaEquip(props: CharaEquipProps) {
-  const { promotions = [], uniqueEquip, userProfile = {} as Partial<PCRStoreValue<'user_profile'>> } = props;
-  const { promotion_level = 18, equip_enhance_status = {}, unique_enhance_level = 0 } = userProfile;
+  const { promotions = [], uniqueEquip, userProfile = maxUserProfile } = props;
+  const { promotion_level, equip_enhance_status, unique_enhance_level } = userProfile;
   const styles = useStyles();
 
   const getSlotData = (promotionLevel: number, slot: EquipData | undefined) => {
@@ -146,7 +147,7 @@ function CharaEquip(props: CharaEquipProps) {
       let enhanceLevel = equip_enhance_status[slot.equipment_id];
       enhanceLevel = enhanceLevel === undefined ? -1 : enhanceLevel;
       const isCurrPromotion = promotionLevel === promotion_level;
-      const invalid = (isCurrPromotion && enhanceLevel < 0) || (promotionLevel > promotion_level);
+      const invalid = (isCurrPromotion && enhanceLevel < 0) || (promotionLevel !== promotion_level);
       if (invalid) {
         srcName = 'invalid_' + slot.equipment_id;
       } else {
@@ -189,7 +190,10 @@ function CharaEquip(props: CharaEquipProps) {
       {promotions.map(promotion => (
         <div
           key={promotion.promotion_level}
-          className={clsx(styles.item, styles['rank' + getRankPoint(promotion.promotion_level) as keyof typeof styles])}
+          className={clsx(
+            styles.item,
+            styles['rank' + getRankPoint(promotion.promotion_level) as keyof typeof styles],
+          )}
         >
           <div className="equip-label">
             {'RANK' + promotion.promotion_level}

@@ -61,8 +61,8 @@ export function compareSubID(a: number, b: number): boolean {
   return getSubID(a) === getSubID(b);
 }
 
-export function getValidID(unitID: number, rarity = 3, last = 1): string {
-  rarity = rarity < 3 ? 1 : rarity > 3 && rarity < 6 ? 3 : rarity;
+export function getValidID(unitID: number, rarity = 3, min = 1, last = 1): string {
+  rarity = rarity < 3 ? min : rarity > 3 && rarity < 6 ? 3 : rarity;
   return getSubID(unitID) + rarity + last;
 }
 

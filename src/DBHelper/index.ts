@@ -8,6 +8,7 @@ import { getPromotionData, PromotionData } from './promotion';
 import { getStoryStatusData, StoryStatusMemo, StoryStatusData } from './story_status';
 import { plus, Property } from './property';
 import ImageData from './ImageData';
+import maxUserProfile from './maxUserProfile';
 
 export type PropertyData = [RarityData, PromotionStatusData, PromotionData, StoryStatusData, UniqueEquipData | undefined];
 
@@ -19,9 +20,9 @@ export interface CharaBaseData {
 }
 
 export interface CharaDetailData extends CharaBaseData {
-  charaProfile: PCRStoreValue<'unit_profile'>;
-  charaPromotions: PromotionData[];
-  charaSkillData: UnitSkillData;
+  unitProfile: PCRStoreValue<'unit_profile'>;
+  unitSkillData: UnitSkillData;
+  promotions: PromotionData[];
 }
 
 export function getCharaProperty(this: CharaBaseData): Property {
@@ -32,15 +33,12 @@ export function getCharaProperty(this: CharaBaseData): Property {
     promotionStatusData.getProperty(),
     promotionData.getProperty(equip_enhance_status),
     storyStatus.getProperty(love_level_status),
-    uniqueEquipData?.getProperty(unique_enhance_level)
+    uniqueEquipData && uniqueEquipData.getProperty(unique_enhance_level)
   ]);
 }
 
 class DBHelper extends ImageData {
   readonly default_user = 'MAX';
-  readonly max_level = 178;
-  readonly max_promotion_level = 18;
-  readonly max_unique_enhance_level = 180;
 
   // eslint-disable-next-line @typescript-eslint/no-useless-constructor
   constructor(db: PCRDB) {
@@ -48,11 +46,11 @@ class DBHelper extends ImageData {
   }
 
   async getCharaDetailData(unit_id: number, user_name = this.default_user): Promise<CharaDetailData | undefined> {
-    const [charaData, userProfile, unitProfile, charaPromotions, charaSkillData] = await Promise.all([
+    const [charaData, userProfile, unitProfile, promotions, unitSkillData] = await Promise.all([
       this.db.transaction('chara_data', 'readonly').store.get(unit_id),
       this.db.transaction('user_profile', 'readonly').store.get([user_name, unit_id]),
       this.db.transaction('unit_profile', 'readonly').store.get(unit_id),
-      this.getCharaPromotions(unit_id),
+      this.getPromotions(unit_id),
       getUnitSkillData(this.db, unit_id),
     ]).catch(() => []);
     if (!userProfile || !charaData) {
@@ -60,9 +58,9 @@ class DBHelper extends ImageData {
       if (count > 0) return undefined;
       return this.getAllCharaBaseData().then(list => ({
         ...list.find(item => item.charaData.unit_id === unit_id)!,
-        charaProfile: unitProfile!,
-        charaPromotions: charaPromotions!,
-        charaSkillData: charaSkillData!,
+        unitProfile: unitProfile!,
+        unitSkillData: unitSkillData!,
+        promotions: promotions!,
       }));
     }
     const propertyData = await this.getCharaPropertyData(userProfile);
@@ -70,9 +68,9 @@ class DBHelper extends ImageData {
     data.charaData = charaData;
     data.userProfile = userProfile;
     data.propertyData = propertyData;
-    data.charaProfile = unitProfile!;
-    data.charaPromotions = charaPromotions!;
-    data.charaSkillData = charaSkillData!;
+    data.unitProfile = unitProfile!;
+    data.unitSkillData = unitSkillData!;
+    data.promotions = promotions!;
     data.getProperty = getCharaProperty.bind(data);
     return data;
   }
@@ -84,13 +82,7 @@ class DBHelper extends ImageData {
     ]);
     const memo = {};
     if (allCharaData.length < 1 || userProfiles.length < 1) {
-      [allCharaData, userProfiles] = await getAllInit(
-        this.db,
-        user_name,
-        this.max_level,
-        this.max_promotion_level,
-        this.max_unique_enhance_level
-      );
+      [allCharaData, userProfiles] = await getAllInit(this.db, user_name);
       this.setAllCharaData(allCharaData);
       this.setUserProfiles(userProfiles);
     }
@@ -121,9 +113,17 @@ class DBHelper extends ImageData {
     ]);
   }
 
-  protected getCharaPromotions(unit_id: number): Promise<PromotionData[]> {
+  getRarityData(unit_id: number, rarity: number): Promise<RarityData> {
+    return getRarityData(this.db, unit_id, rarity);
+  }
+
+  getPromotionStatusData(unit_id: number, promotion_level: number): Promise<PromotionStatusData> {
+    return getPromotionStatusData(this.db, unit_id, promotion_level);
+  }
+
+  protected getPromotions(unit_id: number): Promise<PromotionData[]> {
     const promiseArr: Promise<PromotionData>[] = [];
-    let promotionLevel = this.max_promotion_level;
+    let promotionLevel = maxUserProfile.promotion_level;
     while(promotionLevel > 0) {
       promiseArr.push(getPromotionData(this.db, unit_id, promotionLevel));
       promotionLevel--;

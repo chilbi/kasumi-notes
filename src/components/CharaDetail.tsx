@@ -11,6 +11,8 @@ import CharaStatus from './CharaStatus';
 import CharaProfile from './CharaProfile';
 import { DBHelperContext } from './PCRDBProvider';
 import { CharaDetailData } from '../DBHelper';
+import { EquipEnhanceStatus } from '../DBHelper/promotion';
+import { PromotionStatusData } from '../DBHelper/promotion_status';
 import { PCRStoreValue } from '../db';
 import clsx from 'clsx';
 
@@ -50,10 +52,10 @@ function CharaDetail(props: CharaDetailProps) {
   const [detail, setDetail] = useState<CharaDetailData>();
 
   useEffect(() => {
-    if (dbHelper) dbHelper.getCharaDetailData(props.unitID).then(data => {
-      if (data) {
-        userProfileRef.current = data.userProfile;
-        setDetail(data);
+    if (dbHelper) dbHelper.getCharaDetailData(props.unitID).then(detailData => {
+      if (detailData) {
+        userProfileRef.current = detailData.userProfile;
+        setDetail(detailData);
       }
     });
   }, [dbHelper, props.unitID]);
@@ -62,6 +64,39 @@ function CharaDetail(props: CharaDetailProps) {
   const handleChangeTabsValue = useCallback((e: React.SyntheticEvent, newValue: number) => {
     setTabsValue(newValue);
   }, []);
+
+  const handleChangeRarity = useCallback((e: React.MouseEvent, rarity: number) => {
+    if (dbHelper && detail) dbHelper.getRarityData(detail.charaData.unit_id, rarity).then(rarityData => {
+      detail.userProfile = { ...detail.userProfile, rarity };
+      detail.propertyData[0] = rarityData;
+      setDetail({ ...detail });
+    });
+  }, [dbHelper, detail]);
+
+  const handleChangePromotionLevel = useCallback((e: React.MouseEvent, promotion_level: number) => {
+    if (!detail) return;
+    const _change = (promotionStatusData: PromotionStatusData) => {
+      const promotionData = detail.promotions.find(item => item.promotion_level === promotion_level)!;
+      const equip_enhance_status: EquipEnhanceStatus = {};
+      for (let slot of promotionData.equip_slots) {
+        if (slot) equip_enhance_status[slot.equipment_id] = slot.max_enhance_level;
+      }
+      detail.userProfile = { ...detail.userProfile, promotion_level, equip_enhance_status };
+      detail.propertyData[1] = promotionStatusData;
+      detail.propertyData[2] = promotionData;
+      setDetail({ ...detail });
+    };
+    if (promotion_level > 1 && dbHelper) {
+      dbHelper.getPromotionStatusData(detail.charaData.unit_id, promotion_level).then(promotionStatusData => {
+        _change(promotionStatusData);
+      });
+    } else {
+      const promotionStatusData = {
+        getProperty() { return {}; }
+      } as any;
+      _change(promotionStatusData);
+    }
+  }, [dbHelper, detail]);
 
   const property = useMemo(() => detail && detail.getProperty(), [detail]);
 
@@ -81,19 +116,19 @@ function CharaDetail(props: CharaDetailProps) {
     ),
     catchCopy: (
       <div className={clsx(styles.text, styles.catchCopy)}>
-        {detail ? detail.charaProfile.catch_copy : '???'}
+        {detail ? detail.unitProfile.catch_copy : '???'}
       </div>
     ),
     selfText: (
       <div className={clsx(styles.text, styles.selfText)}>
-        {(detail ? detail.charaProfile.self_text : '???').split('\n').map((txt, i) => (
+        {(detail ? detail.unitProfile.self_text : '???').split('\n').map((txt, i) => (
           <React.Fragment key={i}>{txt}<br /></React.Fragment>
         ))}
       </div>
     ),
     profile: (
       <div className={styles.infoBox}>
-        <CharaProfile profile={detail && detail.charaProfile} />
+        <CharaProfile profile={detail && detail.unitProfile} />
       </div>
     ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -104,6 +139,8 @@ function CharaDetail(props: CharaDetailProps) {
       <CharaUserProfile
         maxRarity={detail && detail.charaData.max_rarity}
         userProfile={detail && detail.userProfile}
+        onChangeRarity={handleChangeRarity}
+        onChangePromotionLevel={handleChangePromotionLevel}
       />
     ),
     skill: (
@@ -111,13 +148,13 @@ function CharaDetail(props: CharaDetailProps) {
         atkType={detail && detail.charaData.atk_type}
         atkCastTime={detail && detail.charaData.normal_atk_cast_time}
         property={property}
-        charaSkill={detail && detail.charaSkillData}
+        unitSkillData={detail && detail.unitSkillData}
         userProfile={detail && detail.userProfile}
       />
     ),
     equip: (
       <CharaEquip
-        promotions={detail && detail.charaPromotions}
+        promotions={detail && detail.promotions}
         uniqueEquip={detail && detail.propertyData[4]}
         userProfile={detail && detail.userProfile}
       />

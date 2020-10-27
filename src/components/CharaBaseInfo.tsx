@@ -108,7 +108,7 @@ function CharaBaseInfo(props: CharaBaseInfoProps) {
   const { rarity = 5, charaData = defaultCharaData } = props;
   const styles = useStyles();
 
-  const stillImgSrc = charaData.unit_id ? getPublicImageURL('still_unit', getValidID(charaData.unit_id, rarity)) : undefined;
+  const stillImgSrc = charaData.unit_id ? getPublicImageURL('still_unit', getValidID(charaData.unit_id, rarity, 3)) : undefined;
   const iconImgSrc = charaData.unit_id ? getPublicImageURL('icon_unit', getValidID(charaData.unit_id, rarity)) : undefined;
 
   return (

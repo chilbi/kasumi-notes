@@ -31,6 +31,9 @@ const useStyles = makeStyles(() => {
     star6: {
       backgroundImage: `url(${star6})`,
     },
+    pointer: {
+      cursor: 'pointer',
+    },
   };
 });
 
@@ -57,7 +60,11 @@ function Rarities(props: RaritiesProps) {
   return (
     <div ref={rootRef} className={clsx(styles.root, classes.root)}>
       {starClassNames.map((name, i) => (
-        <div key={i} className={clsx(styles.star, classes.star, name)} onClick={onChange && ((e: React.MouseEvent) => onChange(e, i)) } />
+        <div
+          key={i}
+          className={clsx(styles.star, onChange && rarity !== i + 1 && styles.pointer, classes.star, name)}
+          onClick={onChange && (e => rarity !== i + 1 && onChange(e, i + 1))}
+        />
       ))}
     </div>
   );

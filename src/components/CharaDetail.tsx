@@ -11,6 +11,7 @@ import CharaStatus from './CharaStatus';
 import CharaProfile from './CharaProfile';
 import { DBHelperContext } from './PCRDBProvider';
 import { CharaDetailData } from '../DBHelper';
+import { getCharaID } from '../DBHelper/helper';
 import { EquipEnhanceStatus } from '../DBHelper/promotion';
 import { PromotionStatusData } from '../DBHelper/promotion_status';
 import { PCRStoreValue } from '../db';
@@ -65,15 +66,41 @@ function CharaDetail(props: CharaDetailProps) {
     setTabsValue(newValue);
   }, []);
 
+  const handleChangeLevel = useCallback((e: React.SyntheticEvent, level: number) => {
+    if (detail) {
+      const skill_enhance_status = detail.userProfile.skill_enhance_status;
+      skill_enhance_status['ub'] = level;
+      skill_enhance_status[1] = level;
+      skill_enhance_status[2] = level;
+      skill_enhance_status['ex'] = level;
+      detail.userProfile.level = level;
+      setDetail({ ...detail });
+    }
+  }, [detail]);
+
+  const handleChangeLove = useCallback((e: React.SyntheticEvent, love: number) => {
+    if (detail) {
+      detail.userProfile.love_level_status[getCharaID(detail.charaData.unit_id)] = love;
+      setDetail({ ...detail });
+    }
+  }, [detail]);
+
   const handleChangeRarity = useCallback((e: React.MouseEvent, rarity: number) => {
     if (dbHelper && detail) dbHelper.getRarityData(detail.charaData.unit_id, rarity).then(rarityData => {
-      detail.userProfile = { ...detail.userProfile, rarity };
+      detail.userProfile.rarity = rarity;
       detail.propertyData[0] = rarityData;
       setDetail({ ...detail });
     });
   }, [dbHelper, detail]);
 
-  const handleChangePromotionLevel = useCallback((e: React.MouseEvent, promotion_level: number) => {
+  const handleChangeUnique = useCallback((e: React.SyntheticEvent, unique_enhancle_level: number) => {
+    if (detail) {
+      detail.userProfile.unique_enhance_level = unique_enhancle_level;
+      setDetail({ ...detail });
+    }
+  }, [detail]);
+
+  const handleChangePromotion = useCallback((e: React.MouseEvent, promotion_level: number) => {
     if (!detail) return;
     const _change = (promotionStatusData: PromotionStatusData) => {
       const promotionData = detail.promotions.find(item => item.promotion_level === promotion_level)!;
@@ -81,7 +108,8 @@ function CharaDetail(props: CharaDetailProps) {
       for (let slot of promotionData.equip_slots) {
         if (slot) equip_enhance_status[slot.equipment_id] = slot.max_enhance_level;
       }
-      detail.userProfile = { ...detail.userProfile, promotion_level, equip_enhance_status };
+      detail.userProfile.equip_enhance_status = equip_enhance_status;
+      detail.userProfile.promotion_level = promotion_level;
       detail.propertyData[1] = promotionStatusData;
       detail.propertyData[2] = promotionData;
       setDetail({ ...detail });
@@ -139,8 +167,11 @@ function CharaDetail(props: CharaDetailProps) {
       <CharaUserProfile
         maxRarity={detail && detail.charaData.max_rarity}
         userProfile={detail && detail.userProfile}
+        onChangeLevel={handleChangeLevel}
+        onChangeLove={handleChangeLove}
         onChangeRarity={handleChangeRarity}
-        onChangePromotionLevel={handleChangePromotionLevel}
+        onChangeUnique={handleChangeUnique}
+        onChangePromotion={handleChangePromotion}
       />
     ),
     skill: (

@@ -55,7 +55,7 @@ function getFormula(
   propertyFactor?: number,
   atkType?: number,
   property?: Property,
-  cb = (v: Big) => v.round(0, 3/*ceil*/)
+  cb = (v: Big) => v.round(0, 1)
 ): [/*calc*/number, /*formula*/string?] {
   let formula = constant.toString();
   let calc = Big(constant);
@@ -908,7 +908,8 @@ export function getDescData(this: SkillAction, skillLevel: number, property: Pro
 export async function getSkillAction(db: PCRDB, action_id: number): Promise<SkillAction> {
   const skillAction = await db.transaction('skill_action', 'readonly').store.get(action_id);
   if (!skillAction) throw new Error(`objectStore('skill_action').get(/*action_id*/${action_id}) => undefined`);
-  const data = skillAction as SkillAction;
-  data.getDescData = getDescData.bind(data);
-  return data;
+  return {
+    ...skillAction,
+    getDescData,
+  };
 }

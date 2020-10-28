@@ -1,6 +1,8 @@
 import React, { useState, useCallback, useRef } from 'react';
 import { makeStyles, Theme } from '@material-ui/core/styles';
+import ButtonBase from '@material-ui/core/ButtonBase';
 import Popover from '@material-ui/core/Popover';
+import DebouncedSlider from './DebouncedSlider';
 import Infobar from './Infobar';
 import Rarities from './Rarities';
 import { getCharaID, getRankPoint } from '../DBHelper/helper';
@@ -54,6 +56,7 @@ const useStyles = makeStyles((theme: Theme) => {
       padding: 0,
       listStyle: 'none',
       '&>li': {
+        display: 'flex',
         borderRadius: 0,
         marginTop: 2,
       },
@@ -64,16 +67,21 @@ const useStyles = makeStyles((theme: Theme) => {
     promotionLevel: {
       margin: '0',
       padding: '0',
-      width: '6.5em',
+      width: '6em',
       textAlign: 'center',
       borderRadius: '1em',
       color: '#fff',
     },
-    pointer: {
-      cursor: 'pointer',
+    sliderPaper: {
+      padding: '0 0.5em',
+      width: 300,
+      overflow: 'unset',
     },
-    popover: {
+    promotionLevelPaper: {
       borderRadius: '1em',
+    },
+    button: {
+      fontFamily: 'inherit',
     },
     bg1: {
       backgroundColor: theme.rankColor[1],
@@ -99,77 +107,168 @@ const useStyles = makeStyles((theme: Theme) => {
 interface CharaUserProfileProps {
   maxRarity?: number;
   userProfile?: PCRStoreValue<'user_profile'>;
+  onChangeLevel?: (e: React.SyntheticEvent, level: number) => void;
+  onChangeLove?: (e: React.SyntheticEvent, level: number) => void;
   onChangeRarity?: (e: React.MouseEvent, rarity: number) => void;
-  onChangePromotionLevel?: (e: React.MouseEvent, promotionLevel: number) => void;
+  onChangeUnique?: (e: React.SyntheticEvent, uniqueEnhanceLevel: number) => void;
+  onChangePromotion?: (e: React.MouseEvent, promotionLevel: number) => void;
 }
 
 function CharaUserProfile(props: CharaUserProfileProps) {
   const {
     maxRarity = maxUserProfile.rarity,
     userProfile = maxUserProfile,
+    onChangeLevel,
+    onChangeLove,
     onChangeRarity,
-    onChangePromotionLevel
+    onChangeUnique,
+    onChangePromotion
   } = props;
   const styles = useStyles();
+
+  const [levelEl, setLevelEl] = useState<Element | null>(null);
+  const handleOpenLevel = useCallback((e: React.MouseEvent) => {
+    setLevelEl(e.currentTarget);
+  }, []);
+  const handleCloseLevel = useCallback(() => {
+    setLevelEl(null);
+  }, []);
+
+  const [loveEl, setLoveEl] = useState<Element | null>(null);
+  const handleOpenLove = useCallback((e: React.MouseEvent) => {
+    setLoveEl(e.currentTarget);
+  }, []);
+  const handleCloseLove = useCallback(() => {
+    setLoveEl(null);
+  }, []);
+
+  const [uniqueEl, setUniqueEl] = useState<Element | null>(null);
+  const handleOpenUnique = useCallback((e: React.MouseEvent) => {
+    setUniqueEl(e.currentTarget);
+  }, []);
+  const handleCloseUnique = useCallback(() => {
+    setUniqueEl(null);
+  }, []);
+
   const promotionLevelHeightRef = useRef(0);
-
-  const [promotionLevelEl, setPromotionLevelEl] = useState<HTMLDivElement | null>(null);
-
-  const handleOpenPromotionLevel = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+  const [promotionLevelEl, setPromotionLevelEl] = useState<Element | null>(null);
+  const handleOpenPromotionLevel = useCallback((e: React.MouseEvent) => {
     promotionLevelHeightRef.current = e.currentTarget.clientHeight + 2;
     setPromotionLevelEl(e.currentTarget);
   }, []);
-
   const handleClosePromotionLevel = useCallback(() => {
     setPromotionLevelEl(null);
   }, []);
 
   return (
     <div className={styles.root}>
-      <Infobar
-        className={clsx(styles.level, styles.pointer)}
-        size="small"
-        label="Lv"
-        value={userProfile.level}
-      />
-      <div
-        className={clsx(
-          styles.loveLevel,
-          styles.pointer
-        )}
+      <ButtonBase component="div" className={styles.button} onClick={handleOpenLevel}>
+        <Infobar
+          className={styles.level}
+          size="small"
+          label="Lv"
+          value={userProfile.level}
+        />
+      </ButtonBase>
+      <Popover
+        classes={{ paper: styles.sliderPaper }}
+        open={!!levelEl}
+        anchorEl={levelEl}
+        marginThreshold={0}
+        anchorOrigin={{ horizontal: 'left', vertical: 'bottom' }}
+        transformOrigin={{ horizontal: 'left', vertical: 'top' }}
+        onClose={handleCloseLevel}
       >
+        <DebouncedSlider
+          wait={200}
+          min={1}
+          max={maxUserProfile.level}
+          step={1}
+          valueLabelDisplay="on"
+          defaultValue={userProfile.level}
+          onDebouncedChange={onChangeLevel}
+        />
+      </Popover>
+
+      <ButtonBase component="div" className={clsx(styles.loveLevel, styles.button)} onClick={handleOpenLove}>
         {userProfile.unit_id ? userProfile.love_level_status[getCharaID(userProfile.unit_id)] : 0}
-      </div>
+      </ButtonBase>
+      {userProfile.unit_id && (
+        <Popover
+          classes={{ paper: styles.sliderPaper }}
+          open={!!loveEl}
+          anchorEl={loveEl}
+          marginThreshold={0}
+          anchorOrigin={{ horizontal: 'left', vertical: 'bottom' }}
+          transformOrigin={{ horizontal: 'left', vertical: 'top' }}
+          onClose={handleCloseLove}
+        >
+          <DebouncedSlider
+            wait={200}
+            min={0}
+            max={maxRarity === 6 ? 12 : 8}
+            step={1}
+            valueLabelDisplay="on"
+            defaultValue={userProfile.love_level_status[getCharaID(userProfile.unit_id)]}
+            onDebouncedChange={onChangeLove}
+          />
+        </Popover>
+      )}
+
       <Rarities
         maxRarity={maxRarity}
         rarity={userProfile.rarity}
         onChange={onChangeRarity}
       />
+  
       {userProfile.unique_equip_id !== maxUserProfile.unique_equip_id && (
         <React.Fragment>
-          <div
+          <ButtonBase
+            component="div"
             className={clsx(
               styles.unique,
-              styles.pointer,
+              styles.button,
               userProfile.unique_enhance_level < 1 && styles.disableUnique
             )}
+            onClick={handleOpenUnique}
           >
             {userProfile.unique_enhance_level}
-          </div>
+          </ButtonBase>
+          <Popover
+            classes={{ paper: styles.sliderPaper }}
+            open={!!uniqueEl}
+            anchorEl={uniqueEl}
+            marginThreshold={0}
+            anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+            transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+            onClose={handleCloseUnique}
+          >
+            <DebouncedSlider
+              wait={200}
+              min={0}
+              max={maxUserProfile.unique_enhance_level}
+              step={1}
+              valueLabelDisplay="on"
+              defaultValue={userProfile.unique_enhance_level}
+              onDebouncedChange={onChangeUnique}
+            />
+          </Popover>
         </React.Fragment>
       )}
-      <div
+
+      <ButtonBase
+        component="div"
         className={clsx(
           styles.promotionLevel,
-          styles.pointer,
+          styles.button,
           styles['bg' + getRankPoint(userProfile.promotion_level) as keyof typeof styles]
         )}
         onClick={handleOpenPromotionLevel}
       >
         {'RANK' + userProfile.promotion_level}
-      </div>
+      </ButtonBase>
       <Popover
-        className={styles.popover}
+        classes={{ paper: styles.promotionLevelPaper }}
         open={!!promotionLevelEl}
         anchorEl={promotionLevelEl}
         marginThreshold={0}
@@ -177,23 +276,24 @@ function CharaUserProfile(props: CharaUserProfileProps) {
         transformOrigin={{ horizontal: 0, vertical: promotionLevelHeightRef.current * (maxUserProfile.promotion_level - userProfile.promotion_level) }}
         onClose={handleClosePromotionLevel}
       >
-        <ul className={clsx(styles.list, styles.pointer)}>
+        <ul className={styles.list}>
           {Array.from(Array(maxUserProfile.promotion_level)).map((_, i) => {
             const promotionLevel = maxUserProfile.promotion_level - i;
             return (
-              <li
+              <ButtonBase
                 key={promotionLevel}
+                component="li"
                 className={clsx(
                   styles.promotionLevel,
                   styles['bg' + getRankPoint(promotionLevel) as keyof typeof styles]
                 )}
-                onClick={onChangePromotionLevel && (e => {
-                  if (userProfile.promotion_level !== promotionLevel) onChangePromotionLevel(e, promotionLevel);
+                onClick={onChangePromotion && ((e: React.MouseEvent) => {
+                  if (userProfile.promotion_level !== promotionLevel) onChangePromotion(e, promotionLevel);
                   setPromotionLevelEl(null);
                 })}
               >
                 {'RANK' + promotionLevel}
-              </li>
+              </ButtonBase>
             )
           })}
         </ul>

@@ -64,15 +64,15 @@ class DBHelper extends ImageData {
       }));
     }
     const propertyData = await this.getCharaPropertyData(userProfile);
-    const data = {} as CharaDetailData;
-    data.charaData = charaData;
-    data.userProfile = userProfile;
-    data.propertyData = propertyData;
-    data.unitProfile = unitProfile!;
-    data.unitSkillData = unitSkillData!;
-    data.promotions = promotions!;
-    data.getProperty = getCharaProperty.bind(data);
-    return data;
+    return {
+      charaData,
+      userProfile,
+      propertyData,
+      unitProfile: unitProfile!,
+      unitSkillData: unitSkillData!,
+      promotions: promotions!,
+      getProperty: getCharaProperty,
+    };
   }
 
   async getAllCharaBaseData(user_name = this.default_user): Promise<CharaBaseData[]> {
@@ -91,12 +91,12 @@ class DBHelper extends ImageData {
       const userProfile = userProfiles[i];
       const charaData = allCharaData.find(item => item.unit_id === userProfile.unit_id)!;
       promiseArr.push(this.getCharaPropertyData(userProfile, memo).then(propertyData => {
-        const data = {} as CharaBaseData;
-        data.charaData = charaData;
-        data.userProfile = userProfile;
-        data.propertyData = propertyData;
-        data.getProperty = getCharaProperty.bind(data);
-        return data;
+        return {
+          charaData,
+          userProfile,
+          propertyData,
+          getProperty: getCharaProperty,
+        };
       }));
     }
     return Promise.all(promiseArr);

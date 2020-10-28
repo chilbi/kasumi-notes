@@ -30,11 +30,10 @@ export async function getPromotionData(db: PCRDB, unit_id: number, promotion_lev
     const equip_id = unitPromotion['equip_slot_' + (i + 1) as keyof typeof unitPromotion];
     return equip_id === 999999 ? undefined : getEquipData(db, equip_id);
   }));
-  const data: PromotionData = {
+  return {
     unit_id,
     promotion_level,
     equip_slots,
-  } as any;
-  data.getProperty = getPromotionProperty.bind(data);
-  return data;
+    getProperty: getPromotionProperty,
+  };
 }

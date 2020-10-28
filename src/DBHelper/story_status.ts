@@ -78,7 +78,7 @@ async function getStoryStatus(db: PCRDB, chara_id: number, memo?: StoryStatusMem
   }
   status.chara_type = firstValue.chara_type;
   status.max_love_level = arrLen > 8 ? 12 : 8;
-  status.getProperty = getProperty.bind(status);
+  status.getProperty = getProperty;
   if (memo) memo[chara_id] = status;
   return status;
 }
@@ -92,11 +92,10 @@ export function getStoryStatusProperty(this: StoryStatusData, loveLevelStatus: L
 export async function getStoryStatusData(db: PCRDB, unit_id: number, memo?: StoryStatusMemo): Promise<StoryStatusData> {
   const self_story = await getStoryStatus(db, getCharaID(unit_id), memo);
   const share_stories = await Promise.all(self_story.share_chara_ids.map(id => getStoryStatus(db, id, memo)));
-  const data: StoryStatusData = {
+  return {
     unit_id,
     self_story,
     share_stories,
-  } as any;
-  data.getProperty = getStoryStatusProperty.bind(data);
-  return data;
+    getProperty: getStoryStatusProperty,
+  };
 }

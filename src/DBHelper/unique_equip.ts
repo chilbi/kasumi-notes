@@ -9,7 +9,8 @@ export interface UniqueEquipData {
 }
 
 export function getUniqueEquipProperty(this: UniqueEquipData, enhance_level: number): Property {
-  return plusMultiply(this.unique_equipment_data, this.unique_equipment_enhance_rate, enhance_level, v => v, v => v.round(0, 3)/*ceil*/);
+  if (enhance_level < 1) return {} as Property;
+  return plusMultiply(this.unique_equipment_data, this.unique_equipment_enhance_rate, enhance_level - 1, v => v.round(0, 1));
 }
 
 export async function getUniqueEquipData(db: PCRDB, unit_id: number): Promise<UniqueEquipData | undefined>
@@ -27,11 +28,10 @@ export async function getUniqueEquipData(db: PCRDB, unit_id: number, unique_equi
   ]);
   if (!uniqueEquipmentData) throw new Error(`objectStore('unique_equipment_data').get(/*unique_equip_id*/${unique_equip_id}) => undefined`);
   if (!uniqueEquipmentEnhanceRate) throw new Error(`objectStore('unique_equipment_enhance_rate').get(/*unique_equip_id*/${unique_equip_id}) => undefined`);
-  const data: UniqueEquipData = {
+  return {
     unit_id,
     unique_equipment_data: uniqueEquipmentData,
     unique_equipment_enhance_rate: uniqueEquipmentEnhanceRate,
-  } as any;
-  data.getProperty = getUniqueEquipProperty.bind(data);
-  return data;
+    getProperty: getUniqueEquipProperty,
+  };
 }

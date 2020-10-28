@@ -4,7 +4,7 @@ import { PCRStoreValue } from '../db';
 
 const defaultProfile: PCRStoreValue<'unit_profile'> = {
   height: '???',
-  weigth: '???',
+  weight: '???',
   age: '???',
   birth_month: '???',
   birth_day: '???',

@@ -15,11 +15,10 @@ export function getPromotionStatusProperty(this: PromotionStatusData): Property 
 export async function getPromotionStatusData(db: PCRDB, unit_id: number, promotion_level: number): Promise<PromotionStatusData> {
   const unitPromotionStatus = await db.transaction('unit_promotion_status', 'readonly').store.get([unit_id, promotion_level]);
   if (!unitPromotionStatus) throw new Error(`objectStore('unit_promotion_status').get(/*unit_id*/[${unit_id}, /*promotion_level*/${promotion_level}]) => undefined`);
-  const data: PromotionStatusData = {
+  return {
     unit_id,
     promotion_level,
     unit_promotion_status: unitPromotionStatus,
-  } as any;
-  data.getProperty = getPromotionStatusProperty.bind(data);
-  return data;
+    getProperty: getPromotionStatusProperty,
+  };
 }

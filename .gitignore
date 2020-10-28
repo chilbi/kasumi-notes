@@ -24,3 +24,4 @@ yarn-error.log*
 
 /redive_master_db_diff-master
 debug.log
+package-lock.json

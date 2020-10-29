@@ -15,8 +15,6 @@ const useStyles = makeStyles({
 interface CharaListItemProps {
   variant: 'icon_unit' | 'unit_plate';
   unitID?: number;
-  unitName?: string;
-  actualName?: string;
   rarity: number;
   maxRarity: number;
   promotionLevel: number;
@@ -25,7 +23,7 @@ interface CharaListItemProps {
 }
 
 function CharaListItem(props: CharaListItemProps) {
-  const { unitID, unitName, actualName, ...other } = props;
+  const { unitID, ...other } = props;
   const styles = useStyles();
   const history = useHistory();
   let src;

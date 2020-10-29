@@ -31,8 +31,6 @@ function CharaList(props: CharaListProps) {
           key={i}
           variant={props.variant}
           unitID={base && base.charaData.unit_id}
-          unitName={base && base.charaData.unit_name}
-          actualName={base && base.charaData.actual_name}
           rarity={base ? base.userProfile.rarity : 6}
           maxRarity={base ? base.charaData.max_rarity : 6}
           promotionLevel={base ? base.userProfile.promotion_level : 18}

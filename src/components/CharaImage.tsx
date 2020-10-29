@@ -1,22 +1,10 @@
 import React, { useRef, useLayoutEffect } from 'react';
 import { makeStyles, Theme } from '@material-ui/core/styles';
 import SkeletonImage from './SkeletonImage';
+import RankBorder from './RankBorder';
 import Rarities from './Rarities';
-import { getRankPoint } from '../DBHelper/helper';
 import Big from 'big.js';
 import clsx from 'clsx';
-import borderIcon1 from '../images/border_icon_1.png';
-import borderIcon2 from '../images/border_icon_2.png';
-import borderIcon4 from '../images/border_icon_4.png';
-import borderIcon7 from '../images/border_icon_7.png';
-import borderIcon11 from '../images/border_icon_11.png';
-import borderIcon18 from '../images/border_icon_18.png';
-import borderPlate1 from '../images/border_plate_1.png';
-import borderPlate2 from '../images/border_plate_2.png';
-import borderPlate4 from '../images/border_plate_4.png';
-import borderPlate7 from '../images/border_plate_7.png';
-import borderPlate11 from '../images/border_plate_11.png';
-import borderPlate18 from '../images/border_plate_18.png';
 import position1 from '../images/position_1.png';
 import position2 from '../images/position_2.png';
 import position3 from '../images/position_3.png';
@@ -30,7 +18,6 @@ const useStyles = makeStyles((theme: Theme) => {
     starSize = Big(24).times(iScalage).div(rem),
     uniqueSize = Big(24).times(iScalage).div(rem),
     iconImageSize = Big(128).times(iScalage).div(rem),
-    iconBorderWidth = Big(8).times(iScalage).div(rem),
     iconBorderSlice = 12,
     iconBorderRadius = Big(iconBorderSlice).times(iScalage).div(rem),
     iconScalage = iconImageSize.div(starSize.times(5).plus(positionSize)).round(1, 0),
@@ -41,8 +28,6 @@ const useStyles = makeStyles((theme: Theme) => {
     pScalage = 0.359375,
     plateImageWidth = Big(512).times(pScalage).div(rem),
     plateImageHeight = Big(256).times(pScalage).div(rem),
-    plateBorderWidth = [8, 7, 11, 7].map(v => Big(v).div(rem)),
-    plateBorderSlice = [16, 16, 21, 16],
     plateBorderRadius = Big(32).times(pScalage).div(rem),
     plateScalage = plateImageWidth.div(1.5).div(starSize.times(6).plus(positionSize)).round(1, 0),
     platePositionSize = positionSize.times(plateScalage),
@@ -84,82 +69,6 @@ const useStyles = makeStyles((theme: Theme) => {
     },
     plateImg: {
       borderRadius: plateBorderRadius + 'rem',
-    },
-    iconBorder: {
-      zIndex: 1,
-      position: 'absolute',
-      top: 0,
-      right: 0,
-      bottom: 0,
-      left: 0,
-      borderWidth: iconBorderWidth + 'rem',
-      borderStyle: 'solid',
-      borderImageSlice: iconBorderSlice,
-      borderImageWidth: iconBorderWidth + 'rem',
-      borderImageOutset: 0,
-      borderImageRepeat: 'round stretch',
-    },
-    plateBorder: {
-      zIndex: 1,
-      position: 'absolute',
-      top: 0,
-      right: 0,
-      bottom: plateBorderWidth[0].minus(plateBorderWidth[2]) + 'rem',
-      left: 0,
-      borderWidth: plateBorderWidth.map(v => v + 'rem').join(' '),
-      borderStyle: 'solid',
-      borderImageSlice: plateBorderSlice.join(' '),
-      borderImageWidth: plateBorderWidth.map(v => v + 'rem').join(' '),
-      borderImageOutset: 0,
-      borderImageRepeat: 'round stretch',
-    },
-    iconBorder1: {
-      borderColor: theme.rankColor[1],
-      borderImageSource: `url(${borderIcon1})`,
-    },
-    iconBorder2: {
-      borderColor: theme.rankColor[2],
-      borderImageSource: `url(${borderIcon2})`,
-    },
-    iconBorder4: {
-      borderColor: theme.rankColor[4],
-      borderImageSource: `url(${borderIcon4})`,
-    },
-    iconBorder7: {
-      borderColor: theme.rankColor[7],
-      borderImageSource: `url(${borderIcon7})`,
-    },
-    iconBorder11: {
-      borderColor: theme.rankColor[11],
-      borderImageSource: `url(${borderIcon11})`,
-    },
-    iconBorder18: {
-      borderColor: theme.rankColor[18],
-      borderImageSource: `url(${borderIcon18})`,
-    },
-    plateBorder1: {
-      borderColor: theme.rankColor[1],
-      borderImageSource: `url(${borderPlate1})`,
-    },
-    plateBorder2: {
-      borderColor: theme.rankColor[2],
-      borderImageSource: `url(${borderPlate2})`,
-    },
-    plateBorder4: {
-      borderColor: theme.rankColor[4],
-      borderImageSource: `url(${borderPlate4})`,
-    },
-    plateBorder7: {
-      borderColor: theme.rankColor[7],
-      borderImageSource: `url(${borderPlate7})`,
-    },
-    plateBorder11: {
-      borderColor: theme.rankColor[11],
-      borderImageSource: `url(${borderPlate11})`,
-    },
-    plateBorder18: {
-      borderColor: theme.rankColor[18],
-      borderImageSource: `url(${borderPlate18})`,
     },
     iconStars: {
       zIndex: 2,
@@ -285,7 +194,6 @@ function CharaImage(props: CharaImageProps) {
   let
     rootClassName = '',
     imgClassName = '',
-    borderClassName = '',
     starsClassName = '',
     starClassName = '',
     positionClassName = '',
@@ -294,7 +202,6 @@ function CharaImage(props: CharaImageProps) {
   if (variant === 'icon_unit') {
     rootClassName = styles.icon;
     imgClassName = styles.iconImg;
-    borderClassName = clsx(styles.iconBorder, styles['iconBorder' + getRankPoint(promotionLevel) as keyof typeof styles]);
     starsClassName = styles.iconStars;
     starClassName = styles.iconStar;
     positionClassName = styles.iconPosition;
@@ -302,7 +209,6 @@ function CharaImage(props: CharaImageProps) {
   } else {
     rootClassName = styles.plate;
     imgClassName = styles.plateImg;
-    borderClassName = clsx(styles.plateBorder, styles['plateBorder' + getRankPoint(promotionLevel) as keyof typeof styles]);
     starsClassName = styles.plateStars;
     starClassName = styles.plateStar;
     positionClassName = styles.platePosition;
@@ -313,7 +219,7 @@ function CharaImage(props: CharaImageProps) {
 
   return (
     <SkeletonImage classes={{ root: rootClassName, img: imgClassName }} src={src} save>
-      <div className={borderClassName} />
+      <RankBorder variant={variant} promotionLevel={promotionLevel} />
       <Rarities rootRef={raritiesRef} classes={{ root: starsClassName, star: starClassName }} maxRarity={maxRarity} rarity={rarity} />
       <div ref={positionRef} className={positionClassName} />
       <div ref={uniqueRef} className={uniqueClassName} />

@@ -1,15 +1,18 @@
 import React from 'react';
 import { makeStyles, Theme } from '@material-ui/core/styles';
 import SkeletonImage from './SkeletonImage';
+import RankBorder from './RankBorder';
 import Rarities from './Rarities';
 import { EquipData } from '../DBHelper/equip';
 import { PromotionData } from '../DBHelper/promotion';
 import { UniqueEquipData } from '../DBHelper/unique_equip';
-import { getPublicImageURL, getRankPoint } from '../DBHelper/helper';
+import { getPublicImageURL, getRankPoint, getValidID } from '../DBHelper/helper';
 import maxUserProfile from '../DBHelper/maxUserProfile';
 import { PCRStoreValue } from '../db';
 import Big from 'big.js';
 import clsx from 'clsx';
+
+const dishMap = ['topLeft', 'topRight', 'left', 'right', 'bottomLeft', 'bottomRight'] as const;
 
 const useStyles = makeStyles((theme: Theme) => {
   const
@@ -18,14 +21,17 @@ const useStyles = makeStyles((theme: Theme) => {
     iconSize = Big(128).times(scalage).div(rem),
     starSize = Big(24).times(scalage).div(rem),
     iconRadius = Big(12).times(scalage).div(rem),
-    iconGup = iconSize.minus(starSize.times(5)).div(2),
+    gup = iconSize.minus(starSize.times(5)).div(2),
+    iconStarSize = starSize.times(iconSize.div(starSize.times(6)).round(1, 0)),
+    iconGup = iconSize.minus(iconStarSize.times(6)).div(2).round(2, 0),
     labelLineHeight = 1.5,
-    itemMarginTop = Big(labelLineHeight).plus(0.5);
+    itemMarginTop = Big(labelLineHeight).plus(0.5),
+    len = iconSize.times(1.75),
+    x = len.times(Math.cos(Math.PI / 4)).round(3, 0),
+    y = len.times(Math.sin(Math.PI / 4)).round(3, 0);
 
   return {
     root: {
-      // display: 'flex',
-      // flexDirection: 'column-reverse',
       padding: '0.25em 0',
     },
     item: {
@@ -59,13 +65,24 @@ const useStyles = makeStyles((theme: Theme) => {
     stars: {
       zIndex: 2,
       position: 'absolute',
-      bottom: iconGup + 'rem',
-      left: iconGup + 'rem',
+      bottom: gup + 'rem',
+      left: gup + 'rem',
     },
     star: {
       width: starSize + 'rem',
       height: starSize + 'rem',
       backgroundSize: starSize + 'rem ' + starSize + 'rem',
+    },
+    iconStars: {
+      zIndex: 2,
+      position: 'absolute',
+      bottom: iconGup + 'rem',
+      left: iconGup + 'rem',
+    },
+    iconStar: {
+      width: iconStarSize + 'rem',
+      height: iconStarSize + 'rem',
+      backgroundSize: iconStarSize + 'rem ' + iconStarSize + 'rem',
     },
     uniqueInfo: {
       alignSelf: 'center',
@@ -88,6 +105,44 @@ const useStyles = makeStyles((theme: Theme) => {
       '&>.equip-label': {
         backgroundColor: '#d34bef',
       },
+    },
+    dishBox: {
+      textAlign: 'center',
+    },
+    dish: {
+      display: 'inline-block',
+      position: 'relative',
+      margin: len + 'rem',
+      width: iconSize + 'rem',
+      height: iconSize + 'rem',
+    },
+    dishItem: {
+      position: 'absolute',
+      transformOrigin: '50% 50% 0',
+    },
+    top: {
+      transform: `translate(0, -${len}rem)`,
+    },
+    bottom: {
+      transform: `translate(0, ${len}rem)`,
+    },
+    left: {
+      transform: `translate(-${len}rem, 0)`,
+    },
+    right: {
+      transform: `translate(${len}rem, 0)`,
+    },
+    topLeft: {
+      transform: `translate(-${x}rem, -${y}rem)`,
+    },
+    topRight: {
+      transform: `translate(${x}rem, -${y}rem)`,
+    },
+    bottomLeft: {
+      transform: `translate(-${x}rem, ${y}rem)`,
+    },
+    bottomRight: {
+      transform: `translate(${x}rem, ${y}rem)`,
     },
     rank1: {
       borderColor: theme.rankColor[1],
@@ -129,17 +184,22 @@ const useStyles = makeStyles((theme: Theme) => {
 });
 
 interface CharaEquipProps {
+  maxRarity?: number;
   promotions?: PromotionData[];
   uniqueEquip?: UniqueEquipData;
   userProfile?: PCRStoreValue<'user_profile'>;
 }
 
 function CharaEquip(props: CharaEquipProps) {
-  const { promotions = [], uniqueEquip, userProfile = maxUserProfile } = props;
+  const { maxRarity = 5, promotions = [], uniqueEquip, userProfile = maxUserProfile } = props;
   const { promotion_level, equip_enhance_status, unique_enhance_level } = userProfile;
   const styles = useStyles();
 
-  const getSlotData = (promotionLevel: number, slot: EquipData | undefined) => {
+  const equipSlots = promotions.length < 1
+    ? Array(6).fill(undefined)
+    : promotions.find(item => item.promotion_level === promotion_level)!.equip_slots;
+
+  const getSlotData = (promotionLevel: number, slot: EquipData | undefined, invalidSrc = '') => {
     let srcName: number | string = 999999;
     let maxRarity: number | undefined = undefined;
     let rarity: number | undefined = undefined;
@@ -149,7 +209,7 @@ function CharaEquip(props: CharaEquipProps) {
       const isCurrPromotion = promotionLevel === promotion_level;
       const invalid = (isCurrPromotion && enhanceLevel < 0) || (promotionLevel !== promotion_level);
       if (invalid) {
-        srcName = 'invalid_' + slot.equipment_id;
+        srcName = invalidSrc + slot.equipment_id;
       } else {
         srcName = slot.equipment_id;
         if (isCurrPromotion) {
@@ -177,6 +237,29 @@ function CharaEquip(props: CharaEquipProps) {
 
   return (
     <div className={styles.root}>
+      <div className={styles.dishBox}>
+        <div className={styles.dish}>
+          <SkeletonImage
+            classes={{ root: clsx(styles.iconRoot, styles.dishItem, styles.top) }}
+            src={userProfile.unit_id ? getPublicImageURL('icon_unit', getValidID(userProfile.unit_id, userProfile.rarity)) : undefined}
+            save
+          >
+            <RankBorder variant="icon_unit" promotionLevel={promotion_level} />
+            <Rarities classes={{ root: styles.iconStars, star: styles.iconStar }} maxRarity={maxRarity} rarity={userProfile.rarity} />
+          </SkeletonImage>
+          <SkeletonImage key="unique" classes={{ root: clsx(styles.iconRoot, styles.dishItem, styles.bottom) }} src={getPublicImageURL('icon_equipment', uniqueImgName)} save />
+          {equipSlots.map((slot, i) => {
+            const { imgSrc, maxRarity, rarity } = getSlotData(promotion_level, slot, 'invalid_');
+            return (
+              <SkeletonImage key={'equip' + i} classes={{ root: clsx(styles.iconRoot, styles.dishItem, styles[dishMap[i]]) }} src={imgSrc} save>
+                {maxRarity && rarity && (
+                  <Rarities classes={{ root: styles.stars, star: styles.star }} maxRarity={maxRarity} rarity={rarity} />
+                )}
+              </SkeletonImage>
+            );
+          })}
+        </div>
+      </div>
       <div key="unique" className={clsx(styles.item, styles.unique)}>
         <div className="equip-label">専用装備</div>
         <div className={styles.equipBox}>
@@ -199,16 +282,14 @@ function CharaEquip(props: CharaEquipProps) {
             {'RANK' + promotion.promotion_level}
           </div>
           <div className={styles.equipBox}>
-            {promotion.equip_slots.map((slot, i) => {
-              const { imgSrc, maxRarity, rarity } = getSlotData(promotion.promotion_level, slot);
-              return (
-                <SkeletonImage key={i} classes={{ root: styles.iconRoot }} src={imgSrc} save>
-                  {maxRarity && rarity && (
-                    <Rarities classes={{ root: styles.stars, star: styles.star }} maxRarity={maxRarity} rarity={rarity} />
-                  )}
-                </SkeletonImage>
-              );
-            })}
+            {promotion.equip_slots.map((slot, i) => (
+              <SkeletonImage
+                key={i}
+                classes={{ root: styles.iconRoot }}
+                src={getSlotData(promotion.promotion_level, slot).imgSrc}
+                save
+              />
+            ))}
           </div>
         </div>
       ))}

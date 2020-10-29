@@ -30,9 +30,13 @@ const useStyles = makeStyles((theme: Theme) => {
       backgroundColor: '#fff',
     },
     level: {
+      fontFamily: 'inherit',
+      flexBasis: '4rem',
       padding: 0,
     },
-    loveLevel: {
+    love: {
+      fontFamily: 'inherit',
+      flexBasis: '2.5rem',
       paddingLeft: LoveLevelWidth + 'rem',
       lineHeight: 1.25,
       backgroundImage: `url(${loveLevel})`,
@@ -41,6 +45,8 @@ const useStyles = makeStyles((theme: Theme) => {
       backgroundPosition: 'left center',
     },
     unique: {
+      fontFamily: 'inherit',
+      flexBasis: '3rem',
       paddingLeft: uniqueSize + 'rem',
       lineHeight: 1.25,
       backgroundImage: `url(${unique})`,
@@ -48,8 +54,18 @@ const useStyles = makeStyles((theme: Theme) => {
       backgroundSize: uniqueSize + 'rem ' + uniqueSize + 'rem',
       backgroundPosition: 'left center',
     },
-    disableUnique: {
-      filter: 'grayscale(100%)',
+    promotion: {
+      margin: '0',
+      padding: '0',
+      width: '6em',
+      textAlign: 'center',
+      borderRadius: '1em',
+      color: '#fff',
+    },
+    sliderPaper: {
+      padding: '0.5em 0',
+      height: 200,
+      overflow: 'unset',
     },
     list: {
       margin: 0,
@@ -64,24 +80,11 @@ const useStyles = makeStyles((theme: Theme) => {
         marginTop: 0,
       },
     },
-    promotionLevel: {
-      margin: '0',
-      padding: '0',
-      width: '6em',
-      textAlign: 'center',
-      borderRadius: '1em',
-      color: '#fff',
-    },
-    sliderPaper: {
-      padding: '0 0.5em',
-      width: 300,
-      overflow: 'unset',
-    },
-    promotionLevelPaper: {
+    promotionPaper: {
       borderRadius: '1em',
     },
-    button: {
-      fontFamily: 'inherit',
+    disableUnique: {
+      filter: 'grayscale(100%)',
     },
     bg1: {
       backgroundColor: theme.rankColor[1],
@@ -162,9 +165,10 @@ function CharaUserProfile(props: CharaUserProfileProps) {
 
   return (
     <div className={styles.root}>
-      <ButtonBase component="div" className={styles.button} onClick={handleOpenLevel}>
+      <ButtonBase component="div" className={styles.level} onClick={handleOpenLevel}>
         <Infobar
           className={styles.level}
+          width={100}
           size="small"
           label="Lv"
           value={userProfile.level}
@@ -174,12 +178,12 @@ function CharaUserProfile(props: CharaUserProfileProps) {
         classes={{ paper: styles.sliderPaper }}
         open={!!levelEl}
         anchorEl={levelEl}
-        marginThreshold={0}
-        anchorOrigin={{ horizontal: 'left', vertical: 'bottom' }}
-        transformOrigin={{ horizontal: 'left', vertical: 'top' }}
+        anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+        transformOrigin={{ horizontal: 'left', vertical: 'bottom' }}
         onClose={handleCloseLevel}
       >
         <DebouncedSlider
+          orientation="vertical"
           wait={200}
           min={1}
           max={maxUserProfile.level}
@@ -190,7 +194,7 @@ function CharaUserProfile(props: CharaUserProfileProps) {
         />
       </Popover>
 
-      <ButtonBase component="div" className={clsx(styles.loveLevel, styles.button)} onClick={handleOpenLove}>
+      <ButtonBase component="div" className={styles.love} onClick={handleOpenLove}>
         {userProfile.unit_id ? userProfile.love_level_status[getCharaID(userProfile.unit_id)] : 0}
       </ButtonBase>
       {userProfile.unit_id && (
@@ -198,12 +202,12 @@ function CharaUserProfile(props: CharaUserProfileProps) {
           classes={{ paper: styles.sliderPaper }}
           open={!!loveEl}
           anchorEl={loveEl}
-          marginThreshold={0}
-          anchorOrigin={{ horizontal: 'left', vertical: 'bottom' }}
-          transformOrigin={{ horizontal: 'left', vertical: 'top' }}
+          anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+          transformOrigin={{ horizontal: 'left', vertical: 'bottom' }}
           onClose={handleCloseLove}
         >
           <DebouncedSlider
+            orientation="vertical"
             wait={200}
             min={0}
             max={maxRarity === 6 ? 12 : 8}
@@ -227,7 +231,6 @@ function CharaUserProfile(props: CharaUserProfileProps) {
             component="div"
             className={clsx(
               styles.unique,
-              styles.button,
               userProfile.unique_enhance_level < 1 && styles.disableUnique
             )}
             onClick={handleOpenUnique}
@@ -238,12 +241,12 @@ function CharaUserProfile(props: CharaUserProfileProps) {
             classes={{ paper: styles.sliderPaper }}
             open={!!uniqueEl}
             anchorEl={uniqueEl}
-            marginThreshold={0}
             anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
-            transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+            transformOrigin={{ horizontal: 'left', vertical: 'bottom' }}
             onClose={handleCloseUnique}
           >
             <DebouncedSlider
+              orientation="vertical"
               wait={200}
               min={0}
               max={maxUserProfile.unique_enhance_level}
@@ -259,8 +262,7 @@ function CharaUserProfile(props: CharaUserProfileProps) {
       <ButtonBase
         component="div"
         className={clsx(
-          styles.promotionLevel,
-          styles.button,
+          styles.promotion,
           styles['bg' + getRankPoint(userProfile.promotion_level) as keyof typeof styles]
         )}
         onClick={handleOpenPromotionLevel}
@@ -268,7 +270,7 @@ function CharaUserProfile(props: CharaUserProfileProps) {
         {'RANK' + userProfile.promotion_level}
       </ButtonBase>
       <Popover
-        classes={{ paper: styles.promotionLevelPaper }}
+        classes={{ paper: styles.promotionPaper }}
         open={!!promotionLevelEl}
         anchorEl={promotionLevelEl}
         marginThreshold={0}
@@ -284,7 +286,7 @@ function CharaUserProfile(props: CharaUserProfileProps) {
                 key={promotionLevel}
                 component="li"
                 className={clsx(
-                  styles.promotionLevel,
+                  styles.promotion,
                   styles['bg' + getRankPoint(promotionLevel) as keyof typeof styles]
                 )}
                 onClick={onChangePromotion && ((e: React.MouseEvent) => {

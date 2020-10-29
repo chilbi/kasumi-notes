@@ -185,6 +185,7 @@ function CharaDetail(props: CharaDetailProps) {
     ),
     equip: (
       <CharaEquip
+        maxRarity={detail && detail.charaData.max_rarity}
         promotions={detail && detail.promotions}
         uniqueEquip={detail && detail.propertyData[4]}
         userProfile={detail && detail.userProfile}

@@ -13,7 +13,7 @@ export interface EquipData {
 }
 
 export function getEquipProperty(this: EquipData, enhance_level: number): Property {
-  return plusMultiply(this.equipment_data, this.equipment_enhance_rate, enhance_level, v => v.round(0, 1));
+  return plusMultiply(this.equipment_data, this.equipment_enhance_rate, enhance_level, v => v.round(0, 3));
 }
 
 export async function getEquipData(db: PCRDB, equipment_id: number): Promise<EquipData> {

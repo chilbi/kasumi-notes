@@ -10,7 +10,7 @@ export interface UniqueEquipData {
 
 export function getUniqueEquipProperty(this: UniqueEquipData, enhance_level: number): Property {
   if (enhance_level < 1) return {} as Property;
-  return plusMultiply(this.unique_equipment_data, this.unique_equipment_enhance_rate, enhance_level - 1, v => v.round(0, 1));
+  return plusMultiply(this.unique_equipment_data, this.unique_equipment_enhance_rate, enhance_level - 1, v => v.round(0, 3));
 }
 
 export async function getUniqueEquipData(db: PCRDB, unit_id: number): Promise<UniqueEquipData | undefined>

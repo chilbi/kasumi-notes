@@ -55,19 +55,23 @@ function getFormula(
   propertyFactor?: number,
   atkType?: number,
   property?: Property,
-  cb = (v: Big) => v.round(0, 1)
+  cb = (v: Big) => v.round(0, 3)
 ): [/*calc*/number, /*formula*/string?] {
   let formula = constant.toString();
   let calc = Big(constant);
+  let flag = false;
   if (skillLevelFactor && skillLevel) {
     formula = (!calc.eq(0) ? `${formula}+` : '') + `${skillLevelFactor}*skill_level`;
-    calc = cb(Big(skillLevelFactor).times(skillLevel).plus(calc));
+    calc = Big(skillLevelFactor).times(skillLevel).plus(calc);
+    flag = true;
   }
   if (propertyFactor && atkType && property) {
     const atkKey = getAtkKey(atkType);
     formula = (!calc.eq(0) ? `${formula}+` : '') +  `${propertyFactor}*${atkKey}`;
-    calc = calc.plus(cb(Big(propertyFactor).times(property[atkKey as keyof typeof property])));
+    calc = calc.plus(Big(propertyFactor).times(property[atkKey as keyof typeof property]));
+    flag = true;
   }
+  if (flag) calc = cb(calc);
   return calc.toString() === formula ? [calc.toNumber()] : [calc.toNumber(), formula];
 }
 

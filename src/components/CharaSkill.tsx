@@ -10,6 +10,9 @@ import { state } from '../DBHelper/state';
 import { PCRStoreValue } from '../db';
 import Big from 'big.js';
 import clsx from 'clsx';
+import ButtonPopover from './ButtonPopover';
+import maxUserProfile from '../DBHelper/maxUserProfile';
+import DebouncedSlider from './DebouncedSlider';
 
 const useStyles = makeStyles((theme: Theme) => {
   const
@@ -41,6 +44,8 @@ const useStyles = makeStyles((theme: Theme) => {
     level: {
       display: 'inline-block',
       marginLeft: 'auto',
+      width: '3.5rem',
+      paddingLeft: '0.25em',
       color: theme.palette.secondary.light,
     },
     patternBox: {
@@ -113,6 +118,7 @@ const useStyles = makeStyles((theme: Theme) => {
       fontFamily: '"Arial","Microsoft YaHei",sans-serif',
       fontWeight: 700,
       textAlign: 'center',
+      borderRadius: '50%',
       color: '#fff',
       backgroundColor: theme.palette.grey[600],
       clipPath: 'polygon(50% 0, 100% 50%, 50% 100%, 0 50%)',
@@ -141,6 +147,11 @@ const useStyles = makeStyles((theme: Theme) => {
       top: 0,
       left: 0,
     },
+    sliderPaper: {
+      padding: '0.5em 0',
+      height: 200,
+      overflow: 'unset',
+    },
   };
 });
 
@@ -152,7 +163,7 @@ interface PatternItemProps {
 interface SkillItemProps {
   label: string;
   skillData: SkillData;
-  skillLevel: number;
+  skillKey: keyof SkillEnhanceStatus;
 }
 
 interface CharaSkillProps {
@@ -161,10 +172,11 @@ interface CharaSkillProps {
   property?: Property;
   unitSkillData?: UnitSkillData;
   userProfile?: PCRStoreValue<'user_profile'>;
+  onChangeSkillLevel?: (e: React.SyntheticEvent, level: number, skillKey: keyof SkillEnhanceStatus) => void;
 }
 
 function CharaSkill(props: CharaSkillProps) {
-  const { atkType, atkCastTime, property, unitSkillData, userProfile = {} as Partial<PCRStoreValue<'user_profile'>> } = props;
+  const { atkType, atkCastTime, property, unitSkillData, userProfile = {} as Partial<PCRStoreValue<'user_profile'>>, onChangeSkillLevel } = props;
   const { skill_enhance_status = { ub: 1, 1: 1, 2: 1, ex: 1 }, unique_enhance_level = 0 } = userProfile;
   const styles = useStyles();
 
@@ -280,54 +292,69 @@ function CharaSkill(props: CharaSkillProps) {
     }
   };
 
-  const getSkillItem = ({ label, skillData, skillLevel }: SkillItemProps) => (
-    <div key={label} className={styles.item}>
-      <div className={styles.flexBox}>
-        <span className={styles.label}>{label}</span>
-        <span className={styles.level}>Lv{skillLevel}</span>
-      </div>
-      <div className={styles.flexBox}>
-        <SkeletonImage classes={{ root: styles.imgRoot }} src={getPublicImageURL('icon_skill', skillData.icon_type)} save />
-        <div className={styles.nameBox}>
-          <span className={styles.name}>{skillData.name}</span>
-          <span className={styles.castTime}>待機時間：{skillData.skill_cast_time}s</span>
+  const getSkillItem = ({ label, skillData, skillKey }: SkillItemProps) => {
+    const skillLevel = skill_enhance_status[skillKey];
+    return (
+      <div key={label} className={styles.item}>
+        <div className={styles.flexBox}>
+          <div className={styles.label}>{label}</div>
+          <ButtonPopover 
+            classes={{ button: styles.level, popover: styles.sliderPaper }}
+            position="left"
+            content={
+              <DebouncedSlider
+                min={1}
+                max={maxUserProfile.level}
+                defaultValue={skillLevel}
+                onDebouncedChange={onChangeSkillLevel && ((e, value) => onChangeSkillLevel(e, value, skillKey))}
+              />
+            }
+            children={'Lv' + skillLevel}
+          />
         </div>
+        <div className={styles.flexBox}>
+          <SkeletonImage classes={{ root: styles.imgRoot }} src={getPublicImageURL('icon_skill', skillData.icon_type)} save />
+          <div className={styles.nameBox}>
+            <span className={styles.name}>{skillData.name}</span>
+            <span className={styles.castTime}>待機時間：{skillData.skill_cast_time}s</span>
+          </div>
+        </div>
+        <div className={styles.skillDesc}>{skillData.description}</div>
+        <div className={styles.actionLabel}>スキルアクション</div>
+        <ol className={styles.actionList}>
+          {skillData.action.map((item, i) => (
+            <li key={item.action_id} className={styles.actionItem}>
+              <span className={clsx(styles.actionNum, styles.absolute0)}>{i + 1}</span>
+              {renderDesc(item.getDescData(skillLevel, property, skillData.action), item.action_id)}
+            </li>
+          ))}
+        </ol>
       </div>
-      <div className={styles.skillDesc}>{skillData.description}</div>
-      <div className={styles.actionLabel}>スキルアクション</div>
-      <ol className={styles.actionList}>
-        {skillData.action.map((item, i) => (
-          <li key={item.action_id} className={styles.actionItem}>
-            <span className={clsx(styles.actionNum, styles.absolute0)}>{i + 1}</span>
-            {renderDesc(item.getDescData(skillLevel, property, skillData.action), item.action_id)}
-          </li>
-        ))}
-      </ol>
-    </div>
-  );
+    );
+  };
   const skillList: SkillItemProps[] = [];
-  skillList.push({ label: 'UB', skillData: unitSkillData.union_burst, skillLevel: skill_enhance_status['ub'] });
+  skillList.push({ label: 'UB', skillData: unitSkillData.union_burst, skillKey: 'ub' });
   if (unitSkillData.union_burst_evolution) {
-    skillList.push({ label: 'UB+', skillData: unitSkillData.union_burst_evolution, skillLevel: skill_enhance_status['ub'] });
+    skillList.push({ label: 'UB+', skillData: unitSkillData.union_burst_evolution, skillKey: 'ub' });
   }
   const pushItem = (label: string, normal: SkillData[], evolution: SkillData[], ex?: boolean) => {
     const len = normal.length;
     const isOneEX = ex && len === 1 && evolution.length === 1;
     for (let i = 0; i < len; i++) {
       const n = i + 1;
-      const skillLevel = ex ? skill_enhance_status['ex'] : (skill_enhance_status[n as keyof SkillEnhanceStatus] || skill_enhance_status['ub']);
+      const skillKey = (ex ? 'ex' : n) as keyof SkillEnhanceStatus;
       const renameLabel = label + (isOneEX ? '' : n);
       skillList.push({
         label: renameLabel,
         skillData: normal[i],
-        skillLevel,
+        skillKey,
       });
       const evItem = evolution[i];
       if (evItem) {
         skillList.push({
           label: renameLabel + '+',
           skillData: evItem,
-          skillLevel,
+          skillKey,
         });
       }
     }

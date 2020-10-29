@@ -2,6 +2,7 @@ import React, { useState, useCallback, useRef } from 'react';
 import { makeStyles, Theme } from '@material-ui/core/styles';
 import ButtonBase from '@material-ui/core/ButtonBase';
 import Popover from '@material-ui/core/Popover';
+import ButtonPopover from './ButtonPopover';
 import DebouncedSlider from './DebouncedSlider';
 import Infobar from './Infobar';
 import Rarities from './Rarities';
@@ -32,7 +33,6 @@ const useStyles = makeStyles((theme: Theme) => {
     level: {
       fontFamily: 'inherit',
       flexBasis: '4rem',
-      padding: 0,
     },
     love: {
       fontFamily: 'inherit',
@@ -59,20 +59,15 @@ const useStyles = makeStyles((theme: Theme) => {
       padding: '0',
       width: '6em',
       textAlign: 'center',
-      borderRadius: '1em',
+      borderRadius: 10,
       color: '#fff',
-    },
-    sliderPaper: {
-      padding: '0.5em 0',
-      height: 200,
-      overflow: 'unset',
     },
     list: {
       margin: 0,
       padding: 0,
       listStyle: 'none',
       '&>li': {
-        display: 'flex',
+        display: 'block',
         borderRadius: 0,
         marginTop: 2,
       },
@@ -80,11 +75,19 @@ const useStyles = makeStyles((theme: Theme) => {
         marginTop: 0,
       },
     },
+    sliderPaper: {
+      padding: '0.5em 0',
+      height: 200,
+      overflow: 'unset',
+    },
     promotionPaper: {
-      borderRadius: '1em',
+      borderRadius: 10,
     },
     disableUnique: {
       filter: 'grayscale(100%)',
+    },
+    p0: {
+      padding: 0,
     },
     bg1: {
       backgroundColor: theme.rankColor[1],
@@ -129,30 +132,6 @@ function CharaUserProfile(props: CharaUserProfileProps) {
   } = props;
   const styles = useStyles();
 
-  const [levelEl, setLevelEl] = useState<Element | null>(null);
-  const handleOpenLevel = useCallback((e: React.MouseEvent) => {
-    setLevelEl(e.currentTarget);
-  }, []);
-  const handleCloseLevel = useCallback(() => {
-    setLevelEl(null);
-  }, []);
-
-  const [loveEl, setLoveEl] = useState<Element | null>(null);
-  const handleOpenLove = useCallback((e: React.MouseEvent) => {
-    setLoveEl(e.currentTarget);
-  }, []);
-  const handleCloseLove = useCallback(() => {
-    setLoveEl(null);
-  }, []);
-
-  const [uniqueEl, setUniqueEl] = useState<Element | null>(null);
-  const handleOpenUnique = useCallback((e: React.MouseEvent) => {
-    setUniqueEl(e.currentTarget);
-  }, []);
-  const handleCloseUnique = useCallback(() => {
-    setUniqueEl(null);
-  }, []);
-
   const promotionLevelHeightRef = useRef(0);
   const [promotionLevelEl, setPromotionLevelEl] = useState<Element | null>(null);
   const handleOpenPromotionLevel = useCallback((e: React.MouseEvent) => {
@@ -165,98 +144,56 @@ function CharaUserProfile(props: CharaUserProfileProps) {
 
   return (
     <div className={styles.root}>
-      <ButtonBase component="div" className={styles.level} onClick={handleOpenLevel}>
-        <Infobar
-          className={styles.level}
-          width={100}
-          size="small"
-          label="Lv"
-          value={userProfile.level}
-        />
-      </ButtonBase>
-      <Popover
-        classes={{ paper: styles.sliderPaper }}
-        open={!!levelEl}
-        anchorEl={levelEl}
-        anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
-        transformOrigin={{ horizontal: 'left', vertical: 'bottom' }}
-        onClose={handleCloseLevel}
-      >
-        <DebouncedSlider
-          orientation="vertical"
-          wait={200}
-          min={1}
-          max={maxUserProfile.level}
-          step={1}
-          valueLabelDisplay="on"
-          defaultValue={userProfile.level}
-          onDebouncedChange={onChangeLevel}
-        />
-      </Popover>
-
-      <ButtonBase component="div" className={styles.love} onClick={handleOpenLove}>
-        {userProfile.unit_id ? userProfile.love_level_status[getCharaID(userProfile.unit_id)] : 0}
-      </ButtonBase>
-      {userProfile.unit_id && (
-        <Popover
-          classes={{ paper: styles.sliderPaper }}
-          open={!!loveEl}
-          anchorEl={loveEl}
-          anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
-          transformOrigin={{ horizontal: 'left', vertical: 'bottom' }}
-          onClose={handleCloseLove}
-        >
+      <ButtonPopover
+        classes={{ button: styles.level, popover: styles.sliderPaper }}
+        content={
           <DebouncedSlider
-            orientation="vertical"
-            wait={200}
+            min={1}
+            max={maxUserProfile.level}
+            defaultValue={userProfile.level}
+            onDebouncedChange={onChangeLevel}
+          />
+        }
+        children={
+          <Infobar className={styles.p0} width={100} size="small" label="Lv" value={userProfile.level} />
+        }
+      />
+
+      <ButtonPopover
+        classes={{ button: styles.love, popover: styles.sliderPaper }}
+        content={userProfile.unit_id && (
+          <DebouncedSlider
             min={0}
             max={maxRarity === 6 ? 12 : 8}
-            step={1}
-            valueLabelDisplay="on"
             defaultValue={userProfile.love_level_status[getCharaID(userProfile.unit_id)]}
             onDebouncedChange={onChangeLove}
           />
-        </Popover>
-      )}
+        )}
+        children={userProfile.unit_id ? userProfile.love_level_status[getCharaID(userProfile.unit_id)] : 0}
+      />
 
       <Rarities
         maxRarity={maxRarity}
         rarity={userProfile.rarity}
         onChange={onChangeRarity}
       />
-  
+
       {userProfile.unique_equip_id !== maxUserProfile.unique_equip_id && (
-        <React.Fragment>
-          <ButtonBase
-            component="div"
-            className={clsx(
-              styles.unique,
-              userProfile.unique_enhance_level < 1 && styles.disableUnique
-            )}
-            onClick={handleOpenUnique}
-          >
-            {userProfile.unique_enhance_level}
-          </ButtonBase>
-          <Popover
-            classes={{ paper: styles.sliderPaper }}
-            open={!!uniqueEl}
-            anchorEl={uniqueEl}
-            anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
-            transformOrigin={{ horizontal: 'left', vertical: 'bottom' }}
-            onClose={handleCloseUnique}
-          >
+        <ButtonPopover
+          classes={{
+            button: clsx(styles.unique, userProfile.unique_enhance_level < 1 && styles.disableUnique),
+            popover: styles.sliderPaper
+          }}
+          content={
             <DebouncedSlider
-              orientation="vertical"
-              wait={200}
               min={0}
               max={maxUserProfile.unique_enhance_level}
-              step={1}
-              valueLabelDisplay="on"
               defaultValue={userProfile.unique_enhance_level}
               onDebouncedChange={onChangeUnique}
             />
-          </Popover>
-        </React.Fragment>
+          }
+          children={userProfile.unique_enhance_level}
+        />
       )}
 
       <ButtonBase
@@ -274,7 +211,7 @@ function CharaUserProfile(props: CharaUserProfileProps) {
         open={!!promotionLevelEl}
         anchorEl={promotionLevelEl}
         marginThreshold={0}
-        anchorOrigin={{ horizontal: 'left', vertical: 'top' }}
+        anchorOrigin={{ horizontal: 0, vertical: 0 }}
         transformOrigin={{ horizontal: 0, vertical: promotionLevelHeightRef.current * (maxUserProfile.promotion_level - userProfile.promotion_level) }}
         onClose={handleClosePromotionLevel}
       >

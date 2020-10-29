@@ -26,6 +26,9 @@ const useStyles = makeStyles((theme: Theme) => {
     iconGup = iconSize.minus(iconStarSize.times(6)).div(2).round(2, 0),
     labelLineHeight = 1.5,
     itemMarginTop = Big(labelLineHeight).plus(0.5),
+    pLeft = 0.75,
+    lvWidth = pLeft + 4,
+    lvScalage = iconSize.div(1.25).div(lvWidth).round(2, 0),
     len = iconSize.times(1.75),
     x = len.times(Math.cos(Math.PI / 4)).round(3, 0),
     y = len.times(Math.sin(Math.PI / 4)).round(3, 0);
@@ -33,6 +36,14 @@ const useStyles = makeStyles((theme: Theme) => {
   return {
     root: {
       padding: '0.25em 0',
+      textAlign: 'center',
+    },
+    inner: {
+      display: 'inline-block',
+    },
+    rankList: {
+      paddingTop: '0.25em',
+      textAlign: 'left',
     },
     item: {
       position: 'relative',
@@ -106,9 +117,6 @@ const useStyles = makeStyles((theme: Theme) => {
         backgroundColor: '#d34bef',
       },
     },
-    dishBox: {
-      textAlign: 'center',
-    },
     dish: {
       display: 'inline-block',
       position: 'relative',
@@ -118,7 +126,25 @@ const useStyles = makeStyles((theme: Theme) => {
     },
     dishItem: {
       position: 'absolute',
+      margin: 0,
       transformOrigin: '50% 50% 0',
+    },
+    dishUniqueLevel: {
+      zIndex: 2,
+      position: 'absolute',
+      right: 0,
+      bottom: 0,
+      display: 'inline-block',
+      paddingLeft: pLeft + 'rem',
+      width: lvWidth + 'rem',
+      textAlign: 'center',
+      overflow: 'hidden',
+      borderBottomRightRadius: iconRadius.div(lvScalage) + 'rem',
+      color: '#fff',
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      transformOrigin: 'right bottom',
+      transform: `scale(${lvScalage})`,
+      clipPath: `polygon(${pLeft}rem 0, 100% 0, 100% 100%, 0 100%)`,
     },
     top: {
       transform: `translate(0, -${len}rem)`,
@@ -237,9 +263,10 @@ function CharaEquip(props: CharaEquipProps) {
 
   return (
     <div className={styles.root}>
-      <div className={styles.dishBox}>
+      <div className={styles.inner}>
         <div className={styles.dish}>
           <SkeletonImage
+            key="chara"
             classes={{ root: clsx(styles.iconRoot, styles.dishItem, styles.top) }}
             src={userProfile.unit_id ? getPublicImageURL('icon_unit', getValidID(userProfile.unit_id, userProfile.rarity)) : undefined}
             save
@@ -247,7 +274,13 @@ function CharaEquip(props: CharaEquipProps) {
             <RankBorder variant="icon_unit" promotionLevel={promotion_level} />
             <Rarities classes={{ root: styles.iconStars, star: styles.iconStar }} maxRarity={maxRarity} rarity={userProfile.rarity} />
           </SkeletonImage>
-          <SkeletonImage key="unique" classes={{ root: clsx(styles.iconRoot, styles.dishItem, styles.bottom) }} src={getPublicImageURL('icon_equipment', uniqueImgName)} save />
+          <SkeletonImage
+            key="unique" classes={{ root: clsx(styles.iconRoot, styles.dishItem, styles.bottom) }}
+            src={getPublicImageURL('icon_equipment', uniqueImgName)}
+            save
+          >
+            {unique_enhance_level > 0 && <span className={styles.dishUniqueLevel}>Lv{unique_enhance_level}</span>}
+          </SkeletonImage>
           {equipSlots.map((slot, i) => {
             const { imgSrc, maxRarity, rarity } = getSlotData(promotion_level, slot, 'invalid_');
             return (
@@ -259,40 +292,43 @@ function CharaEquip(props: CharaEquipProps) {
             );
           })}
         </div>
-      </div>
-      <div key="unique" className={clsx(styles.item, styles.unique)}>
-        <div className="equip-label">専用装備</div>
-        <div className={styles.equipBox}>
-          <SkeletonImage classes={{ root: styles.iconRoot }} src={getPublicImageURL('icon_equipment', uniqueImgName)} save />
-          <div className={styles.uniqueInfo}>
-            <span className={clsx(styles.uniqueName, invalidUnique && styles.invalidUniqueName)}>{uniqueName}</span>
-            {!invalidUnique && <span className={styles.uniqueLevel}>Lv{unique_enhance_level}</span>}
+
+        <div className={styles.rankList}>
+          <div key="unique" className={clsx(styles.item, styles.unique)}>
+            <div className="equip-label">専用装備</div>
+            <div className={styles.equipBox}>
+              <SkeletonImage classes={{ root: styles.iconRoot }} src={getPublicImageURL('icon_equipment', uniqueImgName)} save />
+              <div className={styles.uniqueInfo}>
+                <span className={clsx(styles.uniqueName, invalidUnique && styles.invalidUniqueName)}>{uniqueName}</span>
+                {!invalidUnique && <span className={styles.uniqueLevel}>Lv{unique_enhance_level}</span>}
+              </div>
+            </div>
           </div>
+          {promotions.map(promotion => (
+            <div
+              key={promotion.promotion_level}
+              className={clsx(
+                styles.item,
+                styles['rank' + getRankPoint(promotion.promotion_level) as keyof typeof styles],
+              )}
+            >
+              <div className="equip-label">
+                {'RANK' + promotion.promotion_level}
+              </div>
+              <div className={styles.equipBox}>
+                {promotion.equip_slots.map((slot, i) => (
+                  <SkeletonImage
+                    key={i}
+                    classes={{ root: styles.iconRoot }}
+                    src={getSlotData(promotion.promotion_level, slot).imgSrc}
+                    save
+                  />
+                ))}
+              </div>
+            </div>
+          ))}
         </div>
       </div>
-      {promotions.map(promotion => (
-        <div
-          key={promotion.promotion_level}
-          className={clsx(
-            styles.item,
-            styles['rank' + getRankPoint(promotion.promotion_level) as keyof typeof styles],
-          )}
-        >
-          <div className="equip-label">
-            {'RANK' + promotion.promotion_level}
-          </div>
-          <div className={styles.equipBox}>
-            {promotion.equip_slots.map((slot, i) => (
-              <SkeletonImage
-                key={i}
-                classes={{ root: styles.iconRoot }}
-                src={getSlotData(promotion.promotion_level, slot).imgSrc}
-                save
-              />
-            ))}
-          </div>
-        </div>
-      ))}
     </div>
   );
 }

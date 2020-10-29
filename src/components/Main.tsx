@@ -30,13 +30,13 @@ const useStyles = makeStyles((theme: Theme) => ({
     zIndex: theme.zIndex.appBar,
     position: 'absolute',
     width: '100%',
-    height: '3.5rem',
   },
   topBar: {
     top: 0,
     right: 0,
     bottom: 'auto',
     left: 0,
+    height: '3rem',
     display: 'flex',
     alignItems: 'center',
     borderBottom: '1px solid ' + theme.palette.grey[100],
@@ -47,6 +47,7 @@ const useStyles = makeStyles((theme: Theme) => ({
     right: 0,
     bottom: 0,
     left: 0,
+    height: '3.5rem',
     borderTop: '1px solid ' + theme.palette.grey[100],
   },
   subtitle: {

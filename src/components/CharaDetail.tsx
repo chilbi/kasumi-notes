@@ -14,6 +14,7 @@ import { CharaDetailData } from '../DBHelper';
 import { getCharaID } from '../DBHelper/helper';
 import { EquipEnhanceStatus } from '../DBHelper/promotion';
 import { PromotionStatusData } from '../DBHelper/promotion_status';
+import { SkillEnhanceStatus } from '../DBHelper/skill';
 import { PCRStoreValue } from '../db';
 import clsx from 'clsx';
 
@@ -100,6 +101,13 @@ function CharaDetail(props: CharaDetailProps) {
     }
   }, [detail]);
 
+  const handleChangeSkillLevel = useCallback((e: React.SyntheticEvent, level: number, skillKey: keyof SkillEnhanceStatus) => {
+    if (detail) {
+      detail.userProfile.skill_enhance_status[skillKey] = level;
+      setDetail({ ...detail });
+    }
+  }, [detail]);
+
   const handleChangePromotion = useCallback((e: React.MouseEvent, promotion_level: number) => {
     if (!detail) return;
     const _change = (promotionStatusData: PromotionStatusData) => {
@@ -181,6 +189,7 @@ function CharaDetail(props: CharaDetailProps) {
         property={property}
         unitSkillData={detail && detail.unitSkillData}
         userProfile={detail && detail.userProfile}
+        onChangeSkillLevel={handleChangeSkillLevel}
       />
     ),
     equip: (

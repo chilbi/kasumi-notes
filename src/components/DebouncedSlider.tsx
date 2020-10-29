@@ -8,7 +8,7 @@ interface DebouncedSliderProps extends SliderProps {
 }
 
 function DebouncedSlider(props: DebouncedSliderProps) {
-  const { wait = 500, defaultValue, onDebouncedChange, ...other } = props;
+  const { wait = 200, defaultValue, onDebouncedChange, orientation = 'vertical', valueLabelDisplay = 'on', step = 1, ...other } = props;
   const [value, setValue] = useState(defaultValue);
 
   const handleDebouncedChange = useDebounced((e: React.SyntheticEvent, value: number) => {
@@ -21,7 +21,7 @@ function DebouncedSlider(props: DebouncedSliderProps) {
   }, [handleDebouncedChange]);
 
   return (
-    <Slider {...other} value={value} onChange={handleChange} />
+    <Slider {...other} orientation={orientation} valueLabelDisplay={valueLabelDisplay} step={step} value={value} onChange={handleChange} />
   );
 }
 

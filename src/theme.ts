@@ -40,7 +40,7 @@ const theme = createMuiTheme({
           },
           '#root': {
             position: 'relative',
-            padding: '3.5rem 0',
+            padding: '3rem 0 3.5rem 0',
             maxWidth: '40rem',
             height: '100vh',
             margin: '0 auto',

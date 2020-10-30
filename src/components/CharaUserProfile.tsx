@@ -1,11 +1,11 @@
 import React, { useState, useCallback, useRef } from 'react';
-import { makeStyles, Theme } from '@material-ui/core/styles';
+import { makeStyles, Theme, StyleRules } from '@material-ui/core/styles';
 import ButtonBase from '@material-ui/core/ButtonBase';
 import Popover from '@material-ui/core/Popover';
 import ButtonPopover from './ButtonPopover';
 import DebouncedSlider, { marks } from './DebouncedSlider';
-import Infobar from './Infobar';
 import Rarities from './Rarities';
+import Infobar from './Infobar';
 import { getCharaID, getRankPoint } from '../DBHelper/helper';
 import maxUserProfile from '../DBHelper/maxUserProfile';
 import { PCRStoreValue } from '../db';
@@ -21,6 +21,14 @@ const useStyles = makeStyles((theme: Theme) => {
     LoveLevelWidth = Big(28).times(scalage).div(rem),
     LoveLevelHeight = Big(24).times(scalage).div(rem),
     uniqueSize = Big(24).times(scalage).div(rem);
+
+  const bgStyles = {} as StyleRules<string>;
+  const rankColorKeys = Object.keys(theme.rankColor) as any as (keyof typeof theme.rankColor)[];
+  for (let key of rankColorKeys) {
+    bgStyles['bg' + key] = {
+      backgroundColor: theme.rankColor[key],
+    };
+  }
 
   return {
     root: {
@@ -77,7 +85,7 @@ const useStyles = makeStyles((theme: Theme) => {
     },
     sliderPaper: {
       padding: '0.5em 0',
-      height: 300,
+      height: 250,
       overflow: 'unset',
     },
     promotionPaper: {
@@ -89,33 +97,16 @@ const useStyles = makeStyles((theme: Theme) => {
     p0: {
       padding: 0,
     },
-    bg1: {
-      backgroundColor: theme.rankColor[1],
-    },
-    bg2: {
-      backgroundColor: theme.rankColor[2],
-    },
-    bg4: {
-      backgroundColor: theme.rankColor[4],
-    },
-    bg7: {
-      backgroundColor: theme.rankColor[7],
-    },
-    bg11: {
-      backgroundColor: theme.rankColor[11],
-    },
-    bg18: {
-      backgroundColor: theme.rankColor[18],
-    },
+    ...bgStyles,
   };
 });
 
 interface CharaUserProfileProps {
   maxRarity?: number;
   userProfile?: PCRStoreValue<'user_profile'>;
+  onChangeRarity?: (rarity: number) => void;
   onChangeLevel?: (level: number) => void;
   onChangeLove?: (loveLevel: number, charaID: number) => void;
-  onChangeRarity?: (rarity: number) => void;
   onChangeUnique?: (uniqueEnhanceLevel: number) => void;
   onChangePromotion?: (promotionLevel: number) => void;
 }
@@ -124,9 +115,9 @@ function CharaUserProfile(props: CharaUserProfileProps) {
   const {
     maxRarity = maxUserProfile.rarity,
     userProfile = maxUserProfile,
+    onChangeRarity,
     onChangeLevel,
     onChangeLove,
-    onChangeRarity,
     onChangeUnique,
     onChangePromotion
   } = props;
@@ -151,6 +142,12 @@ function CharaUserProfile(props: CharaUserProfileProps) {
 
   return (
     <div className={styles.root}>
+      <Rarities
+        maxRarity={maxRarity}
+        rarity={userProfile.rarity}
+        onChange={onChangeRarity}
+      />
+
       <ButtonPopover
         classes={{ button: styles.level, popover: styles.sliderPaper }}
         content={
@@ -179,12 +176,6 @@ function CharaUserProfile(props: CharaUserProfileProps) {
           />
         )}
         children={love_level}
-      />
-
-      <Rarities
-        maxRarity={maxRarity}
-        rarity={userProfile.rarity}
-        onChange={onChangeRarity}
       />
 
       {userProfile.unique_equip_id !== maxUserProfile.unique_equip_id && (

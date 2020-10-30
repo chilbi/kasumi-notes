@@ -149,7 +149,7 @@ const useStyles = makeStyles((theme: Theme) => {
     },
     sliderPaper: {
       padding: '0.5em 0',
-      height: 300,
+      height: 250,
       overflow: 'unset',
     },
   };

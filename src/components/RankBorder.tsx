@@ -1,5 +1,5 @@
 import React from 'react';
-import { makeStyles, Theme } from '@material-ui/core/styles';
+import { makeStyles, Theme, StyleRules } from '@material-ui/core/styles';
 import { getRankPoint } from '../DBHelper/helper';
 import Big from 'big.js';
 import clsx from 'clsx';
@@ -24,6 +24,26 @@ const useStyles = makeStyles((theme: Theme) => {
     iconBorderSlice = 12,
     plateBorderWidth = [8, 7, 11, 7].map(v => Big(v).div(rem)),
     plateBorderSlice = [16, 16, 21, 16];
+
+  const borderStyles = {} as StyleRules<string>;
+  const borders = {
+    1: [borderIcon1, borderPlate1],
+    2: [borderIcon2, borderPlate2],
+    4: [borderIcon4, borderPlate4],
+    7: [borderIcon7, borderPlate7],
+    11: [borderIcon11, borderPlate11],
+    18: [borderIcon18, borderPlate18],
+  };
+  const rankColorKeys = Object.keys(borders) as any as (keyof typeof borders)[];
+  const borderTypes = [['icon', 0], ['plate', 1]] as const;
+  for (let key of rankColorKeys) {
+    for (let type of borderTypes) {
+      borderStyles[`${type[0]}Border${key}`] = {
+        borderColor: theme.rankColor[key],
+        borderImageSource: `url(${borders[key][type[1]]})`,
+      };
+    }
+  }
 
   return {
     iconBorder: {
@@ -54,54 +74,7 @@ const useStyles = makeStyles((theme: Theme) => {
       borderImageOutset: 0,
       borderImageRepeat: 'round stretch',
     },
-    iconBorder1: {
-      borderColor: theme.rankColor[1],
-      borderImageSource: `url(${borderIcon1})`,
-    },
-    iconBorder2: {
-      borderColor: theme.rankColor[2],
-      borderImageSource: `url(${borderIcon2})`,
-    },
-    iconBorder4: {
-      borderColor: theme.rankColor[4],
-      borderImageSource: `url(${borderIcon4})`,
-    },
-    iconBorder7: {
-      borderColor: theme.rankColor[7],
-      borderImageSource: `url(${borderIcon7})`,
-    },
-    iconBorder11: {
-      borderColor: theme.rankColor[11],
-      borderImageSource: `url(${borderIcon11})`,
-    },
-    iconBorder18: {
-      borderColor: theme.rankColor[18],
-      borderImageSource: `url(${borderIcon18})`,
-    },
-    plateBorder1: {
-      borderColor: theme.rankColor[1],
-      borderImageSource: `url(${borderPlate1})`,
-    },
-    plateBorder2: {
-      borderColor: theme.rankColor[2],
-      borderImageSource: `url(${borderPlate2})`,
-    },
-    plateBorder4: {
-      borderColor: theme.rankColor[4],
-      borderImageSource: `url(${borderPlate4})`,
-    },
-    plateBorder7: {
-      borderColor: theme.rankColor[7],
-      borderImageSource: `url(${borderPlate7})`,
-    },
-    plateBorder11: {
-      borderColor: theme.rankColor[11],
-      borderImageSource: `url(${borderPlate11})`,
-    },
-    plateBorder18: {
-      borderColor: theme.rankColor[18],
-      borderImageSource: `url(${borderPlate18})`,
-    },
+    ...borderStyles,
   };
 });
 

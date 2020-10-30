@@ -66,6 +66,14 @@ function CharaDetail(props: CharaDetailProps) {
     setTabsValue(newValue);
   }, []);
 
+  const handleChangeRarity = useCallback((rarity: number) => {
+    if (dbHelper && detail) dbHelper.getRarityData(detail.charaData.unit_id, rarity).then(rarityData => {
+      detail.userProfile.rarity = rarity;
+      detail.propertyData[0] = rarityData;
+      setDetail({ ...detail });
+    });
+  }, [dbHelper, detail]);
+
   const handleChangeLevel = useCallback((level: number) => {
     if (detail) {
       const skill_enhance_status = detail.userProfile.skill_enhance_status;
@@ -86,14 +94,6 @@ function CharaDetail(props: CharaDetailProps) {
       setDetail({ ...detail });
     }
   }, [detail]);
-
-  const handleChangeRarity = useCallback((rarity: number) => {
-    if (dbHelper && detail) dbHelper.getRarityData(detail.charaData.unit_id, rarity).then(rarityData => {
-      detail.userProfile.rarity = rarity;
-      detail.propertyData[0] = rarityData;
-      setDetail({ ...detail });
-    });
-  }, [dbHelper, detail]);
 
   const handleChangeUnique = useCallback((unique_enhancle_level: number) => {
     if (detail) {
@@ -176,9 +176,9 @@ function CharaDetail(props: CharaDetailProps) {
       <CharaUserProfile
         maxRarity={detail && detail.charaData.max_rarity}
         userProfile={detail && detail.userProfile}
+        onChangeRarity={handleChangeRarity}
         onChangeLevel={handleChangeLevel}
         onChangeLove={handleChangeLove}
-        onChangeRarity={handleChangeRarity}
         onChangeUnique={handleChangeUnique}
         onChangePromotion={handleChangePromotion}
       />
@@ -199,6 +199,8 @@ function CharaDetail(props: CharaDetailProps) {
         promotions={detail && detail.promotions}
         uniqueEquip={detail && detail.propertyData[4]}
         userProfile={detail && detail.userProfile}
+        onChangeUnique={handleChangeUnique}
+        onChangePromotion={handleChangePromotion}
       />
     ),
     story: (

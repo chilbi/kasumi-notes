@@ -1,5 +1,7 @@
 import React from 'react';
-import { makeStyles, Theme } from '@material-ui/core/styles';
+import { makeStyles, Theme, StyleRules } from '@material-ui/core/styles';
+import Checkbox from '@material-ui/core/Checkbox';
+import Radio from '@material-ui/core/Radio';
 import SkeletonImage from './SkeletonImage';
 import RankBorder from './RankBorder';
 import Rarities from './Rarities';
@@ -24,14 +26,20 @@ const useStyles = makeStyles((theme: Theme) => {
     gup = iconSize.minus(starSize.times(5)).div(2),
     iconStarSize = starSize.times(iconSize.div(starSize.times(6)).round(1, 0)),
     iconGup = iconSize.minus(iconStarSize.times(6)).div(2).round(2, 0),
-    labelLineHeight = 1.5,
-    itemMarginTop = Big(labelLineHeight).plus(0.5),
     pLeft = 0.75,
     lvWidth = pLeft + 4,
     lvScalage = iconSize.div(1.25).div(lvWidth).round(2, 0),
     len = iconSize.times(1.75),
     x = len.times(Math.cos(Math.PI / 4)).round(3, 0),
     y = len.times(Math.sin(Math.PI / 4)).round(3, 0);
+
+  const rankStyles = {} as StyleRules<string>;
+  const rankColorKeys = Object.keys(theme.rankColor) as any as (keyof typeof theme.rankColor)[];
+  for (let key of rankColorKeys) {
+    rankStyles['rankColor' + key] = {
+      color: theme.rankColor[key],
+    };
+  }
 
   return {
     root: {
@@ -41,34 +49,38 @@ const useStyles = makeStyles((theme: Theme) => {
     inner: {
       display: 'inline-block',
     },
-    rankList: {
+    equipList: {
       paddingTop: '0.25em',
       textAlign: 'left',
     },
-    item: {
-      position: 'relative',
-      margin: itemMarginTop + 'em 0.25em 0.5em 0.25em',
-      borderWidth: 2,
-      borderStyle: 'solid',
-      borderRadius: '0 0.5em 0.5em 0.5em',
-      '&>.equip-label': {
-        position: 'absolute',
-        bottom: '100%',
-        left: -2,
-        display: 'inline-block',
-        padding: '0 0.5em',
-        lineHeight: labelLineHeight,
-        borderRadius: '0.5em 0.5em 0 0',
-        color: '#fff',
-      },
+    equipItem: {
+      margin: '0.5em 0',
+    },
+    labelBox: {
+      display: 'flex',
+    },
+    label: {
+      display: 'inline-block',
+      width: '6em',
+      lineHeight: '24px',
+      textAlign: 'center',
+      verticalAlign: 'middle',
+      borderRadius: '0.5em 0.5em 0 0',
+      backgroundColor: 'currentcolor',
+    },
+    checkbox: {
+      margin: '0 0.25em 0 auto',
+      padding: 0,
     },
     equipBox: {
       display: 'flex',
       justifyContent: 'flex-start',
-      padding: '0.25em',
+      padding: '0.125rem',
+      border: '1px solid currentcolor',
+      borderRadius: '0 0.5em 0.5em 0.5em',
     },
     iconRoot: {
-      margin: '0.25em',
+      margin: '0.125rem',
       width: iconSize + 'rem',
       height: iconSize + 'rem',
       borderRadius: iconRadius + 'rem',
@@ -103,19 +115,10 @@ const useStyles = makeStyles((theme: Theme) => {
     },
     uniqueName: {
       fontSize: '1.2em',
-      color: '#d34bef',
-    },
-    invalidUniqueName: {
-      color: theme.palette.grey[600],
+      color: theme.palette.primary.dark,
     },
     uniqueLevel: {
-      color: theme.palette.secondary.light,
-    },
-    unique: {
-      borderColor: '#d34bef',
-      '&>.equip-label': {
-        backgroundColor: '#d34bef',
-      },
+      color: theme.palette.secondary.main,
     },
     dish: {
       display: 'inline-block',
@@ -170,42 +173,16 @@ const useStyles = makeStyles((theme: Theme) => {
     bottomRight: {
       transform: `translate(${x}rem, ${y}rem)`,
     },
-    rank1: {
-      borderColor: theme.rankColor[1],
-      '&>.equip-label': {
-        backgroundColor: theme.rankColor[1],
-      },
+    invalidColor: {
+      color: theme.palette.grey[600],
     },
-    rank2: {
-      borderColor: theme.rankColor[2],
-      '&>.equip-label': {
-        backgroundColor: theme.rankColor[2],
-      },
+    labelColor: {
+      color: '#fff',
     },
-    rank4: {
-      borderColor: theme.rankColor[4],
-      '&>.equip-label': {
-        backgroundColor: theme.rankColor[4],
-      },
+    uniqueColor: {
+      color: '#d34bef',
     },
-    rank7: {
-      borderColor: theme.rankColor[7],
-      '&>.equip-label': {
-        backgroundColor: theme.rankColor[7],
-      },
-    },
-    rank11: {
-      borderColor: theme.rankColor[11],
-      '&>.equip-label': {
-        backgroundColor: theme.rankColor[11],
-      },
-    },
-    rank18: {
-      borderColor: theme.rankColor[18],
-      '&>.equip-label': {
-        backgroundColor: theme.rankColor[18],
-      },
-    },
+    ...rankStyles,
   };
 });
 
@@ -214,10 +191,12 @@ interface CharaEquipProps {
   promotions?: PromotionData[];
   uniqueEquip?: UniqueEquipData;
   userProfile?: PCRStoreValue<'user_profile'>;
+  onChangeUnique?: (uniqueEnhanceLevel: number) => void;
+  onChangePromotion?: (promotionLevel: number) => void;
 }
 
 function CharaEquip(props: CharaEquipProps) {
-  const { maxRarity = 5, promotions = [], uniqueEquip, userProfile = maxUserProfile } = props;
+  const { maxRarity = 5, promotions = [], uniqueEquip, userProfile = maxUserProfile, onChangeUnique, onChangePromotion } = props;
   const { promotion_level, equip_enhance_status, unique_enhance_level } = userProfile;
   const styles = useStyles();
 
@@ -251,9 +230,10 @@ function CharaEquip(props: CharaEquipProps) {
   let uniqueImgName: string | number = 'lock_unique';
   let uniqueName = '未実装';
   let invalidUnique = true;
-  if (uniqueEquip) {
-    uniqueImgName = uniqueEquip.unique_equipment_data.equipment_id;
-    uniqueName = uniqueEquip.unique_equipment_data.equipment_name;
+  const hasUnique = !!uniqueEquip;
+  if (hasUnique) {
+    uniqueImgName = uniqueEquip!.unique_equipment_data.equipment_id;
+    uniqueName = uniqueEquip!.unique_equipment_data.equipment_name;
     invalidUnique = false;
     if (unique_enhance_level < 1) {
       uniqueImgName = 'invalid_' + uniqueImgName;
@@ -293,40 +273,59 @@ function CharaEquip(props: CharaEquipProps) {
           })}
         </div>
 
-        <div className={styles.rankList}>
-          <div key="unique" className={clsx(styles.item, styles.unique)}>
-            <div className="equip-label">専用装備</div>
+        <div className={styles.equipList}>
+          <div key="unique" className={clsx(styles.equipItem, styles.uniqueColor)}>
+            <div className={styles.labelBox}>
+              <div className={styles.label}>
+                <span className={styles.labelColor}>専用装備</span>
+              </div>
+              <Checkbox
+                classes={{ root: styles.checkbox }}
+                indeterminate={!hasUnique}
+                disabled={!hasUnique}
+                checked={!invalidUnique}
+                onChange={onChangeUnique && (() => onChangeUnique(invalidUnique ? maxUserProfile.unique_enhance_level : 0))}
+              />
+            </div>
             <div className={styles.equipBox}>
               <SkeletonImage classes={{ root: styles.iconRoot }} src={getPublicImageURL('icon_equipment', uniqueImgName)} save />
               <div className={styles.uniqueInfo}>
-                <span className={clsx(styles.uniqueName, invalidUnique && styles.invalidUniqueName)}>{uniqueName}</span>
+                <span className={clsx(styles.uniqueName, invalidUnique && styles.invalidColor)}>{uniqueName}</span>
                 {!invalidUnique && <span className={styles.uniqueLevel}>Lv{unique_enhance_level}</span>}
               </div>
             </div>
           </div>
-          {promotions.map(promotion => (
-            <div
-              key={promotion.promotion_level}
-              className={clsx(
-                styles.item,
-                styles['rank' + getRankPoint(promotion.promotion_level) as keyof typeof styles],
-              )}
-            >
-              <div className="equip-label">
-                {'RANK' + promotion.promotion_level}
-              </div>
-              <div className={styles.equipBox}>
-                {promotion.equip_slots.map((slot, i) => (
-                  <SkeletonImage
-                    key={i}
-                    classes={{ root: styles.iconRoot }}
-                    src={getSlotData(promotion.promotion_level, slot).imgSrc}
-                    save
+          {promotions.map(promotion => {
+            const promotionLevel = promotion.promotion_level;
+            const isEqual = promotionLevel === promotion_level;
+            return (
+              <div
+                key={promotionLevel}
+                className={clsx(styles.equipItem, styles['rankColor' + getRankPoint(promotionLevel) as keyof typeof styles])}
+              >
+                <div className={styles.labelBox}>
+                  <div className={styles.label}>
+                    <span className={styles.labelColor}>{'RANK' + promotionLevel}</span>
+                  </div>
+                  <Radio
+                    classes={{ root: styles.checkbox }}
+                    checked={isEqual}
+                    onChange={onChangePromotion && (() => !isEqual && onChangePromotion(promotionLevel))}
                   />
-                ))}
+                </div>
+                <div className={styles.equipBox}>
+                  {promotion.equip_slots.map((slot, i) => (
+                    <SkeletonImage
+                      key={i}
+                      classes={{ root: styles.iconRoot }}
+                      src={getSlotData(promotionLevel, slot).imgSrc}
+                      save
+                    />
+                  ))}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </div>

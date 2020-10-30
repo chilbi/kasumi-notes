@@ -88,14 +88,8 @@ const useStyles = makeStyles((theme: Theme) => {
       color: theme.palette.primary.dark,
     },
     actualName: {
-      color: theme.palette.secondary.light,
+      color: theme.palette.secondary.main,
     },
-    // skeleton: {
-    //   backgroundColor: theme.palette.grey[200], // '#ecebf0',
-    //   '&::before': {
-    //     content: '"\\00a0"',
-    //   }
-    // },
   };
 });
 

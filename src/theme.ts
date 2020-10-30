@@ -22,7 +22,7 @@ const theme = createMuiTheme({
   spacing: 4,
   palette: {
     primary: { main: '#5f96f5' },
-    secondary: { main: '#f85090' },
+    secondary: { main: '#f84e90' },
   },
   typography: {
     fontFamily: '"Marugo", "Arial","Microsoft YaHei","黑体","宋体",sans-serif',
@@ -41,10 +41,9 @@ const theme = createMuiTheme({
           '#root': {
             position: 'relative',
             padding: '3rem 0 3.5rem 0',
-            maxWidth: '40rem',
+            maxWidth: '37.5rem',
             height: '100vh',
             margin: '0 auto',
-            // backgroundColor: '#fff',
           },
         },
       },

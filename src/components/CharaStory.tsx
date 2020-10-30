@@ -139,7 +139,7 @@ function CharaStory(props: CharaStoryProps) {
               <Checkbox
                 classes={{ root: styles.checkbox }}
                 checked={checked}
-                onChange={onChangeLoveLevel && (() => onChangeLoveLevel(newLoveLevel, charaID))}
+                onChange={onChangeLoveLevel && (() => newLoveLevel !== loveLevel && onChangeLoveLevel(newLoveLevel, charaID))}
               />
             </div>
             <div className={styles.contentBox}>

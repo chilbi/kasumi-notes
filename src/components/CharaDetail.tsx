@@ -11,7 +11,6 @@ import CharaStatus from './CharaStatus';
 import CharaProfile from './CharaProfile';
 import { DBHelperContext } from './PCRDBProvider';
 import { CharaDetailData } from '../DBHelper';
-import { getCharaID } from '../DBHelper/helper';
 import { EquipEnhanceStatus } from '../DBHelper/promotion';
 import { PromotionStatusData } from '../DBHelper/promotion_status';
 import { SkillEnhanceStatus } from '../DBHelper/skill';
@@ -67,7 +66,7 @@ function CharaDetail(props: CharaDetailProps) {
     setTabsValue(newValue);
   }, []);
 
-  const handleChangeLevel = useCallback((e: React.SyntheticEvent, level: number) => {
+  const handleChangeLevel = useCallback((level: number) => {
     if (detail) {
       const skill_enhance_status = detail.userProfile.skill_enhance_status;
       skill_enhance_status['ub'] = level;
@@ -79,14 +78,16 @@ function CharaDetail(props: CharaDetailProps) {
     }
   }, [detail]);
 
-  const handleChangeLove = useCallback((e: React.SyntheticEvent, love: number) => {
+  const handleChangeLove = useCallback((loveLevel: number, charaID: number) => {
     if (detail) {
-      detail.userProfile.love_level_status[getCharaID(detail.charaData.unit_id)] = love;
+      const love_level_status = { ...detail.userProfile.love_level_status };
+      love_level_status[charaID] = loveLevel;
+      detail.userProfile.love_level_status = love_level_status;
       setDetail({ ...detail });
     }
   }, [detail]);
 
-  const handleChangeRarity = useCallback((e: React.MouseEvent, rarity: number) => {
+  const handleChangeRarity = useCallback((rarity: number) => {
     if (dbHelper && detail) dbHelper.getRarityData(detail.charaData.unit_id, rarity).then(rarityData => {
       detail.userProfile.rarity = rarity;
       detail.propertyData[0] = rarityData;
@@ -94,21 +95,21 @@ function CharaDetail(props: CharaDetailProps) {
     });
   }, [dbHelper, detail]);
 
-  const handleChangeUnique = useCallback((e: React.SyntheticEvent, unique_enhancle_level: number) => {
+  const handleChangeUnique = useCallback((unique_enhancle_level: number) => {
     if (detail) {
       detail.userProfile.unique_enhance_level = unique_enhancle_level;
       setDetail({ ...detail });
     }
   }, [detail]);
 
-  const handleChangeSkillLevel = useCallback((e: React.SyntheticEvent, level: number, skillKey: keyof SkillEnhanceStatus) => {
+  const handleChangeSkill = useCallback((level: number, skillKey: keyof SkillEnhanceStatus) => {
     if (detail) {
       detail.userProfile.skill_enhance_status[skillKey] = level;
       setDetail({ ...detail });
     }
   }, [detail]);
 
-  const handleChangePromotion = useCallback((e: React.MouseEvent, promotion_level: number) => {
+  const handleChangePromotion = useCallback((promotion_level: number) => {
     if (!detail) return;
     const _change = (promotionStatusData: PromotionStatusData) => {
       const promotionData = detail.promotions.find(item => item.promotion_level === promotion_level)!;
@@ -189,7 +190,7 @@ function CharaDetail(props: CharaDetailProps) {
         property={property}
         unitSkillData={detail && detail.unitSkillData}
         userProfile={detail && detail.userProfile}
-        onChangeSkillLevel={handleChangeSkillLevel}
+        onChangeSkill={handleChangeSkill}
       />
     ),
     equip: (
@@ -204,6 +205,7 @@ function CharaDetail(props: CharaDetailProps) {
       <CharaStory
         storyStatus={detail && detail.propertyData[3]}
         userProfile={detail && detail.userProfile}
+        onChangeLove={handleChangeLove}
       />
     ),
     status: (

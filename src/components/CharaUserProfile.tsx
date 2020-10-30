@@ -3,7 +3,7 @@ import { makeStyles, Theme } from '@material-ui/core/styles';
 import ButtonBase from '@material-ui/core/ButtonBase';
 import Popover from '@material-ui/core/Popover';
 import ButtonPopover from './ButtonPopover';
-import DebouncedSlider from './DebouncedSlider';
+import DebouncedSlider, { marks } from './DebouncedSlider';
 import Infobar from './Infobar';
 import Rarities from './Rarities';
 import { getCharaID, getRankPoint } from '../DBHelper/helper';
@@ -77,7 +77,7 @@ const useStyles = makeStyles((theme: Theme) => {
     },
     sliderPaper: {
       padding: '0.5em 0',
-      height: 200,
+      height: 300,
       overflow: 'unset',
     },
     promotionPaper: {
@@ -113,11 +113,11 @@ const useStyles = makeStyles((theme: Theme) => {
 interface CharaUserProfileProps {
   maxRarity?: number;
   userProfile?: PCRStoreValue<'user_profile'>;
-  onChangeLevel?: (e: React.SyntheticEvent, level: number) => void;
-  onChangeLove?: (e: React.SyntheticEvent, level: number) => void;
-  onChangeRarity?: (e: React.MouseEvent, rarity: number) => void;
-  onChangeUnique?: (e: React.SyntheticEvent, uniqueEnhanceLevel: number) => void;
-  onChangePromotion?: (e: React.MouseEvent, promotionLevel: number) => void;
+  onChangeLevel?: (level: number) => void;
+  onChangeLove?: (loveLevel: number, charaID: number) => void;
+  onChangeRarity?: (rarity: number) => void;
+  onChangeUnique?: (uniqueEnhanceLevel: number) => void;
+  onChangePromotion?: (promotionLevel: number) => void;
 }
 
 function CharaUserProfile(props: CharaUserProfileProps) {
@@ -142,12 +142,20 @@ function CharaUserProfile(props: CharaUserProfileProps) {
     setPromotionLevelEl(null);
   }, []);
 
+  let chara_id = 0;
+  let love_level = 1;
+  if (userProfile.unit_id) {
+    chara_id = getCharaID(userProfile.unit_id);
+    love_level = userProfile.love_level_status[chara_id];
+  }
+
   return (
     <div className={styles.root}>
       <ButtonPopover
         classes={{ button: styles.level, popover: styles.sliderPaper }}
         content={
           <DebouncedSlider
+            marks={marks.level}
             min={1}
             max={maxUserProfile.level}
             defaultValue={userProfile.level}
@@ -163,13 +171,14 @@ function CharaUserProfile(props: CharaUserProfileProps) {
         classes={{ button: styles.love, popover: styles.sliderPaper }}
         content={userProfile.unit_id && (
           <DebouncedSlider
-            min={0}
+            marks={marks.love}
+            min={1}
             max={maxRarity === 6 ? 12 : 8}
-            defaultValue={userProfile.love_level_status[getCharaID(userProfile.unit_id)]}
-            onDebouncedChange={onChangeLove}
+            defaultValue={userProfile.love_level_status[chara_id]}
+            onDebouncedChange={onChangeLove && (value => onChangeLove(value, chara_id))}
           />
         )}
-        children={userProfile.unit_id ? userProfile.love_level_status[getCharaID(userProfile.unit_id)] : 0}
+        children={love_level}
       />
 
       <Rarities
@@ -186,6 +195,7 @@ function CharaUserProfile(props: CharaUserProfileProps) {
           }}
           content={
             <DebouncedSlider
+              marks={marks.unique}
               min={0}
               max={maxUserProfile.unique_enhance_level}
               defaultValue={userProfile.unique_enhance_level}
@@ -226,8 +236,8 @@ function CharaUserProfile(props: CharaUserProfileProps) {
                   styles.promotion,
                   styles['bg' + getRankPoint(promotionLevel) as keyof typeof styles]
                 )}
-                onClick={onChangePromotion && ((e: React.MouseEvent) => {
-                  if (userProfile.promotion_level !== promotionLevel) onChangePromotion(e, promotionLevel);
+                onClick={onChangePromotion && (() => {
+                  if (userProfile.promotion_level !== promotionLevel) onChangePromotion(promotionLevel);
                   setPromotionLevelEl(null);
                 })}
               >

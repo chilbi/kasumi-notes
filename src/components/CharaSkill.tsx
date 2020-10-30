@@ -2,17 +2,17 @@ import React from 'react';
 import { makeStyles, Theme } from '@material-ui/core/styles';
 import Divider from '@material-ui/core/Divider';
 import SkeletonImage from './SkeletonImage';
+import ButtonPopover from './ButtonPopover';
+import DebouncedSlider, { marks } from './DebouncedSlider';
 import { AttackPattern, SkillData, UnitSkillData, SkillEnhanceStatus } from '../DBHelper/skill';
 import { DescData } from '../DBHelper/skill_action';
 import { getPublicImageURL } from '../DBHelper/helper';
+import maxUserProfile from '../DBHelper/maxUserProfile';
 import { Property } from '../DBHelper/property';
 import { state } from '../DBHelper/state';
 import { PCRStoreValue } from '../db';
 import Big from 'big.js';
 import clsx from 'clsx';
-import ButtonPopover from './ButtonPopover';
-import maxUserProfile from '../DBHelper/maxUserProfile';
-import DebouncedSlider from './DebouncedSlider';
 
 const useStyles = makeStyles((theme: Theme) => {
   const
@@ -43,10 +43,10 @@ const useStyles = makeStyles((theme: Theme) => {
     },
     level: {
       display: 'inline-block',
-      marginLeft: 'auto',
+      margin: '0 0.25em 0 auto',
       width: '3.5rem',
       paddingLeft: '0.25em',
-      color: theme.palette.secondary.light,
+      color: theme.palette.secondary.main,
     },
     patternBox: {
       display: 'flex',
@@ -149,7 +149,7 @@ const useStyles = makeStyles((theme: Theme) => {
     },
     sliderPaper: {
       padding: '0.5em 0',
-      height: 200,
+      height: 300,
       overflow: 'unset',
     },
   };
@@ -172,11 +172,11 @@ interface CharaSkillProps {
   property?: Property;
   unitSkillData?: UnitSkillData;
   userProfile?: PCRStoreValue<'user_profile'>;
-  onChangeSkillLevel?: (e: React.SyntheticEvent, level: number, skillKey: keyof SkillEnhanceStatus) => void;
+  onChangeSkill?: (level: number, skillKey: keyof SkillEnhanceStatus) => void;
 }
 
 function CharaSkill(props: CharaSkillProps) {
-  const { atkType, atkCastTime, property, unitSkillData, userProfile = {} as Partial<PCRStoreValue<'user_profile'>>, onChangeSkillLevel } = props;
+  const { atkType, atkCastTime, property, unitSkillData, userProfile = {} as Partial<PCRStoreValue<'user_profile'>>, onChangeSkill } = props;
   const { skill_enhance_status = { ub: 1, 1: 1, 2: 1, ex: 1 }, unique_enhance_level = 0 } = userProfile;
   const styles = useStyles();
 
@@ -303,10 +303,11 @@ function CharaSkill(props: CharaSkillProps) {
             position="left"
             content={
               <DebouncedSlider
+                marks={marks.level}
                 min={1}
                 max={maxUserProfile.level}
                 defaultValue={skillLevel}
-                onDebouncedChange={onChangeSkillLevel && ((e, value) => onChangeSkillLevel(e, value, skillKey))}
+                onDebouncedChange={onChangeSkill && (value => onChangeSkill(value, skillKey))}
               />
             }
             children={'Lv' + skillLevel}

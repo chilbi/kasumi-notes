@@ -42,7 +42,7 @@ interface RaritiesProps {
   classes?: Partial<Record<'root' | 'star', string>>;
   maxRarity: number;
   rarity: number;
-  onChange?: (e: React.MouseEvent, rarity: number) => void;
+  onChange?: (rarity: number) => void;
 }
 
 function Rarities(props: RaritiesProps) {
@@ -59,13 +59,17 @@ function Rarities(props: RaritiesProps) {
 
   return (
     <div ref={rootRef} className={clsx(styles.root, classes.root)}>
-      {starClassNames.map((name, i) => (
-        <div
-          key={i}
-          className={clsx(styles.star, onChange && rarity !== i + 1 && styles.pointer, classes.star, name)}
-          onClick={onChange && (e => rarity !== i + 1 && onChange(e, i + 1))}
-        />
-      ))}
+      {starClassNames.map((name, i) => {
+        const newRarity = i + 1;
+        const isDiff = rarity !== newRarity;
+        return (
+          <div
+            key={i}
+            className={clsx(styles.star, onChange && isDiff && styles.pointer, classes.star, name)}
+            onClick={onChange && (() => isDiff && onChange(newRarity))}
+          />
+        );
+      })}
     </div>
   );
 }

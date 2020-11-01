@@ -1,6 +1,5 @@
 import { PCRDB } from '../db';
 import { getSkillAction, SkillAction } from './skill_action';
-// import { Property } from './property';
 
 export type SkillEnhanceStatus = Record</*skill*/'ub' | 1 | 2 | 'ex', /*enhance_level*/number>;
 
@@ -13,13 +12,13 @@ export interface AttackPattern {
 export interface SkillData {
   skill_id: number;
   name: string;
-  skill_type: number;
-  skill_area_width: number;
+  // skill_type: number;
+  // skill_area_width: number;
   skill_cast_time: number;
   description: string;
   icon_type: number;
   action: SkillAction[]; // 1-7
-  depend_action: SkillAction[]; // 1-7
+  // depend_action: SkillAction[]; // 1-7
 }
 
 export interface UnitSkillData {
@@ -72,21 +71,23 @@ async function getSkillData(db: PCRDB, skill_id: number): Promise<SkillData> {
     return Promise.all(promiseArr);
   };
 
-  const [action, depend_action] = await Promise.all([
-    getSkillActionArr('action_', 7),
-    getSkillActionArr('depend_action_', 7)
-  ]);
+  // const [action, depend_action] = await Promise.all([
+  //   getSkillActionArr('action_', 7),
+  //   getSkillActionArr('depend_action_', 7)
+  // ]);
+
+  const action = await getSkillActionArr('action_', 7);
 
   return {
     skill_id: skillData.skill_id,
     name: skillData.name,
-    skill_type: skillData.skill_type,
-    skill_area_width: skillData.skill_area_width,
+    // skill_type: skillData.skill_type,
+    // skill_area_width: skillData.skill_area_width,
     skill_cast_time: skillData.skill_cast_time,
     description: skillData.description,
     icon_type: skillData.icon_type,
     action,
-    depend_action,
+    // depend_action,
   };
 }
 
@@ -131,7 +132,7 @@ export async function getUnitSkillData(db: PCRDB, unit_id: number): Promise<Unit
     getSkillDataArr('sp_skill_evolution_', 2)
   ]);
 
-  const data: UnitSkillData = {
+  return {
     unit_id,
     attack_pattern,
     union_burst,
@@ -143,5 +144,4 @@ export async function getUnitSkillData(db: PCRDB, unit_id: number): Promise<Unit
     sp_skill,
     sp_skill_evolution,
   };
-  return data;
 }

@@ -50,8 +50,11 @@ class ImageData {
     }
   }
 
-  protected async putImageData(url: string, dataURL: string): Promise<void> {
-    await this.db.transaction('image_data', 'readwrite').store.put({
+  protected async addImageData(url: string, dataURL: string): Promise<void> {
+    const store = this.db.transaction('image_data', 'readwrite').store;
+    const data = await store.get(url);
+    if (data) return;
+    await store.add({
       url,
       data_url: dataURL,
       last_visit: new Date(),
@@ -99,7 +102,7 @@ class ImageData {
       const result = await this.img2base64(options);
       const putDel = () => {
         this.realtimeImageCount += 1;
-        this.addQueueTasks(() => this.putImageData(options.src, result.dataURL));
+        this.addQueueTasks(() => this.addImageData(options.src, result.dataURL));
         if (this.realtimeImageCount > this.limit) {
           this.realtimeImageCount -= 1;
           this.addQueueTasks(() => this.deleteOldestImageData());

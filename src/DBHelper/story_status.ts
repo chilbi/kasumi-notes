@@ -1,14 +1,17 @@
 import { PCRDB } from '../db';
 import { propertyKeys, plus, Property } from './property';
 import { getCharaID } from './helper';
+import Big from 'big.js';
 
 export type LoveLevelStatus = Record</*chara_id*/number, /*love_level*/number>;
+
+export type StoryStatusMemo = Record</*chara_id*/number, StoryStatus>;
 
 export interface StoryProperty {
   story_id: number;
   title: string;
   sub_title: string;
-  property: Partial<Property>;
+  property: Partial<Property<Big>>;
 }
 
 export interface StoryStatus {
@@ -17,28 +20,25 @@ export interface StoryStatus {
   stories: StoryProperty[];
   share_chara_ids: number[];
   max_love_level: number;
-  getProperty(loveLevelStatus: LoveLevelStatus): Property;
+  getProperty(loveLevelStatus: LoveLevelStatus): Property<Big>;
 }
 
 export interface StoryStatusData {
   unit_id: number;
   self_story: StoryStatus;
   share_stories: StoryStatus[];
-  getProperty(loveLevelStatus: LoveLevelStatus): Property;
+  getProperty(loveLevelStatus: LoveLevelStatus): Property<Big>;
 }
 
-function getProperty(this: StoryStatus, LoveLevelStatus: LoveLevelStatus): Property {
+function getStoryStatusProperty(this: StoryStatus, LoveLevelStatus: LoveLevelStatus): Property<Big> {
   const loveLevel = LoveLevelStatus[this.chara_id] || 0;
   const unlockCount = this.stories.length < 8 ? Math.floor(loveLevel / 2) : loveLevel;
   const properties: Partial<Property>[] = [];
-  // console.log(`love_level: ${loveLevel};${unlockCount}/${storyStatus.story.length}`);
   for (let i = 0; i < unlockCount; i++) {
     properties.push(this.stories[i].property);
   }
   return plus(properties);
 }
-
-export type StoryStatusMemo = Record</*chara_id*/number, StoryStatus>;
 
 async function getStoryStatus(db: PCRDB, chara_id: number, memo?: StoryStatusMemo): Promise<StoryStatus> {
   if (memo && memo[chara_id]) return memo[chara_id];
@@ -51,14 +51,14 @@ async function getStoryStatus(db: PCRDB, chara_id: number, memo?: StoryStatusMem
   const arrLen = charaStoryStatusArr.length;
   for (let i = 0; i < arrLen; i++) {
     const value = charaStoryStatusArr[i];
-    const property: Partial<Property> = {};
+    const property: Partial<Property<Big>> = {};
     let statusIndex = 1;
     while (statusIndex <= 5) {
       let pType = value['status_type_' + statusIndex as keyof typeof value] as number;
       if (pType === 0) break;
       let pKey = propertyKeys[pType - 1];
       let pValue = value['status_rate_' + statusIndex as keyof typeof value] as number;
-      property[pKey] = pValue;
+      property[pKey] = Big(pValue);
       statusIndex++;
     }
     status.stories.push({
@@ -78,12 +78,12 @@ async function getStoryStatus(db: PCRDB, chara_id: number, memo?: StoryStatusMem
   }
   status.chara_type = firstValue.chara_type;
   status.max_love_level = arrLen > 8 ? 12 : 8;
-  status.getProperty = getProperty;
+  status.getProperty = getStoryStatusProperty;
   if (memo) memo[chara_id] = status;
   return status;
 }
 
-export function getStoryStatusProperty(this: StoryStatusData, loveLevelStatus: LoveLevelStatus): Property {
+function getProperty(this: StoryStatusData, loveLevelStatus: LoveLevelStatus): Property<Big> {
   const selfProperty = this.self_story.getProperty(loveLevelStatus);
   const shareProperties = this.share_stories.map(shareStory => shareStory.getProperty(loveLevelStatus));
   return plus([selfProperty, plus(shareProperties)]);
@@ -96,6 +96,6 @@ export async function getStoryStatusData(db: PCRDB, unit_id: number, memo?: Stor
     unit_id,
     self_story,
     share_stories,
-    getProperty: getStoryStatusProperty,
+    getProperty,
   };
 }

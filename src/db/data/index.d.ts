@@ -2,8 +2,10 @@ import { DBSchema } from 'idb';
 import { PCRDB } from '..';
 import { ActualUnitBackground } from './actual_unit_background';
 import { CharaStoryStatus } from './chara_story_status';
+import { EnemyRewardData } from './enemy_reward_data';
 import { EquipmentData } from './equipment_data';
 import { EquipmentEnhanceRate } from './equipment_enhance_rate';
+import { QuestData } from './quest_data';
 import { SkillAction } from './skill_action';
 import { SkillData } from './skill_data';
 import { UniqueEquipmentData } from './unique_equipment_data';
@@ -16,6 +18,7 @@ import { UnitPromotionStatus } from './unit_promotion_status';
 import { UnitRarity } from './unit_rarity';
 import { UnitSkillData } from './unit_skill_data';
 import { UnitUniqueEquip } from './unit_unique_equip';
+import { WaveGroupData } from './wave_group_data';
 import { ImageData } from './image_data';
 import { CharaData } from './chara_data';
 import { UserProfile } from './user_profile';
@@ -32,6 +35,10 @@ export interface PCRDBSchema extends DBSchema {
       'chara_story_status_0_chara_id': number;
     };
   };
+  'enemy_reward_data': {
+    key: number;
+    value: EnemyRewardData;
+  };
   'equipment_data': {
     key: number;
     value: EquipmentData;
@@ -39,6 +46,10 @@ export interface PCRDBSchema extends DBSchema {
   'equipment_enhance_rate': {
     key: number;
     value: EquipmentEnhanceRate;
+  };
+  'quest_data': {
+    key: number;
+    value: QuestData;
   };
   'skill_action': {
     key: number;
@@ -97,6 +108,10 @@ export interface PCRDBSchema extends DBSchema {
   'unit_unique_equip': {
     key: number;
     value: UnitUniqueEquip;
+  };
+  'wave_group_data': {
+    key: number;
+    value: WaveGroupData;
   };
   'image_data': {
     key: string;

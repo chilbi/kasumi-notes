@@ -1,6 +1,5 @@
 export interface EquipmentEnhanceRate {
   equipment_id: number;
-  equipment_name: string;
   description: string;
   promotion_level: number;
   hp: number;

@@ -8,7 +8,7 @@ function useImage(src?: string, save?: boolean): string | undefined {
   const dbHelper = useContext(DBHelperContext);
 
   useEffect(() => {
-    if (src) srcRef.current[src] = undefined;
+    if (src) delete srcRef.current[src];
     if (save) {
       if (dbHelper && src) {
         const resultPromise = dbHelper.getImageDataURL({ src }).then(result => {

@@ -19,7 +19,6 @@ export interface SkillAction {
   target_number: number;
   target_count: number;
   description: string;
-  level_up_disp: string;
 }
 
 declare const data: SkillAction[];

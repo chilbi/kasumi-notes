@@ -6,7 +6,6 @@ export interface CharaData {
   min_rarity: number;
   max_rarity: number;
   search_area_width: number;
-  position: number;
   atk_type: number;
   normal_atk_cast_time: number;
   comment: string;

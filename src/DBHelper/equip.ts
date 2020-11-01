@@ -1,5 +1,6 @@
-import { PCRDB } from '../db';
+import { PCRDB, PCRStoreValue } from '../db';
 import { plusMultiply, Property } from './property';
+import Big from 'big.js';
 
 export interface EquipData {
   equipment_id: number;
@@ -7,12 +8,12 @@ export interface EquipData {
   description: string;
   promotion_level: number;
   max_enhance_level: number;
-  equipment_data: Property;
-  equipment_enhance_rate: Property;
-  getProperty(enhance_level: number): Property;
+  equipment_data: PCRStoreValue<'equipment_data'>;
+  equipment_enhance_rate: PCRStoreValue<'equipment_enhance_rate'>;
+  getProperty(enhance_level: number): Property<Big>;
 }
 
-export function getEquipProperty(this: EquipData, enhance_level: number): Property {
+function getProperty(this: EquipData, enhance_level: number): Property<Big> {
   return plusMultiply(this.equipment_data, this.equipment_enhance_rate, enhance_level, v => v.round(0, 3));
 }
 
@@ -32,6 +33,6 @@ export async function getEquipData(db: PCRDB, equipment_id: number): Promise<Equ
     max_enhance_level: equipmentData.promotion_level < 3 ? equipmentData.promotion_level - 1 : equipmentData.promotion_level > 3 ? 5 : 3,
     equipment_data: equipmentData,
     equipment_enhance_rate: equipmentEnhanceRate,
-    getProperty: getEquipProperty,
+    getProperty,
   };
 }

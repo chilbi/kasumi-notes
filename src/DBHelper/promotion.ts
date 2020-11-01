@@ -1,6 +1,7 @@
 import { PCRDB } from '../db';
 import { plus, Property } from './property';
 import { getEquipData, EquipData } from './equip';
+import Big from 'big.js';
 
 export type EquipEnhanceStatus = Record</*equipment_id*/number, /*enhance_level*/number>;
 
@@ -8,10 +9,10 @@ export interface PromotionData {
   unit_id: number;
   promotion_level: number;
   equip_slots: (EquipData | undefined)[];
-  getProperty(equipEnhanceStatus: EquipEnhanceStatus): Property;
+  getProperty(equipEnhanceStatus: EquipEnhanceStatus): Property<Big>;
 }
 
-export function getPromotionProperty(this: PromotionData, equipEnhanceStatus: EquipEnhanceStatus): Property {
+function getProperty(this: PromotionData, equipEnhanceStatus: EquipEnhanceStatus): Property<Big> {
   return plus(this.equip_slots.map(equipData => {
     if (equipData) {
       const enhance_level = equipEnhanceStatus[equipData.equipment_id];
@@ -34,6 +35,6 @@ export async function getPromotionData(db: PCRDB, unit_id: number, promotion_lev
     unit_id,
     promotion_level,
     equip_slots,
-    getProperty: getPromotionProperty,
+    getProperty,
   };
 }

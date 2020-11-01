@@ -1,9 +1,10 @@
 import React from 'react';
 import Infobar from './Infobar';
-import { Property } from '../DBHelper/property';
+import { Property, PropertyKeys } from '../DBHelper/property';
+import Big from 'big.js';
 // import { getFightingCapacity } from '../DBHelper/helper';
 
-const allPropertyKeys: (keyof Property)[] = [
+const allPropertyKeys: PropertyKeys[] = [
   'atk', // 2
   'magic_str', // 4
   'def', // 3
@@ -64,17 +65,20 @@ const keyAbbrLabel = {
 };
 
 interface CharaStatusProps {
-  property?: Partial<Property>;
+  property?: Partial<Property<Big>>;
   partial?: boolean;
   abbr?: boolean;
   // showFightingCapacity?: boolean;
 }
 
 function CharaStatus(props: CharaStatusProps) {
-  let property: Partial<Property> = props.property || {};
-  let keys = props.partial ? Object.keys(props.property || {}) as (keyof Property)[] : allPropertyKeys;
-  if (!props.property) {
-    for (let key of keys)  property[key] = '???' as any;
+  const property: Partial<Property<Big>> = props.property || {};
+  const keys = props.partial ? Object.keys(props.property || {}) as PropertyKeys[] : allPropertyKeys;
+  const isNullable = !props.property;
+  if (isNullable) {
+    for (let key of keys) {
+      property[key] = '???' as any;
+    }
   }
   return (
     <>
@@ -84,7 +88,7 @@ function CharaStatus(props: CharaStatusProps) {
           size={props.abbr ? 'medium': 'large'}
           width={50}
           label={props.abbr ? keyAbbrLabel[key] : keyLabel[key]}
-          value={property[key]}
+          value={isNullable ? property[key] as any as string : property[key]!.round(0, 1).toString()}
         />
       ))}
       {/* {props.showFightingCapacity && (

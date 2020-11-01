@@ -1,14 +1,15 @@
+import { PCRDB, PCRStoreValue } from '../db';
 import { Property } from './property';
-import { PCRDB } from '../db';
+// import Big from 'big.js';
 
 export interface PromotionStatusData {
   unit_id: number;
   promotion_level: number;
-  unit_promotion_status: Property;
-  getProperty(): Property;
+  unit_promotion_status: PCRStoreValue<'unit_promotion_status'>;
+  getProperty(): Property<number>;
 }
 
-export function getPromotionStatusProperty(this: PromotionStatusData): Property {
+function getProperty(this: PromotionStatusData): Property<number> {
   return this.unit_promotion_status;
 }
 
@@ -19,6 +20,6 @@ export async function getPromotionStatusData(db: PCRDB, unit_id: number, promoti
     unit_id,
     promotion_level,
     unit_promotion_status: unitPromotionStatus,
-    getProperty: getPromotionStatusProperty,
+    getProperty,
   };
 }

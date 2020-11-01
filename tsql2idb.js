@@ -197,30 +197,51 @@ function emptyDir(dir) {
   });
 }
 
+// /**
+//  * @param {string[]} record 
+//  * @param {Field[]} fields 
+//  * @returns {string}
+//  */
+// function getRecordJSON(record, fields, quotes = '"') {
+//   let str = '{ ';
+//   let isKey = true;
+//   let tempKey = '';
+//   let len = record.length;
+//   for (let i = 0; i < len; i++) {
+//     if (isKey) {
+//       tempKey = record[i];
+//       str += `${quotes}${tempKey}${quotes}: `;
+//       isKey = false;
+//     } else {
+//       let value = record[i];
+//       if (getFieldType(fields, tempKey) === 'string') str += `${quotes}${value.replace(/\r/g, '').replace(/\n/g, '\\n')}${quotes}`;
+//       else str += value === '' ? 'undefined' : value;
+//       if (i < len - 1) str += ', ';
+//       isKey = true;
+//     }
+//   }
+//   str += ' }';
+//   return str;
+// }
+
 /**
- * @param {string[]} record 
- * @param {Field[]} fields 
+ * @param {string[]} record
+ * @param {Field[]} fields
  * @returns {string}
  */
-function getRecordJSON(record, fields, quotes = '"') {
-  let str = '{ ';
-  let isKey = true;
-  let tempKey = '';
-  let len = record.length;
-  for (let i = 0; i < len; i++) {
-    if (isKey) {
-      tempKey = record[i];
-      str += `${quotes}${tempKey}${quotes}: `;
-      isKey = false;
-    } else {
-      let value = record[i];
-      if (getFieldType(fields, tempKey) === 'string') str += `${quotes}${value.replace(/\r/g, '').replace(/\n/g, '\\n')}${quotes}`;
-      else str += value === '' ? 'undefined' : value;
-      if (i < len - 1) str += ', ';
-      isKey = true;
-    }
+function getValues(record, fields) {
+  let str = '';
+  let i = 1;
+  for (let field of fields) {
+    let value = record[i];
+    if (field.fieldType === 'string')
+      str += `'${value.replace(/\r/g, '').replace(/\n/g, '\\n')}'`;
+    else
+      str += value === '' ? 'undefined' : value;
+    str += ', ';
+    i += 2;
   }
-  str += ' }';
+  str = str.substr(0, str.length - 2);
   return str;
 }
 
@@ -276,11 +297,20 @@ function getStr(obj) {
   }
   schema += '  };\n';
 
-  let dataJS = '// eslint-disable-next-line import/no-anonymous-default-export\n';
-  dataJS += 'export default [\n';
-  dataJS += obj.records.map(record => '  ' + getRecordJSON(record, obj.fields)).join(',\n');
-  dataJS += '\n];\n';
-
+  let dataJS = '';
+  if (obj.records.length > 0) {
+    const argsStr = obj.fields.map(field => field.fieldName).join(', ');
+    dataJS += 'export default (() => {\n';
+    dataJS += `  const c = (${argsStr}) =>\n`;
+    dataJS += `    ({ ${argsStr} });\n`;
+    dataJS += '  return [\n';
+    dataJS += obj.records.map(record => `    c(${getValues(record, obj.fields)})`).join(',\n');
+    dataJS += '  ];\n';
+    dataJS += '})();\n';
+  } else {
+    dataJS += '// eslint-disable-next-line import/no-anonymous-default-export\n';
+    dataJS += 'export default [];\n';
+  }
 
   let dataDTS = `export interface ${uName} {\n`;
   obj.fields.forEach(field => {
@@ -422,9 +452,9 @@ function writeOpenDB(dbDir, dbName, dbVersion, createStr) {
 }
 
 function main() {
-  const dbName = 'redive_master_db_diff-master';
+  const dbName = 'pcr';
 
-  const sqlFilesDir = './' + dbName;
+  const sqlFilesDir = './redive_master_db_diff-master';
 
   const dbDir = './src/db';
 
@@ -458,19 +488,19 @@ function main() {
     // 'unlock_rarity_6.sql',
     // 'experience_team.sql',
     // 'guild.sql',
-    // 'item_data.sql'
+    // 'item_data.sql',
     // 'clan_battle_period.sql',
     // 'clan_battle_map_data.sql',
     // 'clan_battle_2_map_data.sql',
     // 'clan_battle_boss_group.sql',
-    // 'wave_group_data.sql',
+    'wave_group_data.sql',
     // 'resist_data.sql',
     // 'enemy_m_parts.sql',
     // 'enemy_parameter.sql',
     // 'unit_enemy_data.sql',
     // 'dungeon_area_data.sql',
-    // 'quest_data.sql',
-    // 'enemy_reward_data.sql',
+    'quest_data.sql',
+    'enemy_reward_data.sql',
     // 'campaign_schedule.sql',
     // 'campaign_freegacha.sql',
     // 'hatsune_schedule.sql',
@@ -481,6 +511,43 @@ function main() {
   ];
 
   const sqlRawObjs = getSqlRawObjs(sqlFilesDir, excludeFiles, includeFiles);
+
+  /** @type {(tableName: string, fields: string[]) => void} */
+  const delField = (tableName, fields) => {
+    const rawObj = sqlRawObjs.find(obj => obj.tableName === tableName);
+    rawObj.fields = rawObj.fields.filter(field => !fields.includes(field.fieldName));
+    const excludeIdx = [];
+    const item0 = rawObj.records[0];
+    fields.forEach(field => {
+      const i = item0.findIndex(value => value === field);
+      excludeIdx.push(i, i + 1);
+    });
+    rawObj.records = rawObj.records.map(record => record.filter((_, i) => !excludeIdx.includes(i)));
+  };
+
+  /** @type {{ tableName: string, fields: string[] }[]} */
+  const delArr = [
+    { tableName: 'actual_unit_background', fields: ['bg_id', 'face_type'] },
+    { tableName: 'equipment_data', fields: ['craft_flg', 'equipment_enhance_point', 'sale_price', 'require_level', 'enable_donation', 'display_item'] },
+    { tableName: 'equipment_enhance_rate', fields: ['equipment_name'] },
+    {
+      tableName: 'quest_data', fields: ['limit_team_level', 'position_x', 'position_y', 'stamina', 'stamina_start', 'team_exp', 'unit_exp', 'love', 'limit_time', 'daily_limit',
+        'background_1', 'wave_bgm_sheet_id_1', 'wave_bgm_que_id_1', 'story_id_wavestart_1', 'story_id_waveend_1',
+        'background_2', 'wave_bgm_sheet_id_2', 'wave_bgm_que_id_2', 'story_id_wavestart_2', 'story_id_waveend_2',
+        'background_3', 'wave_bgm_sheet_id_3', 'wave_bgm_que_id_3', 'story_id_wavestart_3', 'story_id_waveend_3',
+        'quest_detail_bg_id', 'quest_detail_bg_position', 'start_time', 'end_time', 'lv_reward_flag', 'add_treasure_num']
+    },
+    { tableName: 'skill_action', fields: ['level_up_disp'] },
+    { tableName: 'skill_data', fields: ['skill_type', 'skill_area_width', ...Array.from(Array(7)).map((_, i) => `depend_action_${i + 1}`)] },
+    { tableName: 'unique_equipment_data', fields: ['promotion_level', 'craft_flg', 'equipment_enhance_point', 'sale_price', 'require_level'] },
+    { tableName: 'unique_equipment_enhance_rate', fields: ['equipment_name', 'description', 'promotion_level'] },
+    { tableName: 'unit_data', fields: ['prefab_id', 'is_limited', 'motion_type', 'se_type', 'cutin_1', 'cutin_2', 'cutin1_star6', 'guild_id', 'cutin2_star6', 'exskill_display', 'only_disp_owned', 'start_time', 'end_time'] },
+    { tableName: 'unit_profile', fields: ['voice_id'] },
+    { tableName: 'unit_rarity', fields: ['consume_num', 'consume_gold'] }
+  ];
+
+  // 删除不必要的字段
+  delArr.forEach(item => delField(item.tableName, item.fields));
 
   const excludeUnitID = [106701/*ホマレ*/, 110201/*ミサキ（サマー）*/, 900103/*ヒヨリ（不明）*/, 906601/*イノリ（不明）*/];
   const unitProfileObj = sqlRawObjs.find(obj => obj.tableName === 'unit_profile');
@@ -590,7 +657,6 @@ function main() {
       { fieldName: 'min_rarity', fieldType: 'number' },
       { fieldName: 'max_rarity', fieldType: 'number' },
       { fieldName: 'search_area_width', fieldType: 'number' },
-      { fieldName: 'position', fieldType: 'number' },
       { fieldName: 'atk_type', fieldType: 'number' },
       { fieldName: 'normal_atk_cast_time', fieldType: 'number' },
       { fieldName: 'comment', fieldType: 'string' },
@@ -622,7 +688,7 @@ function main() {
 
   if (!fs.existsSync(dbDir)) fs.mkdirSync(dbDir);
   const createStr = writeData(sqlRawObjs, dbDir + '/data/');
-  writeOpenDB(dbDir + '/', dbName, dbVersion, createStr);
+  writeOpenDB(dbDir + '/', dbName, dbVersion + 2, createStr);
 }
 
 main();

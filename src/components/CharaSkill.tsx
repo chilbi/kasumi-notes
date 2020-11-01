@@ -169,7 +169,7 @@ interface SkillItemProps {
 interface CharaSkillProps {
   atkType?: number;
   atkCastTime?: number;
-  property?: Property;
+  property?: Property<Big>;
   unitSkillData?: UnitSkillData;
   userProfile?: PCRStoreValue<'user_profile'>;
   onChangeSkill?: (level: number, skillKey: keyof SkillEnhanceStatus) => void;
@@ -381,7 +381,7 @@ function CharaSkill(props: CharaSkillProps) {
             <span className={styles.castTime}>待機時間：{atkCastTime}s</span>
           </div>
         </div>
-        <div className={styles.skillDesc}>敵単体に{atkData.damege}の{atkData.name}ダメージを与える。</div>
+        <div className={styles.skillDesc}>敵単体に{atkData.damege.round(0, 1).toString()}の{atkData.name}ダメージを与える。</div>
       </div>
       {skillList.map(item => (
         <React.Fragment key={item.label}>

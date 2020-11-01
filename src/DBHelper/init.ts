@@ -21,7 +21,6 @@ async function getInit(db: PCRDB, user_name: string, unit_id: number, memo?: Sto
         min_rarity: unitData.rarity,
         max_rarity: maxUserProfile.rarity,
         search_area_width: unitData.search_area_width,
-        position: unitData.search_area_width < 360 ? 1 : unitData.search_area_width > 590 ? 3 : 2,
         atk_type: unitData.atk_type,
         normal_atk_cast_time: unitData.normal_atk_cast_time,
         comment: unitData.comment,

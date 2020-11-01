@@ -11,7 +11,6 @@ export interface UnitProfile {
   blood_type: string;
   favorite: string;
   voice: string;
-  voice_id: number;
   catch_copy: string;
   self_text: string;
   guild_id: string;

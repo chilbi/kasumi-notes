@@ -6,7 +6,7 @@ import { openDB } from 'idb';
  * @returns {Promise<import('.').PCRDB>}
  */
 export default function openPCRDB(options = {}) {
-  return openDB('redive_master_db_diff-master', 10022270, {
+  return openDB('pcr', 100222702, {
     upgrade(db, oldVersion, newVersion, transaction) {
       if (newVersion !== oldVersion) Array.from(db.objectStoreNames).forEach(name => db.deleteObjectStore(name));
 
@@ -19,12 +19,20 @@ export default function openPCRDB(options = {}) {
       });
       charaStoryStatusStore.createIndex('chara_story_status_0_chara_id', 'chara_id');
 
+      db.createObjectStore('enemy_reward_data', {
+        keyPath: 'drop_reward_id',
+      });
+
       db.createObjectStore('equipment_data', {
         keyPath: 'equipment_id',
       });
 
       db.createObjectStore('equipment_enhance_rate', {
         keyPath: 'equipment_id',
+      });
+
+      db.createObjectStore('quest_data', {
+        keyPath: 'quest_id',
       });
 
       db.createObjectStore('skill_action', {
@@ -77,6 +85,10 @@ export default function openPCRDB(options = {}) {
 
       db.createObjectStore('unit_unique_equip', {
         keyPath: 'unit_id',
+      });
+
+      db.createObjectStore('wave_group_data', {
+        keyPath: 'id',
       });
 
       const imageDataStore = db.createObjectStore('image_data', {

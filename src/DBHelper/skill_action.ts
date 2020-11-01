@@ -32,7 +32,6 @@ export interface SkillAction {
   target_number: number;
   target_count: number;
   description: string;
-  level_up_disp: string;
   getDescData(skillLevel: number, property: Property, actionList: SkillAction[]): DescData;
 }
 
@@ -213,7 +212,7 @@ function getEffectModified(thisAction: SkillAction, targetAction: SkillAction): 
 const actionMap: Record</*action_type*/number, /*getDescription*/(this: SkillAction, skillLevel: number, property: Property, actionList: SkillAction[]) => DescData> = {
   // damage
   1: function (skillLevel, property, actionList) {
-    const formula = getFormula(this.action_value_1, this.action_value_2, skillLevel, this.action_value_3, this.action_detail_1, property);
+    const formula = getFormula(this.action_value_1, this.action_value_2, skillLevel, this.action_value_3, this.action_detail_1, property, v => v.round(0, 1));
     let desc = this.description;
     if (this.target_type === 7) {
       desc = `自分に{0}の${this.action_detail_1 === 2 ? '魔法' : '物理'}ダメージ`;

@@ -34,7 +34,7 @@ function CharaList(props: CharaListProps) {
           rarity={base ? base.userProfile.rarity : 6}
           maxRarity={base ? base.charaData.max_rarity : 6}
           promotionLevel={base ? base.userProfile.promotion_level : 18}
-          position={base ? base.charaData.position : 1}
+          position={base ? base.getPosition() : 1}
           hasUnique={base ? base.userProfile.unique_enhance_level > 0 : true}
         />
       ))}

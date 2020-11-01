@@ -1,15 +1,16 @@
-import { PCRDB } from '../db';
+import { PCRDB, PCRStoreValue } from '../db';
 import { plusMultiply, Property } from './property';
+import Big from 'big.js';
 
 export interface RarityData {
   unit_id: number;
   rarity: number;
-  unit_rarity: Property;
-  getProperty(level: number, promotion_level: number): Property;
+  unit_rarity: PCRStoreValue<'unit_rarity'>;
+  getProperty(level: number, promotion_level: number): Property<Big>;
 }
 
-export function getRarityProperty(this: RarityData, level: number, promotion_level: number): Property {
-  return plusMultiply(this.unit_rarity, this.unit_rarity, level + promotion_level, v => v.round(0, 1), v => v, '_growth');
+function getProperty(this: RarityData, level: number, promotion_level: number): Property<Big> {
+  return plusMultiply(this.unit_rarity, this.unit_rarity, level + promotion_level/*, v => v.round(0, 1)*/, v => v, v => v, '_growth');
 }
 
 export async function getRarityData(db: PCRDB, unit_id: number, rarity: number): Promise<RarityData> {
@@ -19,6 +20,6 @@ export async function getRarityData(db: PCRDB, unit_id: number, rarity: number):
     unit_id,
     rarity,
     unit_rarity: unitRarity,
-    getProperty: getRarityProperty,
+    getProperty,
   };
 }

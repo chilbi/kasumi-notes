@@ -9,6 +9,7 @@ import { getStoryStatusData, StoryStatusMemo, StoryStatusData } from './story_st
 import { plus, Property } from './property';
 import ImageData from './ImageData';
 import maxUserProfile from './maxUserProfile';
+import Big from 'big.js';
 
 export type PropertyData = [RarityData, PromotionStatusData, PromotionData, StoryStatusData, UniqueEquipData | undefined];
 
@@ -16,7 +17,8 @@ export interface CharaBaseData {
   charaData: PCRStoreValue<'chara_data'>;
   userProfile: PCRStoreValue<'user_profile'>;
   propertyData: PropertyData;
-  getProperty(): Property;
+  getPosition(): number;
+  getProperty(): Property<Big>;
 }
 
 export interface CharaDetailData extends CharaBaseData {
@@ -25,7 +27,11 @@ export interface CharaDetailData extends CharaBaseData {
   promotions: PromotionData[];
 }
 
-export function getCharaProperty(this: CharaBaseData): Property {
+function getPosition(this: CharaBaseData): number {
+  return this.charaData.search_area_width < 360 ? 1 : this.charaData.search_area_width > 590 ? 3 : 2;
+}
+
+function getProperty(this: CharaBaseData): Property<Big> {
   const { level, promotion_level, equip_enhance_status, love_level_status, unique_enhance_level } = this.userProfile;
   const [rarityData, promotionStatusData, promotionData, storyStatus, uniqueEquipData] = this.propertyData;
   return plus([
@@ -71,7 +77,8 @@ class DBHelper extends ImageData {
       unitProfile: unitProfile!,
       unitSkillData: unitSkillData!,
       promotions: promotions!,
-      getProperty: getCharaProperty,
+      getPosition,
+      getProperty,
     };
   }
 
@@ -95,7 +102,8 @@ class DBHelper extends ImageData {
           charaData,
           userProfile,
           propertyData,
-          getProperty: getCharaProperty,
+          getPosition,
+          getProperty,
         };
       }));
     }

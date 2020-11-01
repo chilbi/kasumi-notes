@@ -141,6 +141,7 @@ function CharaDetail(props: CharaDetailProps) {
     baseInfo: (
       <CharaBaseInfo
         rarity={detail && detail.userProfile.rarity}
+        position={detail && detail.getPosition()}
         charaData={detail && detail.charaData}
       />
     ),

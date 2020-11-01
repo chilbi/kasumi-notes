@@ -1,8 +1,5 @@
 export interface UniqueEquipmentEnhanceRate {
   equipment_id: number;
-  equipment_name: string;
-  description: string;
-  promotion_level: number;
   hp: number;
   atk: number;
   magic_str: number;

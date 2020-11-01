@@ -12,10 +12,8 @@ import positionBorder3 from '../images/position_border_3.png';
 const PositionText = ['前衛', '中衛', '後衛'];
 
 const defaultCharaData: PCRStoreValue<'chara_data'> = {
-  // unit_id: undefined,
   unit_name: '???',
   actual_name: '???',
-  position: 1,
 } as any;
 
 const useStyles = makeStyles((theme: Theme) => {
@@ -95,11 +93,12 @@ const useStyles = makeStyles((theme: Theme) => {
 
 interface CharaBaseInfoProps {
   rarity?: number;
+  position?: number;
   charaData?: PCRStoreValue<'chara_data'>;
 }
 
 function CharaBaseInfo(props: CharaBaseInfoProps) {
-  const { rarity = 5, charaData = defaultCharaData } = props;
+  const { rarity = 5, position = 1, charaData = defaultCharaData } = props;
   const styles = useStyles();
 
   const stillImgSrc = charaData.unit_id ? getPublicImageURL('still_unit', getValidID(charaData.unit_id, rarity, 3)) : undefined;
@@ -114,8 +113,8 @@ function CharaBaseInfo(props: CharaBaseInfoProps) {
           <span className={styles.unitName}>{charaData.unit_name}</span>
           <span className={styles.actualName}>{charaData.actual_name}</span>
         </div>
-        <div className={clsx(styles.position, styles['position' + charaData.position as keyof typeof styles])}>
-          {PositionText[charaData.position - 1]}
+        <div className={clsx(styles.position, styles['position' + position as keyof typeof styles])}>
+          {PositionText[position - 1]}
         </div>
       </div>
     </>

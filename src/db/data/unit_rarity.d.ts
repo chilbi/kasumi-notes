@@ -34,8 +34,6 @@ export interface UnitRarity {
   energy_reduce_rate: number;
   energy_reduce_rate_growth: number;
   unit_material_id: number;
-  consume_num: number;
-  consume_gold: number;
   accuracy: number;
   accuracy_growth: number;
 }

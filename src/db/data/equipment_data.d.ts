@@ -3,10 +3,6 @@ export interface EquipmentData {
   equipment_name: string;
   description: string;
   promotion_level: number;
-  craft_flg: number;
-  equipment_enhance_point: number;
-  sale_price: number;
-  require_level: number;
   hp: number;
   atk: number;
   magic_str: number;
@@ -23,9 +19,7 @@ export interface EquipmentData {
   hp_recovery_rate: number;
   energy_recovery_rate: number;
   energy_reduce_rate: number;
-  enable_donation: number;
   accuracy: number;
-  display_item: number;
   item_type: number;
 }
 

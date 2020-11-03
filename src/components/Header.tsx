@@ -1,32 +1,46 @@
 import React from 'react';
-import IconButton from '@material-ui/core/IconButton';
-import ArrowBack from '@material-ui/icons/ArrowBack';
-import ViewModule from '@material-ui/icons/ViewModule';
-import ViewStream from '@material-ui/icons/ViewStream';
+import { makeStyles, Theme } from '@material-ui/core/styles';
+
+const useStyles = makeStyles((theme: Theme) => {
+  const h = '3rem';
+
+  return {
+    root: {
+      zIndex: theme.zIndex.appBar,
+      position: 'fixed',
+      margin: '0 auto',
+      maxWidth: theme.maxWidth,
+      top: 0,
+      right: 0,
+      bottom: 'auto',
+      left: 0,
+      height: h,
+      display: 'flex',
+      alignItems: 'center',
+      borderBottom: '1px solid ' + theme.palette.grey[100],
+      backgroundColor: '#fff',
+    },
+    offset: {
+      height: h,
+    },
+  };
+});
 
 interface HeaderProps {
-  classes: Record<'bar' | 'subtitle', string>;
-  variant: 'icon_unit' | 'unit_plate';
-  subtitle: string;
-  disabledBack: boolean;
-  disabledVariant: boolean;
-  onBack: (e: React.MouseEvent) => void;
-  onChangeVariant: (e: React.MouseEvent) => void;
+  children?: React.ReactNode;
 }
 
 function Header(props: HeaderProps) {
-  const { classes, variant, subtitle, disabledBack, disabledVariant, onBack, onChangeVariant } = props;
+  const { children } = props;
+  const styles = useStyles();
 
   return (
-    <div id="header" className={classes.bar}>
-      <IconButton disabled={disabledBack} style={disabledBack ? { opacity: 0 } : undefined} color="primary" onClick={onBack}>
-        <ArrowBack />
-      </IconButton>
-      <h6 className={classes.subtitle}>{subtitle}</h6>
-      <IconButton disabled={disabledVariant} style={disabledVariant ? { opacity: 0 } : undefined} color="primary" onClick={onChangeVariant}>
-        {variant === 'icon_unit' ? <ViewModule /> : <ViewStream />}
-      </IconButton>
-    </div>
+    <>
+      <div id="header" className={styles.root}>
+        {children}
+      </div>
+      <div className={styles.offset} />
+    </>
   );
 }
 

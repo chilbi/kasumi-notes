@@ -5,10 +5,10 @@ import RankBorder from './RankBorder';
 import Rarities from './Rarities';
 import Big from 'big.js';
 import clsx from 'clsx';
-import position1 from '../images/position_1.png';
-import position2 from '../images/position_2.png';
-import position3 from '../images/position_3.png';
-import unique from '../images/unique.png';
+import position1Png from '../images/position_1.png';
+import position2Png from '../images/position_2.png';
+import position3Png from '../images/position_3.png';
+import uniquePng from '../images/unique.png';
 
 const useStyles = makeStyles((theme: Theme) => {
   const
@@ -115,13 +115,13 @@ const useStyles = makeStyles((theme: Theme) => {
       backgroundPosition: 'center',
     },
     position1: {
-      backgroundImage: `url(${position1})`,
+      backgroundImage: `url(${position1Png})`,
     },
     position2: {
-      backgroundImage: `url(${position2})`,
+      backgroundImage: `url(${position2Png})`,
     },
     position3: {
-      backgroundImage: `url(${position3})`,
+      backgroundImage: `url(${position3Png})`,
     },
     iconUnique: {
       zIndex: 2,
@@ -130,7 +130,7 @@ const useStyles = makeStyles((theme: Theme) => {
       left: iconGup + 'rem',
       width: iconUniqueSize + 'rem',
       height: iconUniqueSize + 'rem',
-      backgroundImage: `url(${unique})`,
+      backgroundImage: `url(${uniquePng})`,
       backgroundRepeat: 'no-repeat',
       backgroundSize: iconUniqueSize + 'rem ' + iconUniqueSize + 'rem',
       backgroundPosition: 'center',
@@ -142,7 +142,7 @@ const useStyles = makeStyles((theme: Theme) => {
       left: plateGup + 'rem',
       width: plateUniqueSize + 'rem',
       height: plateUniqueSize + 'rem',
-      backgroundImage: `url(${unique})`,
+      backgroundImage: `url(${uniquePng})`,
       backgroundRepeat: 'no-repeat',
       backgroundSize: plateUniqueSize + 'rem ' + plateUniqueSize + 'rem',
       backgroundPosition: 'center',

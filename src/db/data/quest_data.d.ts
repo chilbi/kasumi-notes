@@ -3,8 +3,6 @@ export interface QuestData {
   area_id: number;
   quest_name: string;
   icon_id: number;
-  clear_reward_group: number;
-  rank_reward_group: number;
   wave_group_id_1: number;
   wave_group_id_2: number;
   wave_group_id_3: number;

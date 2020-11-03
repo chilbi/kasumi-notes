@@ -87,6 +87,9 @@ const useStyles = makeStyles((theme: Theme) => {
       height: '3rem',
       borderRadius: '0.28125rem',
     },
+    hidden: {
+      display: 'none',
+    },
   };
 });
 
@@ -160,7 +163,7 @@ function CharaStory(props: CharaStoryProps) {
       let rarity = '3';
       const loveLevel = loveLevelStatus[charaID];
       if (loveLevel) {
-        if (loveLevel > 11) rarity = '6';
+        if (loveLevel > 8) rarity = '6';
         if (loveLevel < 5) rarity = '1';
       }
       return getPublicImageURL('icon_unit', charaID.toString() + rarity + '1');
@@ -214,7 +217,7 @@ function CharaStory(props: CharaStoryProps) {
     <div>
       {tabsValueMemo.tabs}
       {dataStatusMemo.storyViewArr.map((item, i) => (
-        <div key={i} hidden={i !== tabsValue}>
+        <div key={i} className={i === tabsValue ? undefined : styles.hidden}>
           {item}
         </div>
       ))}

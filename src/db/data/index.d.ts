@@ -3,8 +3,10 @@ import { PCRDB } from '..';
 import { ActualUnitBackground } from './actual_unit_background';
 import { CharaStoryStatus } from './chara_story_status';
 import { EnemyRewardData } from './enemy_reward_data';
+import { EquipmentCraft } from './equipment_craft';
 import { EquipmentData } from './equipment_data';
 import { EquipmentEnhanceRate } from './equipment_enhance_rate';
+import { ItemData } from './item_data';
 import { QuestData } from './quest_data';
 import { SkillAction } from './skill_action';
 import { SkillData } from './skill_data';
@@ -39,6 +41,10 @@ export interface PCRDBSchema extends DBSchema {
     key: number;
     value: EnemyRewardData;
   };
+  'equipment_craft': {
+    key: number;
+    value: EquipmentCraft;
+  };
   'equipment_data': {
     key: number;
     value: EquipmentData;
@@ -46,6 +52,10 @@ export interface PCRDBSchema extends DBSchema {
   'equipment_enhance_rate': {
     key: number;
     value: EquipmentEnhanceRate;
+  };
+  'item_data': {
+    key: number;
+    value: ItemData;
   };
   'quest_data': {
     key: number;

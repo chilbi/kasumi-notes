@@ -2,9 +2,9 @@ import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Big from 'big.js';
 import clsx from 'clsx';
-import star0 from '../images/star_0.png';
-import star1 from '../images/star_1.png';
-import star6 from '../images/star_6.png';
+import star0Png from '../images/star_0.png';
+import star1Png from '../images/star_1.png';
+import star6Png from '../images/star_6.png';
 
 const useStyles = makeStyles(() => {
   const
@@ -23,13 +23,13 @@ const useStyles = makeStyles(() => {
       backgroundSize: starSize + 'rem ' + starSize + 'rem',
     },
     star0: {
-      backgroundImage: `url(${star0})`,
+      backgroundImage: `url(${star0Png})`,
     },
     star1: {
-      backgroundImage: `url(${star1})`,
+      backgroundImage: `url(${star1Png})`,
     },
     star6: {
-      backgroundImage: `url(${star6})`,
+      backgroundImage: `url(${star6Png})`,
     },
     pointer: {
       cursor: 'pointer',

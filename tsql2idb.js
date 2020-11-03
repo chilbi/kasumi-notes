@@ -305,7 +305,7 @@ function getStr(obj) {
     dataJS += `    ({ ${argsStr} });\n`;
     dataJS += '  return [\n';
     dataJS += obj.records.map(record => `    c(${getValues(record, obj.fields)})`).join(',\n');
-    dataJS += '  ];\n';
+    dataJS += '\n  ];\n';
     dataJS += '})();\n';
   } else {
     dataJS += '// eslint-disable-next-line import/no-anonymous-default-export\n';
@@ -465,6 +465,7 @@ function main() {
   const includeFiles = [
     'actual_unit_background.sql',
     'chara_story_status.sql',
+    'equipment_craft.sql',
     'equipment_data.sql',
     // 'equipment_enhance_data.sql',
     'equipment_enhance_rate.sql',
@@ -488,7 +489,7 @@ function main() {
     // 'unlock_rarity_6.sql',
     // 'experience_team.sql',
     // 'guild.sql',
-    // 'item_data.sql',
+    'item_data.sql',
     // 'clan_battle_period.sql',
     // 'clan_battle_map_data.sql',
     // 'clan_battle_2_map_data.sql',
@@ -528,10 +529,13 @@ function main() {
   /** @type {{ tableName: string, fields: string[] }[]} */
   const delArr = [
     { tableName: 'actual_unit_background', fields: ['bg_id', 'face_type'] },
+    { tableName: 'enemy_reward_data', fields: ['drop_count', ...Array.from(Array(5)).map((_, i) => `reward_num_${i + 1}`)] },
+    { tableName: 'equipment_craft', fields: ['crafted_cost'] },
     { tableName: 'equipment_data', fields: ['craft_flg', 'equipment_enhance_point', 'sale_price', 'require_level', 'enable_donation', 'display_item'] },
     { tableName: 'equipment_enhance_rate', fields: ['equipment_name'] },
     {
-      tableName: 'quest_data', fields: ['limit_team_level', 'position_x', 'position_y', 'stamina', 'stamina_start', 'team_exp', 'unit_exp', 'love', 'limit_time', 'daily_limit',
+      tableName: 'quest_data', fields: ['limit_team_level', 'position_x', 'position_y', 'stamina', 'stamina_start',
+        'team_exp', 'unit_exp', 'love', 'limit_time', 'daily_limit', 'clear_reward_group', 'rank_reward_group',
         'background_1', 'wave_bgm_sheet_id_1', 'wave_bgm_que_id_1', 'story_id_wavestart_1', 'story_id_waveend_1',
         'background_2', 'wave_bgm_sheet_id_2', 'wave_bgm_que_id_2', 'story_id_wavestart_2', 'story_id_waveend_2',
         'background_3', 'wave_bgm_sheet_id_3', 'wave_bgm_que_id_3', 'story_id_wavestart_3', 'story_id_waveend_3',
@@ -543,11 +547,24 @@ function main() {
     { tableName: 'unique_equipment_enhance_rate', fields: ['equipment_name', 'description', 'promotion_level'] },
     { tableName: 'unit_data', fields: ['prefab_id', 'is_limited', 'motion_type', 'se_type', 'cutin_1', 'cutin_2', 'cutin1_star6', 'guild_id', 'cutin2_star6', 'exskill_display', 'only_disp_owned', 'start_time', 'end_time'] },
     { tableName: 'unit_profile', fields: ['voice_id'] },
-    { tableName: 'unit_rarity', fields: ['consume_num', 'consume_gold'] }
+    { tableName: 'unit_rarity', fields: ['consume_num', 'consume_gold'] },
+    { tableName: 'wave_group_data', fields: ['id', 'odds'] }
   ];
 
   // 删除不必要的字段
   delArr.forEach(item => delField(item.tableName, item.fields));
+
+  const waveGroupObj = sqlRawObjs.find(obj => obj.tableName === 'wave_group_data');
+  waveGroupObj.primaryKeys = ['wave_group_id'];
+  const newWGRecords = [];
+  for (let record of waveGroupObj.records) {
+    const idIdx = record.indexOf('wave_group_id');
+    const idVal = record[idIdx + 1];
+    if (idVal !== '210010013') {
+      newWGRecords.push(record);
+    }
+  }
+  waveGroupObj.records = newWGRecords;
 
   const excludeUnitID = [106701/*ホマレ*/, 110201/*ミサキ（サマー）*/, 900103/*ヒヨリ（不明）*/, 906601/*イノリ（不明）*/];
   const unitProfileObj = sqlRawObjs.find(obj => obj.tableName === 'unit_profile');

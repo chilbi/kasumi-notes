@@ -1,7 +1,11 @@
 import React, { useState, useCallback, useMemo, useContext, useEffect, useRef } from 'react';
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles, Theme } from '@material-ui/core/styles';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
+import IconButton from '@material-ui/core/IconButton';
+import ArrowBack from '@material-ui/icons/ArrowBack';
+import { useHistory } from 'react-router-dom';
+import Header from './Header';
 import CharaBaseInfo from './CharaBaseInfo';
 import CharaUserProfile from './CharaUserProfile';
 import CharaSkill from './CharaSkill';
@@ -17,37 +21,43 @@ import { SkillEnhanceStatus } from '../DBHelper/skill';
 import { PCRStoreValue } from '../db';
 import clsx from 'clsx';
 
-const useStyles = makeStyles({
-  root: {
-  },
-  tabpanel: {
-    backgroundColor: '#fff',
-  },
-  infoBox: {
-    display: 'flex',
-    flexFlow: 'wrap',
-  },
-  tabs: {
-    margin: '0.25em 0',
-    backgroundColor: '#fff',
-  },
-  text: {
-    padding: '0.5em 0',
-    lineHeight: 1.8,
-    textAlign: 'center',
-  },
-  comment: {},
-  catchCopy: {},
-  selfText: {},
+const useStyles = makeStyles((theme: Theme) => {
+  return {
+    tabpanel: {
+      backgroundColor: '#fff',
+    },
+    infoBox: {
+      display: 'flex',
+      flexFlow: 'wrap',
+    },
+    tabs: {
+      margin: '0.25em 0',
+      backgroundColor: '#fff',
+    },
+    text: {
+      padding: '0.5em 0',
+      lineHeight: 1.8,
+      textAlign: 'center',
+    },
+    subtitle: {
+      flexGrow: 1,
+      paddingRight: '3rem',
+      textAlign: 'center',
+      ...theme.typography.h6,
+    },
+    hidden: {
+      display: 'none',
+    },
+  };
 });
 
 interface CharaDetailProps {
   unitID: number;
 }
 
-// TODO 实现用户可编辑userProfile功能
 function CharaDetail(props: CharaDetailProps) {
   const styles = useStyles();
+  const history = useHistory();
   const dbHelper = useContext(DBHelperContext);
   const userProfileRef = useRef<PCRStoreValue<'user_profile'>>();
   const [detail, setDetail] = useState<CharaDetailData>();
@@ -60,6 +70,10 @@ function CharaDetail(props: CharaDetailProps) {
       }
     });
   }, [dbHelper, props.unitID]);
+
+  const handleBack = useCallback(() => {
+    history.push('/');
+  }, [history]);
 
   const [tabsValue, setTabsValue] = useState(0);
   const handleChangeTabsValue = useCallback((e: React.SyntheticEvent, newValue: number) => {
@@ -146,19 +160,19 @@ function CharaDetail(props: CharaDetailProps) {
       />
     ),
     comment: (
-      <div className={clsx(styles.text, styles.comment)}>
+      <div className={styles.text}>
         {(detail ? detail.charaData.comment : ' \n \n ').split('\n').map((txt, i) => (
           <React.Fragment key={i}>{txt}<br /></React.Fragment>
         ))}
       </div>
     ),
     catchCopy: (
-      <div className={clsx(styles.text, styles.catchCopy)}>
+      <div className={styles.text}>
         {detail ? detail.unitProfile.catch_copy : '???'}
       </div>
     ),
     selfText: (
-      <div className={clsx(styles.text, styles.selfText)}>
+      <div className={styles.text}>
         {(detail ? detail.unitProfile.self_text : '???').split('\n').map((txt, i) => (
           <React.Fragment key={i}>{txt}<br /></React.Fragment>
         ))}
@@ -219,50 +233,59 @@ function CharaDetail(props: CharaDetailProps) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }), [detail, detail && detail.userProfile]);
 
-  const tabsValueMemo = useMemo(() => ({
-    tabs: (
-      <Tabs
-        className={styles.tabs}
-        variant="scrollable"
-        textColor="secondary"
-        indicatorColor="secondary"
-        value={tabsValue}
-        onChange={handleChangeTabsValue}
-      >
-        <Tab label="スキル" />
-        <Tab label="ランク" />
-        <Tab label="ストーリー" />
-        <Tab label="ステータス" />
-        <Tab label="プロフィール" />
-      </Tabs>
-    ),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }), [tabsValue]);
+  const header = useMemo(() => (
+    <Header>
+      <IconButton color="primary" onClick={handleBack}>
+        <ArrowBack />
+      </IconButton>
+      <h6 className={styles.subtitle}>キャラ詳細</h6>
+    </Header>
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  ), [handleBack]);
+
+  const tabs = useMemo(() => (
+    <Tabs
+      className={styles.tabs}
+      variant="scrollable"
+      textColor="secondary"
+      indicatorColor="secondary"
+      value={tabsValue}
+      onChange={handleChangeTabsValue}
+    >
+      <Tab label="スキル" />
+      <Tab label="ランク" />
+      <Tab label="ストーリー" />
+      <Tab label="ステータス" />
+      <Tab label="プロフィール" />
+    </Tabs>
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  ), [tabsValue]);
 
   return (
-    <div className={styles.root}>
+    <>
+      {header}
       {detailMemo.baseInfo}
       {userProfileMemo.userProfile}
-      {tabsValueMemo.tabs}
-      <div className={styles.tabpanel} role="tabpanel" hidden={tabsValue !== 0}>
+      {tabs}
+      <div className={clsx(styles.tabpanel, tabsValue !== 0 && styles.hidden)} role="tabpanel">
         {userProfileMemo.skill}
       </div>
-      <div className={styles.tabpanel} role="tabpanel" hidden={tabsValue !== 1}>
+      <div className={clsx(styles.tabpanel, tabsValue !== 1 && styles.hidden)} role="tabpanel">
         {userProfileMemo.equip}
       </div>
-      <div className={styles.tabpanel} role="tabpanel" hidden={tabsValue !== 2}>
+      <div className={clsx(styles.tabpanel, tabsValue !== 2 && styles.hidden)} role="tabpanel">
         {userProfileMemo.story}
       </div>
-      <div className={styles.tabpanel} role="tabpanel" hidden={tabsValue !== 3}>
+      <div className={clsx(styles.tabpanel, tabsValue !== 3 && styles.hidden)} role="tabpanel">
         {userProfileMemo.status}
         {detailMemo.comment}
       </div>
-      <div className={styles.tabpanel} role="tabpanel" hidden={tabsValue !== 4}>
+      <div className={clsx(styles.tabpanel, tabsValue !== 4 && styles.hidden)} role="tabpanel">
         {detailMemo.profile}
         {detailMemo.catchCopy}
         {detailMemo.selfText}
       </div>
-    </div>
+    </>
   );
 }
 

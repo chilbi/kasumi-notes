@@ -1,13 +1,11 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { Redirect, useRouteMatch, useHistory } from 'react-router-dom';
 import { makeStyles, Theme } from '@material-ui/core/styles';
-import Header from './Header';
 import Footer from './Footer';
 import CharaList from './CharaList';
 import CharaDetail from './CharaDetail';
 import Quest from './Quest';
 import Menu from './Menu';
-import clsx from 'clsx';
 
 function parseParamsUnitID(unit_id: string): number {
   const len = unit_id.length;
@@ -16,46 +14,19 @@ function parseParamsUnitID(unit_id: string): number {
   return parseInt(unit_id);
 }
 
-const useStyles = makeStyles((theme: Theme) => ({
-  main: {
-    width: '100%',
-    height: '100%',
-    overflowY: 'auto',
-    '&>*': {
-      width: '100%',
-      height: '100%',
+const useStyles = makeStyles((theme: Theme) => {
+  return {
+    root: {
+      margin: '0 auto',
+      maxWidth: theme.maxWidth,
+      minHeight: '100vh',
+      backgroundColor: theme.palette.grey[100],
     },
-  },
-  fixedBar: {
-    zIndex: theme.zIndex.appBar,
-    position: 'absolute',
-    width: '100%',
-  },
-  topBar: {
-    top: 0,
-    right: 0,
-    bottom: 'auto',
-    left: 0,
-    height: '3rem',
-    display: 'flex',
-    alignItems: 'center',
-    borderBottom: '1px solid ' + theme.palette.grey[100],
-    backgroundColor: '#fff', // theme.palette.primary.main,
-  },
-  bottomBar: {
-    top: 'auto',
-    right: 0,
-    bottom: 0,
-    left: 0,
-    height: '3.5rem',
-    borderTop: '1px solid ' + theme.palette.grey[100],
-  },
-  subtitle: {
-    flexGrow: 1,
-    textAlign: 'center',
-    ...theme.typography.h6,
-  },
-}));
+    hidden: {
+      display: 'none',
+    },
+  };
+});
 
 function Main() {
   const styles = useStyles();
@@ -79,74 +50,33 @@ function Main() {
   });
   const noMatch = !rootMatch && !charaDetailMatch && !questMatch && !menuMatch;
 
-  const [bottomNavgationValue, setBottomNavigationValue] = useState('/');
-  const handleChangeBottomNavigationValue = useCallback((e: React.SyntheticEvent, value: string) => {
-    history.push(value);
-    setBottomNavigationValue(value);
+  const [value, setValue] = useState(() => rootMatch ? '/' : questMatch ? '/quest' : '/menu');
+  const handleChange = useCallback((e: React.SyntheticEvent, newValue: string) => {
+    history.push(newValue);
+    setValue(newValue);
   }, [history]);
 
-  const [variant, setVariant] = useState<'icon_unit' | 'unit_plate'>('unit_plate');
-  const handleChangeVariant = useCallback(() => {
-    setVariant(prevValue => prevValue === 'icon_unit' ? 'unit_plate' : 'icon_unit');
-  }, []);
-  const handleBack = useCallback(() => {
-    history.goBack();
-  }, [history]);
-
-  const subtitle = useMemo(() => {
-    if (charaDetailMatch) {
-      return 'キャラ詳細';
-    } else if (questMatch) {
-      return '装備一覧';
-    } else if (menuMatch) {
-      return 'メニュー';
-    } else {
-      return 'キャラ一覧';
-    }
-  }, [charaDetailMatch, questMatch, menuMatch]);
-
-  const header = useMemo(() => (
-    <Header
-      classes={{ bar: clsx(styles.fixedBar, styles.topBar), subtitle: styles.subtitle }}
-      variant={variant}
-      subtitle={subtitle}
-      disabledBack={!!rootMatch || !!questMatch || !!menuMatch}
-      disabledVariant={!rootMatch}
-      onBack={handleBack}
-      onChangeVariant={handleChangeVariant}
-    />
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  ), [handleBack, rootMatch, questMatch, menuMatch, subtitle]);
-
-  const footer = useMemo(() => (
-    <Footer
-      className={clsx(styles.fixedBar, styles.bottomBar)}
-      value={bottomNavgationValue}
-      onChange={handleChangeBottomNavigationValue}
-    />
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  ), [bottomNavgationValue, handleChangeBottomNavigationValue]);
+  const footer = useMemo(() => !charaDetailMatch && (
+    <Footer value={value} onChange={handleChange} />
+  ), [value, charaDetailMatch, handleChange]);
 
   return (
-    <>
-      {header}
-      <div id="main" className={styles.main}>
-        <div id="chara-list" hidden={!rootMatch}>
-          <CharaList variant={variant} />
-        </div>
-        <div id="chara-detail" hidden={!charaDetailMatch}>
-          {charaDetailMatch && <CharaDetail unitID={parseParamsUnitID(charaDetailMatch.params.unit_id)} />}
-        </div>
-        <div id="quest" hidden={!questMatch}>
-          <Quest />
-        </div>
-        <div id="menu" hidden={!menuMatch}>
-          <Menu />
-        </div>
+    <div className={styles.root}>
+      <div id="chara-list" className={rootMatch ? undefined : styles.hidden}>
+        <CharaList />
+      </div>
+      <div id="chara-detail" className={charaDetailMatch ? undefined : styles.hidden}>
+        {charaDetailMatch && <CharaDetail unitID={parseParamsUnitID(charaDetailMatch.params.unit_id)} />}
+      </div>
+      <div id="quest" className={questMatch ? undefined : styles.hidden}>
+        <Quest />
+      </div>
+      <div id="menu" className={menuMatch ? undefined : styles.hidden}>
+        <Menu />
       </div>
       {footer}
       {noMatch && <Redirect to="/" />}
-    </>
+    </div>
   );
 }
 

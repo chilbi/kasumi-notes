@@ -15,7 +15,7 @@ function getProperty(this: RarityData, level: number, promotion_level: number): 
 
 export async function getRarityData(db: PCRDB, unit_id: number, rarity: number): Promise<RarityData> {
   const unitRarity = await db.transaction('unit_rarity', 'readonly').store.get([unit_id, rarity]);
-  if (!unitRarity) throw new Error(`objectStore('unit_rarity').get(/*unit_id*/[${unit_id}, /*rarity*/${rarity}]) => undefined`);
+  if (!unitRarity) throw new Error(`objectStore('unit_rarity').get([/*unit_id*/${unit_id}, /*rarity*/${rarity}]) => undefined`);
   return {
     unit_id,
     rarity,

@@ -1,7 +1,5 @@
 export interface WaveGroupData {
-  id: number;
   wave_group_id: number;
-  odds: number;
   enemy_id_1: number;
   drop_gold_1: number;
   drop_reward_id_1: number;

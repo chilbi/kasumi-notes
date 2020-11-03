@@ -2,6 +2,8 @@ import React from 'react';
 import { makeStyles, Theme, StyleRules } from '@material-ui/core/styles';
 import Checkbox from '@material-ui/core/Checkbox';
 import Radio from '@material-ui/core/Radio';
+import ButtonBase from '@material-ui/core/ButtonBase';
+import Dialog from '@material-ui/core/Dialog';
 import SkeletonImage from './SkeletonImage';
 import RankBorder from './RankBorder';
 import Rarities from './Rarities';
@@ -79,8 +81,10 @@ const useStyles = makeStyles((theme: Theme) => {
       border: '1px solid currentcolor',
       borderRadius: '0 0.5em 0.5em 0.5em',
     },
-    iconRoot: {
+    m0125: {
       margin: '0.125rem',
+    },
+    iconRoot: {
       width: iconSize + 'rem',
       height: iconSize + 'rem',
       borderRadius: iconRadius + 'rem',
@@ -111,7 +115,6 @@ const useStyles = makeStyles((theme: Theme) => {
       alignSelf: 'center',
       display: 'flex',
       flexDirection: 'column',
-      margin: '0 auto 0 0.5em',
     },
     uniqueName: {
       fontSize: '1.2em',
@@ -123,13 +126,14 @@ const useStyles = makeStyles((theme: Theme) => {
     dish: {
       display: 'inline-block',
       position: 'relative',
-      margin: len + 'rem',
+      margin: `${y}rem ${len}rem`,
       width: iconSize + 'rem',
       height: iconSize + 'rem',
     },
     dishItem: {
       position: 'absolute',
-      margin: 0,
+      top: 0,
+      left: 0,
       transformOrigin: '50% 50% 0',
     },
     dishUniqueLevel: {
@@ -149,11 +153,14 @@ const useStyles = makeStyles((theme: Theme) => {
       transform: `scale(${lvScalage})`,
       clipPath: `polygon(${pLeft}rem 0, 100% 0, 100% 100%, 0 100%)`,
     },
+    center: {
+      transform: `translate(0, 0)`,
+    },
     top: {
-      transform: `translate(0, -${len}rem)`,
+      transform: `translate(0, -${y}rem)`,
     },
     bottom: {
-      transform: `translate(0, ${len}rem)`,
+      transform: `translate(0, ${y}rem)`,
     },
     left: {
       transform: `translate(-${len}rem, 0)`,
@@ -243,32 +250,43 @@ function CharaEquip(props: CharaEquipProps) {
 
   return (
     <div className={styles.root}>
+      <Dialog open={false} onClose={undefined} />
       <div className={styles.inner}>
         <div className={styles.dish}>
           <SkeletonImage
             key="chara"
-            classes={{ root: clsx(styles.iconRoot, styles.dishItem, styles.top) }}
+            classes={{ root: clsx(styles.iconRoot, styles.dishItem, styles.center) }}
             src={userProfile.unit_id ? getPublicImageURL('icon_unit', getValidID(userProfile.unit_id, userProfile.rarity)) : undefined}
             save
           >
             <RankBorder variant="icon_unit" promotionLevel={promotion_level} />
             <Rarities classes={{ root: styles.iconStars, star: styles.iconStar }} maxRarity={maxRarity} rarity={userProfile.rarity} />
           </SkeletonImage>
+          <ButtonBase key="unique1" className={clsx(styles.dishItem, styles.bottom)}>
+            <SkeletonImage
+              classes={{ root: styles.iconRoot }}
+              src={getPublicImageURL('icon_equipment', uniqueImgName)}
+              save
+            >
+              {unique_enhance_level > 0 && <span className={styles.dishUniqueLevel}>Lv{unique_enhance_level}</span>}
+            </SkeletonImage>
+          </ButtonBase>
           <SkeletonImage
-            key="unique" classes={{ root: clsx(styles.iconRoot, styles.dishItem, styles.bottom) }}
-            src={getPublicImageURL('icon_equipment', uniqueImgName)}
+            key="unique2"
+            classes={{ root: clsx(styles.iconRoot, styles.dishItem, styles.top) }}
+            src={getPublicImageURL('icon_equipment', 'lock_unique')}
             save
-          >
-            {unique_enhance_level > 0 && <span className={styles.dishUniqueLevel}>Lv{unique_enhance_level}</span>}
-          </SkeletonImage>
+          />
           {equipSlots.map((slot, i) => {
             const { imgSrc, maxRarity, rarity } = getSlotData(promotion_level, slot, 'invalid_');
             return (
-              <SkeletonImage key={'equip' + i} classes={{ root: clsx(styles.iconRoot, styles.dishItem, styles[dishMap[i]]) }} src={imgSrc} save>
-                {maxRarity && rarity && (
-                  <Rarities classes={{ root: styles.stars, star: styles.star }} maxRarity={maxRarity} rarity={rarity} />
-                )}
-              </SkeletonImage>
+              <ButtonBase key={'equip' + i} className={clsx(styles.dishItem, styles[dishMap[i]])}>
+                <SkeletonImage classes={{ root: styles.iconRoot }} src={imgSrc} save>
+                  {maxRarity && rarity && (
+                    <Rarities classes={{ root: styles.stars, star: styles.star }} maxRarity={maxRarity} rarity={rarity} />
+                  )}
+                </SkeletonImage>
+              </ButtonBase>
             );
           })}
         </div>
@@ -288,8 +306,10 @@ function CharaEquip(props: CharaEquipProps) {
               />
             </div>
             <div className={styles.equipBox}>
-              <SkeletonImage classes={{ root: styles.iconRoot }} src={getPublicImageURL('icon_equipment', uniqueImgName)} save />
-              <div className={styles.uniqueInfo}>
+              <ButtonBase className={styles.m0125}>
+                <SkeletonImage classes={{ root: styles.iconRoot }} src={getPublicImageURL('icon_equipment', uniqueImgName)} save />
+              </ButtonBase>
+              <div className={clsx(styles.uniqueInfo, styles.m0125)}>
                 <span className={clsx(styles.uniqueName, invalidUnique && styles.invalidColor)}>{uniqueName}</span>
                 {!invalidUnique && <span className={styles.uniqueLevel}>Lv{unique_enhance_level}</span>}
               </div>
@@ -315,12 +335,13 @@ function CharaEquip(props: CharaEquipProps) {
                 </div>
                 <div className={styles.equipBox}>
                   {promotion.equip_slots.map((slot, i) => (
-                    <SkeletonImage
-                      key={i}
-                      classes={{ root: styles.iconRoot }}
-                      src={getSlotData(promotionLevel, slot).imgSrc}
-                      save
-                    />
+                    <ButtonBase key={i} className={styles.m0125}>
+                      <SkeletonImage
+                        classes={{ root: styles.iconRoot }}
+                        src={getSlotData(promotionLevel, slot).imgSrc}
+                        save
+                      />
+                    </ButtonBase>
                   ))}
                 </div>
               </div>

@@ -91,8 +91,38 @@ export function getImageUrl(type: ImagePathType, name: string) {
   return 'https://redive.estertion.win/' + path;
 }
 
-type PublicImagePathType = 'icon_equipment' | 'icon_skill' | 'icon_state' | 'icon_unit' | 'still_unit' | 'thumb_story' | 'unit_plate';
+type PublicImagePathType = 'icon_equipment' | 'icon_skill' | 'icon_state' | 'icon_unit' | 'still_unit' | 'thumb_story' | 'unit_plate' | 'icon_map' | 'icon_item';
 
 export function getPublicImageURL(type: PublicImagePathType, name: string | number): string {
   return `${process.env.PUBLIC_URL}/images/${type}/${type}_${name}.png`;
+}
+
+export type QuestType = 'normal' | 'hard' | 'veryhard' | 'survey';// | 'relic' | 'shrine';
+
+export function mapQuestType(questID: number): QuestType;
+export function mapQuestType(type: QuestType): [number, number];
+export function mapQuestType(arg: number | QuestType): QuestType | [number, number] {
+  if (typeof arg === 'number') {
+    // if (arg > 19000000) return 'shrine';
+    // else if (arg > 18000000) return 'relic';
+    if (arg > 18000000) return 'survey';
+    else if (arg > 13000000) return 'veryhard';
+    else if (arg > 12000000) return 'hard';
+    else return 'normal';
+  } else {
+    switch (arg) {
+      case 'normal':
+        return [11000000, 12000000];
+      case 'hard':
+        return [12000000, 13000000];
+      case 'veryhard':
+        return [13000000, 14000000];
+      case 'survey':
+        return [18000000, 20000000]
+      // case 'relic':
+      //   return [18000000, 19000000];
+      // case 'shrine':
+      //   return [19000000, 20000000];
+    }
+  }
 }

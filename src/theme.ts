@@ -3,14 +3,17 @@ import UDMarugoOtf from './fonts/FOT-UDMarugo_LargePro-B.otf';
 
 declare module '@material-ui/core/styles/createMuiTheme' {
   interface Theme {
+    maxWidth: string;
     rankColor: Record<1 | 2 | 4 | 7 | 11 | 18, string>;
   }
   interface ThemeOptions {
+    maxWidth?: string;
     rankColor?: Record<1 | 2 | 4 | 7 | 11 | 18, string>;
   }
 }
 
 const theme = createMuiTheme({
+  maxWidth: '37.5rem',
   rankColor: {
     1: '#94b5ee',
     2: '#f0ac8a',
@@ -38,12 +41,8 @@ const theme = createMuiTheme({
             fontWeight: 700,
             src: `url(${UDMarugoOtf}) format("opentype")`,
           },
-          '#root': {
-            position: 'relative',
-            padding: '3rem 0 3.5rem 0',
-            maxWidth: '37.5rem',
-            height: '100vh',
-            margin: '0 auto',
+          'body': {
+            backgroundColor: '#616161',
           },
         },
       },

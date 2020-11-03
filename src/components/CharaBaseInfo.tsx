@@ -5,9 +5,9 @@ import { getPublicImageURL, getValidID } from '../DBHelper/helper';
 import { PCRStoreValue } from '../db';
 import Big from 'big.js';
 import clsx from 'clsx';
-import positionBorder1 from '../images/position_border_1.png';
-import positionBorder2 from '../images/position_border_2.png';
-import positionBorder3 from '../images/position_border_3.png';
+import positionBorder1Png from '../images/position_border_1.png';
+import positionBorder2Png from '../images/position_border_2.png';
+import positionBorder3Png from '../images/position_border_3.png';
 
 const PositionText = ['前衛', '中衛', '後衛'];
 
@@ -66,13 +66,13 @@ const useStyles = makeStyles((theme: Theme) => {
       borderImageRepeat: 'repeat stretch',
     },
     position1: {
-      borderImageSource: `url(${positionBorder1})`,
+      borderImageSource: `url(${positionBorder1Png})`,
     },
     position2: {
-      borderImageSource: `url(${positionBorder2})`,
+      borderImageSource: `url(${positionBorder2Png})`,
     },
     position3: {
-      borderImageSource: `url(${positionBorder3})`,
+      borderImageSource: `url(${positionBorder3Png})`,
     },
     nameBox: {
       display: 'flex',

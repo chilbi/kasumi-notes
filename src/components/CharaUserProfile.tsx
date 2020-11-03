@@ -11,8 +11,8 @@ import maxUserProfile from '../DBHelper/maxUserProfile';
 import { PCRStoreValue } from '../db';
 import Big from 'big.js';
 import clsx from 'clsx';
-import loveLevel from '../images/love_level.png';
-import unique from '../images/unique.png';
+import loveLevelPng from '../images/love_level.png';
+import uniquePng from '../images/unique.png';
 
 const useStyles = makeStyles((theme: Theme) => {
   const
@@ -47,7 +47,7 @@ const useStyles = makeStyles((theme: Theme) => {
       flexBasis: '2.5rem',
       paddingLeft: LoveLevelWidth + 'rem',
       lineHeight: 1.25,
-      backgroundImage: `url(${loveLevel})`,
+      backgroundImage: `url(${loveLevelPng})`,
       backgroundRepeat: 'no-repeat',
       backgroundSize: LoveLevelWidth + 'rem ' + LoveLevelHeight + 'rem',
       backgroundPosition: 'left center',
@@ -57,7 +57,7 @@ const useStyles = makeStyles((theme: Theme) => {
       flexBasis: '3rem',
       paddingLeft: uniqueSize + 'rem',
       lineHeight: 1.25,
-      backgroundImage: `url(${unique})`,
+      backgroundImage: `url(${uniquePng})`,
       backgroundRepeat: 'no-repeat',
       backgroundSize: uniqueSize + 'rem ' + uniqueSize + 'rem',
       backgroundPosition: 'left center',

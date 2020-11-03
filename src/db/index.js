@@ -23,12 +23,20 @@ export default function openPCRDB(options = {}) {
         keyPath: 'drop_reward_id',
       });
 
+      db.createObjectStore('equipment_craft', {
+        keyPath: 'equipment_id',
+      });
+
       db.createObjectStore('equipment_data', {
         keyPath: 'equipment_id',
       });
 
       db.createObjectStore('equipment_enhance_rate', {
         keyPath: 'equipment_id',
+      });
+
+      db.createObjectStore('item_data', {
+        keyPath: 'item_id',
       });
 
       db.createObjectStore('quest_data', {
@@ -88,7 +96,7 @@ export default function openPCRDB(options = {}) {
       });
 
       db.createObjectStore('wave_group_data', {
-        keyPath: 'id',
+        keyPath: 'wave_group_id',
       });
 
       const imageDataStore = db.createObjectStore('image_data', {

@@ -3,18 +3,18 @@ import { makeStyles, Theme, StyleRules } from '@material-ui/core/styles';
 import { getRankPoint } from '../DBHelper/helper';
 import Big from 'big.js';
 import clsx from 'clsx';
-import borderIcon1 from '../images/border_icon_1.png';
-import borderIcon2 from '../images/border_icon_2.png';
-import borderIcon4 from '../images/border_icon_4.png';
-import borderIcon7 from '../images/border_icon_7.png';
-import borderIcon11 from '../images/border_icon_11.png';
-import borderIcon18 from '../images/border_icon_18.png';
-import borderPlate1 from '../images/border_plate_1.png';
-import borderPlate2 from '../images/border_plate_2.png';
-import borderPlate4 from '../images/border_plate_4.png';
-import borderPlate7 from '../images/border_plate_7.png';
-import borderPlate11 from '../images/border_plate_11.png';
-import borderPlate18 from '../images/border_plate_18.png';
+import borderIcon1Png from '../images/border_icon_1.png';
+import borderIcon2Png from '../images/border_icon_2.png';
+import borderIcon4Png from '../images/border_icon_4.png';
+import borderIcon7Png from '../images/border_icon_7.png';
+import borderIcon11Png from '../images/border_icon_11.png';
+import borderIcon18Png from '../images/border_icon_18.png';
+import borderPlate1Png from '../images/border_plate_1.png';
+import borderPlate2Png from '../images/border_plate_2.png';
+import borderPlate4Png from '../images/border_plate_4.png';
+import borderPlate7Png from '../images/border_plate_7.png';
+import borderPlate11Png from '../images/border_plate_11.png';
+import borderPlate18Png from '../images/border_plate_18.png';
 
 const useStyles = makeStyles((theme: Theme) => {
   const
@@ -27,12 +27,12 @@ const useStyles = makeStyles((theme: Theme) => {
 
   const borderStyles = {} as StyleRules<string>;
   const borders = {
-    1: [borderIcon1, borderPlate1],
-    2: [borderIcon2, borderPlate2],
-    4: [borderIcon4, borderPlate4],
-    7: [borderIcon7, borderPlate7],
-    11: [borderIcon11, borderPlate11],
-    18: [borderIcon18, borderPlate18],
+    1: [borderIcon1Png, borderPlate1Png],
+    2: [borderIcon2Png, borderPlate2Png],
+    4: [borderIcon4Png, borderPlate4Png],
+    7: [borderIcon7Png, borderPlate7Png],
+    11: [borderIcon11Png, borderPlate11Png],
+    18: [borderIcon18Png, borderPlate18Png],
   };
   const rankColorKeys = Object.keys(borders) as any as (keyof typeof borders)[];
   const borderTypes = [['icon', 0], ['plate', 1]] as const;

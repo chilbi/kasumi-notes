@@ -3,7 +3,7 @@ import { plus, Property } from './property';
 import { getEquipData, EquipData } from './equip';
 import Big from 'big.js';
 
-export type EquipEnhanceStatus = Record</*equipment_id*/number, /*enhance_level*/number>;
+export type EquipEnhanceStatus = Record</*0-5*/number, /*enhance_level*/number>;
 
 export interface PromotionData {
   unit_id: number;
@@ -13,9 +13,9 @@ export interface PromotionData {
 }
 
 function getProperty(this: PromotionData, equipEnhanceStatus: EquipEnhanceStatus): Property<Big> {
-  return plus(this.equip_slots.map(equipData => {
+  return plus(this.equip_slots.map((equipData, i) => {
     if (equipData) {
-      const enhance_level = equipEnhanceStatus[equipData.equipment_id];
+      const enhance_level = equipEnhanceStatus[i];
       if (enhance_level !== undefined && enhance_level > -1) {
         return equipData.getProperty(enhance_level);
       }

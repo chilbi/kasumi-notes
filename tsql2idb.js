@@ -531,7 +531,7 @@ function main() {
     { tableName: 'actual_unit_background', fields: ['bg_id', 'face_type'] },
     { tableName: 'enemy_reward_data', fields: ['drop_count', ...Array.from(Array(5)).map((_, i) => `reward_num_${i + 1}`)] },
     { tableName: 'equipment_craft', fields: ['crafted_cost'] },
-    { tableName: 'equipment_data', fields: ['craft_flg', 'equipment_enhance_point', 'sale_price', 'require_level', 'enable_donation', 'display_item'] },
+    { tableName: 'equipment_data', fields: ['equipment_enhance_point', 'sale_price', 'require_level', 'enable_donation', 'display_item', 'item_type'] },
     { tableName: 'equipment_enhance_rate', fields: ['equipment_name'] },
     {
       tableName: 'quest_data', fields: ['limit_team_level', 'position_x', 'position_y', 'stamina', 'stamina_start',
@@ -694,7 +694,7 @@ function main() {
       { fieldName: 'unique_equip_id', fieldType: 'number' },
       { fieldName: 'unique_enhance_level', fieldType: 'number' },
       { fieldName: 'skill_enhance_status', fieldType: "Record</*skill*/'ub' | 1 | 2 | 'ex', /*enhance_level*/number>" },
-      { fieldName: 'equip_enhance_status', fieldType: 'Record</*equipment_id*/number, /*enhance_level*/number>' },
+      { fieldName: 'equip_enhance_status', fieldType: 'Record</*0-5*/number, /*enhance_level*/number>' },
       { fieldName: 'love_level_status', fieldType: 'Record</*chara_id*/number, /*love_level*/number>' },
     ],
     indexes: [

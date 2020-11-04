@@ -3,6 +3,7 @@ export interface EquipmentData {
   equipment_name: string;
   description: string;
   promotion_level: number;
+  craft_flg: number;
   hp: number;
   atk: number;
   magic_str: number;
@@ -20,7 +21,6 @@ export interface EquipmentData {
   energy_recovery_rate: number;
   energy_reduce_rate: number;
   accuracy: number;
-  item_type: number;
 }
 
 declare const data: EquipmentData[];

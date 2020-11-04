@@ -39,8 +39,9 @@ async function getInit(db: PCRDB, user_name: string, unit_id: number, memo?: Sto
         ex: maxUserProfile.level,
       };
       const equip_enhance_status: EquipEnhanceStatus = {};
-      for (let slot of promotionData.equip_slots) {
-        if (slot) equip_enhance_status[slot.equipment_id] = slot.max_enhance_level;
+      for (let i = 0; i < 6; i++) {
+        const slot = promotionData.equip_slots[i];
+        if (slot) equip_enhance_status[i] = slot.max_enhance_level;
       }
       const love_level_status: LoveLevelStatus = {};
       love_level_status[storyStatusData.self_story.chara_id] = storyStatusData.self_story.max_love_level;

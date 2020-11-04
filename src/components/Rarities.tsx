@@ -61,12 +61,11 @@ function Rarities(props: RaritiesProps) {
     <div ref={rootRef} className={clsx(styles.root, classes.root)}>
       {starClassNames.map((name, i) => {
         const newRarity = i + 1;
-        const isDiff = rarity !== newRarity;
         return (
           <div
             key={i}
-            className={clsx(styles.star, onChange && isDiff && styles.pointer, classes.star, name)}
-            onClick={onChange && (() => isDiff && onChange(newRarity))}
+            className={clsx(styles.star, onChange && styles.pointer, classes.star, name)}
+            onClick={onChange && (() => onChange(rarity === newRarity ? newRarity - 1 : newRarity))}
           />
         );
       })}

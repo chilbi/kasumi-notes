@@ -1,12 +1,12 @@
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 import { makeStyles, Theme, StyleRules } from '@material-ui/core/styles';
 import Checkbox from '@material-ui/core/Checkbox';
 import Radio from '@material-ui/core/Radio';
 import ButtonBase from '@material-ui/core/ButtonBase';
-import Dialog from '@material-ui/core/Dialog';
 import SkeletonImage from './SkeletonImage';
 import RankBorder from './RankBorder';
 import Rarities from './Rarities';
+import EquipDetail from './EquipDetail';
 import { EquipData } from '../DBHelper/equip';
 import { PromotionData } from '../DBHelper/promotion';
 import { UniqueEquipData } from '../DBHelper/unique_equip';
@@ -198,40 +198,50 @@ interface CharaEquipProps {
   promotions?: PromotionData[];
   uniqueEquip?: UniqueEquipData;
   userProfile?: PCRStoreValue<'user_profile'>;
+  onChangeEquip?: (equipEnhanceLevel: number, i: number) => void;
   onChangeUnique?: (uniqueEnhanceLevel: number) => void;
   onChangePromotion?: (promotionLevel: number) => void;
 }
 
+interface CharaEquipState {
+  equipData?: EquipData;
+  uniqueEquipData?: UniqueEquipData;
+  enhanceLevel?: number;
+  onChangeEnhance?: (enhanceLevel: number) => void;
+}
+
 function CharaEquip(props: CharaEquipProps) {
-  const { maxRarity = 5, promotions = [], uniqueEquip, userProfile = maxUserProfile, onChangeUnique, onChangePromotion } = props;
+  const { maxRarity = 5, promotions = [], uniqueEquip, userProfile = maxUserProfile, onChangeEquip, onChangeUnique, onChangePromotion } = props;
   const { promotion_level, equip_enhance_status, unique_enhance_level } = userProfile;
   const styles = useStyles();
+  
+  const [state, setState] = useState<CharaEquipState>();
 
-  const equipSlots = promotions.length < 1
+  const handleClose = useCallback(() => {
+    setState(undefined);
+  }, []);
+
+  const equipSlots: (EquipData | undefined)[] = promotions.length < 1
     ? Array(6).fill(undefined)
     : promotions.find(item => item.promotion_level === promotion_level)!.equip_slots;
 
-  const getSlotData = (promotionLevel: number, slot: EquipData | undefined, invalidSrc = '') => {
+  const getSlotData = (promotionLevel: number, slot: EquipData | undefined, i: number) => {
     let srcName: number | string = 999999;
-    let maxRarity: number | undefined = undefined;
-    let rarity: number | undefined = undefined;
+    let maxEnhanceLevel = 5;
+    let enhanceLevel = 5;
+    let invalid = true;
+    let isCurr = false;
     if (slot) {
-      let enhanceLevel = equip_enhance_status[slot.equipment_id];
-      enhanceLevel = enhanceLevel === undefined ? -1 : enhanceLevel;
-      const isCurrPromotion = promotionLevel === promotion_level;
-      const invalid = (isCurrPromotion && enhanceLevel < 0) || (promotionLevel !== promotion_level);
-      if (invalid) {
-        srcName = invalidSrc + slot.equipment_id;
-      } else {
-        srcName = slot.equipment_id;
-        if (isCurrPromotion) {
-          maxRarity = slot.max_enhance_level;
-          rarity = enhanceLevel;
-        }
-      }
+      let enhance_level = equip_enhance_status[i];
+      enhance_level = enhance_level === undefined ? -1 : enhance_level;
+      isCurr = promotionLevel === promotion_level;
+      invalid = (isCurr && enhance_level < 0);
+      maxEnhanceLevel = slot.max_enhance_level;
+      enhanceLevel = enhance_level;
+      srcName = (invalid ? 'invalid_' : '') + slot.equipment_id;
     }
-    const imgSrc = getPublicImageURL('icon_equipment', srcName)
-    return { imgSrc, maxRarity, rarity };
+    const imgSrc = getPublicImageURL('icon_equipment', srcName);
+    return { imgSrc, invalid, maxEnhanceLevel, enhanceLevel };
   };
 
   let uniqueImgName: string | number = 'lock_unique';
@@ -239,7 +249,7 @@ function CharaEquip(props: CharaEquipProps) {
   let invalidUnique = true;
   const hasUnique = !!uniqueEquip;
   if (hasUnique) {
-    uniqueImgName = uniqueEquip!.unique_equipment_data.equipment_id;
+    uniqueImgName = uniqueEquip!.equipment_id;
     uniqueName = uniqueEquip!.unique_equipment_data.equipment_name;
     invalidUnique = false;
     if (unique_enhance_level < 1) {
@@ -247,10 +257,12 @@ function CharaEquip(props: CharaEquipProps) {
       invalidUnique = true;
     }
   }
+  const handleChangeUnique = useCallback(() => {
+    setState({ uniqueEquipData: uniqueEquip, enhanceLevel: unique_enhance_level, onChangeEnhance: onChangeUnique })
+  }, [onChangeUnique, uniqueEquip, unique_enhance_level]);
 
   return (
     <div className={styles.root}>
-      <Dialog open={false} onClose={undefined} />
       <div className={styles.inner}>
         <div className={styles.dish}>
           <SkeletonImage
@@ -262,7 +274,7 @@ function CharaEquip(props: CharaEquipProps) {
             <RankBorder variant="icon_unit" promotionLevel={promotion_level} />
             <Rarities classes={{ root: styles.iconStars, star: styles.iconStar }} maxRarity={maxRarity} rarity={userProfile.rarity} />
           </SkeletonImage>
-          <ButtonBase key="unique1" className={clsx(styles.dishItem, styles.bottom)}>
+          <ButtonBase key="unique1" className={clsx(styles.dishItem, styles.bottom)} disabled={!hasUnique} onClick={handleChangeUnique}>
             <SkeletonImage
               classes={{ root: styles.iconRoot }}
               src={getPublicImageURL('icon_equipment', uniqueImgName)}
@@ -278,12 +290,19 @@ function CharaEquip(props: CharaEquipProps) {
             save
           />
           {equipSlots.map((slot, i) => {
-            const { imgSrc, maxRarity, rarity } = getSlotData(promotion_level, slot, 'invalid_');
+            const { imgSrc, invalid, maxEnhanceLevel, enhanceLevel } = getSlotData(promotion_level, slot, i);
+            const handleClick = () => {
+              setState({
+                equipData: slot,
+                enhanceLevel: enhanceLevel,
+                onChangeEnhance: onChangeEquip && (enhanceLevel => onChangeEquip(enhanceLevel, i)),
+              });
+            };
             return (
-              <ButtonBase key={'equip' + i} className={clsx(styles.dishItem, styles[dishMap[i]])}>
+              <ButtonBase key={'equip' + i} className={clsx(styles.dishItem, styles[dishMap[i]])} disabled={!slot} onClick={handleClick}>
                 <SkeletonImage classes={{ root: styles.iconRoot }} src={imgSrc} save>
-                  {maxRarity && rarity && (
-                    <Rarities classes={{ root: styles.stars, star: styles.star }} maxRarity={maxRarity} rarity={rarity} />
+                  {!invalid && (
+                    <Rarities classes={{ root: styles.stars, star: styles.star }} maxRarity={maxEnhanceLevel} rarity={enhanceLevel} />
                   )}
                 </SkeletonImage>
               </ButtonBase>
@@ -306,7 +325,7 @@ function CharaEquip(props: CharaEquipProps) {
               />
             </div>
             <div className={styles.equipBox}>
-              <ButtonBase className={styles.m0125}>
+              <ButtonBase className={styles.m0125} disabled={!hasUnique} onClick={handleChangeUnique}>
                 <SkeletonImage classes={{ root: styles.iconRoot }} src={getPublicImageURL('icon_equipment', uniqueImgName)} save />
               </ButtonBase>
               <div className={clsx(styles.uniqueInfo, styles.m0125)}>
@@ -335,10 +354,10 @@ function CharaEquip(props: CharaEquipProps) {
                 </div>
                 <div className={styles.equipBox}>
                   {promotion.equip_slots.map((slot, i) => (
-                    <ButtonBase key={i} className={styles.m0125}>
+                    <ButtonBase key={i} className={styles.m0125} disabled={!slot} onClick={slot ? (() => setState({ equipData: slot })) : undefined}>
                       <SkeletonImage
                         classes={{ root: styles.iconRoot }}
-                        src={getSlotData(promotionLevel, slot).imgSrc}
+                        src={getSlotData(promotionLevel, slot, i).imgSrc}
                         save
                       />
                     </ButtonBase>
@@ -349,6 +368,15 @@ function CharaEquip(props: CharaEquipProps) {
           })}
         </div>
       </div>
+      {state && (
+        <EquipDetail
+          equipData={state.equipData}
+          uniqueEquipData={state.uniqueEquipData}
+          enhanceLevel={state.enhanceLevel}
+          onChangeEnhance={state.onChangeEnhance}
+          onBack={handleClose}
+        />
+      )}
     </div>
   );
 }

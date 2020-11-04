@@ -109,6 +109,13 @@ function CharaDetail(props: CharaDetailProps) {
     }
   }, [detail]);
 
+  const handleChangeEquip = useCallback((equip_enhance_level: number, i: number) => {
+    if (detail) {
+      detail.userProfile.equip_enhance_status[i] = equip_enhance_level;
+      setDetail({ ...detail });
+    }
+  }, [detail]);
+
   const handleChangeUnique = useCallback((unique_enhancle_level: number) => {
     if (detail) {
       detail.userProfile.unique_enhance_level = unique_enhancle_level;
@@ -128,8 +135,9 @@ function CharaDetail(props: CharaDetailProps) {
     const _change = (promotionStatusData: PromotionStatusData) => {
       const promotionData = detail.promotions.find(item => item.promotion_level === promotion_level)!;
       const equip_enhance_status: EquipEnhanceStatus = {};
-      for (let slot of promotionData.equip_slots) {
-        if (slot) equip_enhance_status[slot.equipment_id] = slot.max_enhance_level;
+      for (let i = 0; i < 6; i++) {
+        const slot = promotionData.equip_slots[i];
+        if (slot) equip_enhance_status[i] = slot.max_enhance_level;
       }
       detail.userProfile.equip_enhance_status = equip_enhance_status;
       detail.userProfile.promotion_level = promotion_level;
@@ -214,6 +222,7 @@ function CharaDetail(props: CharaDetailProps) {
         promotions={detail && detail.promotions}
         uniqueEquip={detail && detail.propertyData[4]}
         userProfile={detail && detail.userProfile}
+        onChangeEquip={handleChangeEquip}
         onChangeUnique={handleChangeUnique}
         onChangePromotion={handleChangePromotion}
       />

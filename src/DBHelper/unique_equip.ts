@@ -4,6 +4,7 @@ import Big from 'big.js';
 
 export interface UniqueEquipData {
   unit_id: number;
+  equipment_id: number;
   unique_equipment_data: PCRStoreValue<'unique_equipment_data'>;
   unique_equipment_enhance_rate: PCRStoreValue<'unique_equipment_enhance_rate'>;
   getProperty(enhance_level: number): Property<Big>;
@@ -31,6 +32,7 @@ export async function getUniqueEquipData(db: PCRDB, unit_id: number, unique_equi
   if (!uniqueEquipmentEnhanceRate) throw new Error(`objectStore('unique_equipment_enhance_rate').get(/*unique_equip_id*/${unique_equip_id}) => undefined`);
   return {
     unit_id,
+    equipment_id: uniqueEquipmentData.equipment_id,
     unique_equipment_data: uniqueEquipmentData,
     unique_equipment_enhance_rate: uniqueEquipmentEnhanceRate,
     getProperty,

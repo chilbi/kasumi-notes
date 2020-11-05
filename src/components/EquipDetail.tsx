@@ -45,19 +45,29 @@ const useStyles = makeStyles((theme: Theme) => {
       flexGrow: 1,
       display: 'flex',
       flexDirection: 'column',
-      margin: '0 0.5em',
       justifyContent: 'space-between',
+      margin: '0 0 0 0.5em',
+    },
+    controlBox: {
+      display: 'flex',
+    },
+    control: {
+      flexGrow: 1,
+      alignSelf: 'center',
+      margin: '0 0.5em 0 0',
     },
     name: {
-      fontSize: '1.2em',
+      fontSize: '1.1em',
     },
     genre: {
+      fontSize: '0.9em',
       marginLeft: '0.25em',
       color: theme.palette.grey[600],
     },
     desc: {
       margin: '0.25em 0 0 0',
       padding: '0.5em',
+      textAlign: 'center',
       backgroundColor: '#fff',
     },
     iconRoot: {
@@ -70,6 +80,10 @@ const useStyles = makeStyles((theme: Theme) => {
       margin: '0.25em 0 0 0',
       padding: '0.25em',
       backgroundColor: '#fff',
+    },
+    checkbox: {
+      margin: 0,
+      padding: 0,
     },
     subtitle: {
       flexGrow: 1,
@@ -148,44 +162,51 @@ function EquipDetail(props: EquipDetailProps) {
             <span className={styles.name}>{name}</span>
             <span className={styles.genre}>（{genre}）</span>
           </div>
-          {equipData && equipData.max_enhance_level > 0 && (
-            <Rarities
-              maxRarity={equipData.max_enhance_level}
-              rarity={level}
-              onChange={value => {
-                onChangeEnhance && onChangeEnhance(value);
-                setLevel(value);
-              }}
-            />)
-          }
-          {uniqueEquipData && (
-            <DebouncedSlider
-              orientation="horizontal"
-              valueLabelDisplay="auto"
-              marks={marks.unique}
-              min={min + 1}
-              max={max}
-              defaultValue={level}
-              onDebouncedChange={value => {
-                onChangeEnhance && onChangeEnhance(value);
-                setLevel(value);
-              }}
-            />
-          )}
+          <div className={styles.controlBox}>
+            {equipData && equipData.max_enhance_level > 0 && (
+              <Rarities
+                classes={{ root: styles.control }}
+                maxRarity={equipData.max_enhance_level}
+                rarity={level}
+                onChange={value => {
+                  onChangeEnhance && onChangeEnhance(value);
+                  setLevel(value);
+                }}
+              />)
+            }
+            {uniqueEquipData && (
+              <DebouncedSlider
+                classes={{ root: styles.control }}
+                orientation="horizontal"
+                valueLabelDisplay="auto"
+                marks={marks.unique}
+                min={min + 1}
+                max={max}
+                defaultValue={level}
+                onDebouncedChange={value => {
+                  onChangeEnhance && onChangeEnhance(value);
+                  setLevel(value);
+                }}
+              />
+            )}
+            {enhanceLevel !== undefined && onChangeEnhance && (
+              <Checkbox
+                classes={{ root: styles.checkbox }}
+                checked={level > min}
+                onChange={() => {
+                  const newLevel = level > min ? min : max;
+                  onChangeEnhance(newLevel);
+                  setLevel(newLevel);
+                }}
+              />
+            )}
+          </div>
         </div>
-        {enhanceLevel !== undefined && onChangeEnhance && (
-          <Checkbox
-            checked={level > min}
-            onChange={() => {
-              const newLevel = level > min ? min : max;
-              onChangeEnhance(newLevel);
-              setLevel(newLevel);
-            }}
-          />
-        )}
       </div>
       <div className={styles.desc}>
-        {desc}
+        {desc.split('\n').map((txt, i) => (
+          <React.Fragment key={i}>{txt}<br /></React.Fragment>
+        ))}
       </div>
       <div className={styles.property}>
         <CharaStatus property={property} partial />

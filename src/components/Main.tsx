@@ -4,8 +4,6 @@ import { makeStyles, Theme } from '@material-ui/core/styles';
 import Footer from './Footer';
 import CharaList from './CharaList';
 import CharaDetail from './CharaDetail';
-import Quest from './Quest';
-import Menu from './Menu';
 
 function parseParamsUnitID(unit_id: string): number {
   const len = unit_id.length;
@@ -69,10 +67,10 @@ function Main() {
         {charaDetailMatch && <CharaDetail unitID={parseParamsUnitID(charaDetailMatch.params.unit_id)} />}
       </div>
       <div id="quest" className={questMatch ? undefined : styles.hidden}>
-        <Quest />
+        quest
       </div>
       <div id="menu" className={menuMatch ? undefined : styles.hidden}>
-        <Menu />
+        menu
       </div>
       {footer}
       {noMatch && <Redirect to="/" />}

@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useState, useCallback, useLayoutEffect } from 'react';
 import { makeStyles, Theme, StyleRules } from '@material-ui/core/styles';
 import Checkbox from '@material-ui/core/Checkbox';
 import Radio from '@material-ui/core/Radio';
@@ -189,6 +189,14 @@ const useStyles = makeStyles((theme: Theme) => {
     uniqueColor: {
       color: '#d34bef',
     },
+    hiddenScroll: {
+      position: 'fixed',
+      top: 0,
+      right: 0,
+      bottom: 'auto',
+      left: 0,
+      overflow: 'hidden',
+    },
     ...rankStyles,
   };
 });
@@ -220,6 +228,13 @@ function CharaEquip(props: CharaEquipProps) {
   const handleClose = useCallback(() => {
     setState(undefined);
   }, []);
+  
+  useLayoutEffect(() => {
+    if (state) document.body.classList.add(styles.hiddenScroll);
+    else document.body.classList.remove(styles.hiddenScroll);
+    return () => document.body.classList.remove(styles.hiddenScroll);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state]);
 
   const equipSlots: (EquipData | undefined)[] = promotions.length < 1
     ? Array(6).fill(undefined)

@@ -23,6 +23,7 @@ const useStyles = makeStyles((theme: Theme) => {
       borderTop: '1px solid ' + theme.palette.grey[100],
     },
     offset: {
+      flexShrink: 0,
       height: h,
     },
   };

@@ -36,13 +36,13 @@
 export function getRankPoint(p: number) {
   if (p >= 18) {
     return 18;
-  } else if (p >= 11 && p < 18) {
+  } else if (p >= 11) {
     return 11;
-  } else if (p >= 7 && p < 11) {
+  } else if (p >= 7) {
     return 7;
-  } else if (p >= 4 && p < 7) {
+  } else if (p >= 4) {
     return 4;
-  } else if(p >= 2 && p < 4) {
+  } else if(p >= 2) {
     return 2;
   } else {
     return 1;
@@ -97,32 +97,71 @@ export function getPublicImageURL(type: PublicImagePathType, name: string | numb
   return `${process.env.PUBLIC_URL}/images/${type}/${type}_${name}.png`;
 }
 
-export type QuestType = 'normal' | 'hard' | 'veryhard' | 'survey';// | 'relic' | 'shrine';
+export function getRewardRarity(rewardID: number): string  {
+  const str = rewardID.toString();
+  return str[str.length - 4];
+}
+
+export type Range = [number, number];
+
+export type QuestType = 'N'/*Normal*/ | 'H'/*Hard*/ | 'VH'/*Very Hard*/ | 'S'/*Survey*/;
+
+const mapRange: Record<string, Range> = {
+  'N1': [11001001, 11004013],
+  'N2': [11001008, 11008015],
+  'N3': [11004003, 11013017],
+  'N4': [11006013, 11024014],
+  'N5': [11016004, 12000000],
+  'N6': [11037004, 12000000],
+  'H1': [12001001, 13000000],
+  'H2': [12001001, 12008003],
+  'H3': [12003001, 12013003],
+  'H4': [12007001, 12024003],
+  'H5': [12016001, 13000000],
+  'H6': [12037001, 13000000],
+};
+
+export function mergeRanges(ranges: Range[], a = 0, b = 1, length = ranges.length): Range[] {
+  if (a + 1 === length) return ranges;
+  const
+    [a0, a1] = ranges[a],
+    [b0, b1] = ranges[b];
+  if (a1 < b0 || b1 < a0) {
+    if (b + 1 === length)
+      return mergeRanges(ranges, a + 1, a + 2, length);
+    else
+      return mergeRanges(ranges, a, b + 1, length);
+  } else {
+    ranges[b] = [Math.min(a0, a1, b0, b1), Math.max(a0, a1, b0, b1)];
+    ranges.splice(a, 1);
+    return mergeRanges(ranges, 0, 1, length - 1);
+  }
+}
+
+export function getRange(type: QuestType, rewardID: number): Range {
+  if (type === 'VH' || type === 'S') return mapQuestType(type);
+  const rewardRarity = getRewardRarity(rewardID);
+  return mapRange[type + rewardRarity];
+}
 
 export function mapQuestType(questID: number): QuestType;
-export function mapQuestType(type: QuestType): [number, number];
-export function mapQuestType(arg: number | QuestType): QuestType | [number, number] {
+export function mapQuestType(type: QuestType): Range;
+export function mapQuestType(arg: number | QuestType): QuestType | Range {
   if (typeof arg === 'number') {
-    // if (arg > 19000000) return 'shrine';
-    // else if (arg > 18000000) return 'relic';
-    if (arg > 18000000) return 'survey';
-    else if (arg > 13000000) return 'veryhard';
-    else if (arg > 12000000) return 'hard';
-    else return 'normal';
+    if (arg > 18000000) return 'S';
+    else if (arg > 13000000) return 'VH';
+    else if (arg > 12000000) return 'H';
+    else return 'N';
   } else {
     switch (arg) {
-      case 'normal':
-        return [11000000, 12000000];
-      case 'hard':
-        return [12000000, 13000000];
-      case 'veryhard':
-        return [13000000, 14000000];
-      case 'survey':
-        return [18000000, 20000000]
-      // case 'relic':
-      //   return [18000000, 19000000];
-      // case 'shrine':
-      //   return [19000000, 20000000];
+      case 'N':
+        return [11001001, 12000000];
+      case 'H':
+        return [12001001, 13000000];
+      case 'VH':
+        return [13001001, 14000000];
+      case 'S':
+        return [18001001, 20000000];
     }
   }
 }

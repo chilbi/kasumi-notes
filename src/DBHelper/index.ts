@@ -6,11 +6,12 @@ import { getUnitSkillData, UnitSkillData } from './skill';
 import { getUniqueEquipData, UniqueEquipData } from './unique_equip';
 import { getPromotionData, PromotionData } from './promotion';
 import { getStoryStatusData, StoryStatusMemo, StoryStatusData } from './story_status';
-import { plus, Property } from './property';
+import { getEquipCraft, EquipCraft } from './equip_craft';
 import { getQuestList, QuestData } from './quest';
+import { plus, Property } from './property';
 import ImageData from './ImageData';
 import maxUserProfile from './maxUserProfile';
-import { QuestType } from './helper';
+import { Range } from './helper';
 import Big from 'big.js';
 
 export type PropertyData = [RarityData, PromotionStatusData, PromotionData, StoryStatusData, UniqueEquipData | undefined];
@@ -131,8 +132,14 @@ class DBHelper extends ImageData {
     return getPromotionStatusData(this.db, unit_id, promotion_level);
   }
 
-  getQuestList(type?: QuestType): Promise<QuestData[]> {
-    return getQuestList(this.db, type);
+  getEquipCraft(equipment_id: number): Promise<EquipCraft> {
+    return getEquipCraft(this.db, equipment_id);
+  }
+
+  getQuestList(range: Range): Promise<QuestData[]>;
+  getQuestList(ranges: Range[]): Promise<QuestData[][]>
+  getQuestList(arg: Range | Range[]): Promise<QuestData[] | QuestData[][]> {
+    return getQuestList(this.db, arg as any);
   }
 
   protected getPromotions(unit_id: number): Promise<PromotionData[]> {

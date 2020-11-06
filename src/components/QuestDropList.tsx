@@ -1,10 +1,12 @@
 import React from 'react';
-import { makeStyles, Theme, StyleRules } from '@material-ui/core/styles'
+import { makeStyles, alpha, Theme } from '@material-ui/core/styles'
 import SkeletonImage from './SkeletonImage';
+import QuestLabel from './QuestLabel';
 import useDBHelper from '../hooks/useDBHelper';
-import { getPublicImageURL, mapQuestType } from '../DBHelper/helper';
-import clsx from 'clsx';
+import { getPublicImageURL, getRange, mergeRanges, mapQuestType, QuestType, Range } from '../DBHelper/helper';
+import { QuestData } from '../DBHelper/quest';
 import Big from 'big.js';
+import clsx from 'clsx';
 import manaPng from '../images/mana.png';
 
 const useStyles = makeStyles((theme: Theme) => {
@@ -12,28 +14,12 @@ const useStyles = makeStyles((theme: Theme) => {
     rem = 16,
     scalage = 0.375,
     iconSize = Big(128).times(scalage).div(rem),
-    manaSize = Big(28).times(scalage).div(rem);
-  
-  const colors = [
-    ['normal', '#0e87c7'],
-    ['hard', '#c70e4e'],
-    ['veryhard', '#8d0ec7'],
-    ['survey', '#0ebac7']
-  ];
-
-  const bgStyles: StyleRules = {};
-  for (let color of colors) {
-    bgStyles[color[0]] = {
-      backgroundColor: color[1],
-    };
-  }
+    manaSize = Big(28).times(scalage).div(rem),
+    iconRadius = Big(12).times(scalage).div(rem);
 
   return {
-    root: {
-      padding: '0.5em',
-    },
     item: {
-      margin: '0.5em 0 0 0',
+      margin: '0.25em 0 0 0',
       backgroundColor: '#fff',
       '&:first-child': {
         margin: 0,
@@ -45,11 +31,10 @@ const useStyles = makeStyles((theme: Theme) => {
     },
     label: {
       display: 'inline-block',
-      margin: '0 0 0 0.25em',
+      margin: '0 0 0 0.5em',
       padding: '0 0.25em',
       borderRadius: '0.25em',
       color: '#fff',
-      backgroundColor: theme.palette.primary.dark,
     },
     name: {
       margin: '0 0 0 0.25em',
@@ -70,7 +55,7 @@ const useStyles = makeStyles((theme: Theme) => {
     dropList: {
       display: 'flex',
       flexWrap: 'wrap',
-      padding: '0.125em',
+      padding: '0.25em',
     },
     dropItem: {
       display: 'inline-block',
@@ -79,6 +64,7 @@ const useStyles = makeStyles((theme: Theme) => {
     dropIcon: {
       width: iconSize + 'rem',
       height: iconSize + 'rem',
+      borderRadius: iconRadius + 'rem',
     },
     odds: {
       display: 'inline-block',
@@ -86,33 +72,65 @@ const useStyles = makeStyles((theme: Theme) => {
       fontFamily: '"Arial","Microsoft YaHei",sans-serif',
       textAlign: 'center',
     },
-    ...bgStyles,
+    selected: {
+      backgroundColor: alpha(theme.palette.secondary.main, 0.35),
+    },
   };
 });
 
-interface QuestProps {}
+interface QuestDropListProps {
+  classes?: Partial<Record<'root', string>>;
+  search: Set<number>;
+  types: QuestType[];
+}
 
-function Quest(props: QuestProps) {
+function QuestDropList(props: QuestDropListProps) {
+  const { classes = {}, search, types } = props;
   const styles = useStyles();
-  const questList = useDBHelper(dbHelper => dbHelper.getQuestList('veryhard'), []);
+
+  const questList = useDBHelper(dbHelper => {
+    if (search.size < 1 || types.length < 1)
+      return Promise.resolve(undefined);
+    const ranges: Range[] = [];
+    const values: number[] = [];
+    for (let type of types) {
+      for (let rewardID of search) {
+        ranges.push(getRange(type, rewardID));
+        values.push(rewardID);
+      }
+    }
+    if (ranges.length < 1) return Promise.resolve(undefined);
+    return dbHelper.getQuestList(mergeRanges(ranges)).then(data => {
+      const result: QuestData[] = [];
+      for (let list of data) {
+        for (let item of list) {
+          if (values.some(value => item.hasReward(value))) {
+            result.push(item);
+          }
+        }
+      }
+      return result.sort((a, b) => b.quest_id - a.quest_id);
+    });
+  }, [search, types]);
+
   if (!questList) return null;
-  // console.log(questList);
+
   return (
-    <div className={styles.root}>
-      {questList.map((quest, i) => {
+    <div className={classes.root}>
+      {questList.map(quest => {
         const { drop_gold, drop_reward } = quest.drop_data;
         if (drop_reward.length < 1) return null;
-        const label = mapQuestType(quest.quest_id);
+        const type = mapQuestType(quest.quest_id);
         return (
-          <div key={i} className={styles.item}>
+          <div key={quest.quest_id} className={styles.item}>
             <div className={styles.titleBox}>
-              <span className={clsx(styles.label, styles[label as keyof typeof styles])}>{label}</span>
+              <QuestLabel type={type} />
               <span className={styles.name}>{quest.quest_name}</span>
               {drop_gold > 0 && <span className={styles.mana}>{drop_gold}</span>}
             </div>
             <div className={styles.dropList}>
               {drop_reward.map(drop => (
-                <div key={drop.reward_id} className={styles.dropItem}>
+                <div key={drop.reward_id} className={clsx(styles.dropItem, search.has(drop.reward_id) && styles.selected)}>
                   <SkeletonImage classes={{ root: styles.dropIcon }} src={getPublicImageURL(drop.reward_type === 4 ? 'icon_equipment' : 'icon_item', drop.reward_id)} />
                   <span className={styles.odds}>{drop.odds}%</span>
                 </div>
@@ -125,4 +143,4 @@ function Quest(props: QuestProps) {
   );
 }
 
-export default Quest;
+export default QuestDropList;

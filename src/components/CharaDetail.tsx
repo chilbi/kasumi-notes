@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo, useContext, useEffect, useRef } from 'react';
+import React, { Fragment, useContext, useRef, useState, useCallback, useMemo, useEffect } from 'react';
 import { makeStyles, Theme } from '@material-ui/core/styles';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
@@ -81,7 +81,7 @@ function CharaDetail(props: CharaDetailProps) {
   }, []);
 
   const handleChangeRarity = useCallback((rarity: number) => {
-    if (dbHelper && detail) dbHelper.getRarityData(detail.charaData.unit_id, rarity).then(rarityData => {
+    if (dbHelper && detail && rarity > 0) dbHelper.getRarityData(detail.charaData.unit_id, rarity).then(rarityData => {
       detail.userProfile.rarity = rarity;
       detail.propertyData[0] = rarityData;
       setDetail({ ...detail });
@@ -170,7 +170,7 @@ function CharaDetail(props: CharaDetailProps) {
     comment: (
       <div className={styles.text}>
         {(detail ? detail.charaData.comment : ' \n \n ').split('\n').map((txt, i) => (
-          <React.Fragment key={i}>{txt}<br /></React.Fragment>
+          <Fragment key={i}>{txt}<br /></Fragment>
         ))}
       </div>
     ),
@@ -182,7 +182,7 @@ function CharaDetail(props: CharaDetailProps) {
     selfText: (
       <div className={styles.text}>
         {(detail ? detail.unitProfile.self_text : '???').split('\n').map((txt, i) => (
-          <React.Fragment key={i}>{txt}<br /></React.Fragment>
+          <Fragment key={i}>{txt}<br /></Fragment>
         ))}
       </div>
     ),

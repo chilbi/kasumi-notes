@@ -1,5 +1,4 @@
-import React from 'react';
-import { makeStyles, Theme } from '@material-ui/core/styles';
+import React, { makeStyles, Theme } from '@material-ui/core/styles';
 import SkeletonImage from './SkeletonImage';
 import { getPublicImageURL, getValidID } from '../DBHelper/helper';
 import { PCRStoreValue } from '../db';

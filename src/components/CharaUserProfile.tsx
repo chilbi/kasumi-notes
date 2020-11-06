@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useRef, useState, useCallback } from 'react';
 import { makeStyles, Theme, StyleRules } from '@material-ui/core/styles';
 import ButtonBase from '@material-ui/core/ButtonBase';
 import Popover from '@material-ui/core/Popover';

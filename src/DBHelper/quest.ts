@@ -1,7 +1,7 @@
 import { PCRDB, PCRStoreValue } from '../db';
 import { getWaveGroupData, WaveGroupData } from './wave_group';
 import { RewardData } from './enemy_reward_data';
-import { mapQuestType, QuestType } from './helper';
+import { Range } from './helper';
 
 export interface DropData {
   drop_gold: number;
@@ -17,6 +17,11 @@ export interface QuestData {
   // reward_images: number[]; // 1-5
   // wave_group_data: WaveGroupData[]; // 1-3
   drop_data: DropData;
+  hasReward(reward_id: number): boolean;
+}
+
+function hasReward(this: QuestData, reward_id: number): boolean {
+  return this.drop_data.drop_reward.some(value => value.reward_id === reward_id);
 }
 
 export async function getQuestData(db: PCRDB, quest_id: number): Promise<QuestData>;
@@ -85,20 +90,28 @@ export async function getQuestData(db: PCRDB, questArg: number | PCRStoreValue<'
     quest_name: questData.quest_name,
     icon_id: questData.icon_id,
     drop_data,
+    hasReward,
   };
 }
 
-export async function getQuestList(db: PCRDB, type?: QuestType): Promise<QuestData[]> {
-  let keyRange;
-  if (type) {
-    const range = mapQuestType(type);
-    keyRange = IDBKeyRange.bound(range[0], range[1], true, true);
-  }
-  return db.transaction('quest_data', 'readonly').store.getAll(keyRange).then(questDataList => {
+export function getQuestList(db: PCRDB, range: Range): Promise<QuestData[]>;
+export function getQuestList(db: PCRDB, ranges: Range[]): Promise<QuestData[][]>
+export function getQuestList(db: PCRDB, arg: Range | Range[]): Promise<QuestData[] | QuestData[][]> {
+  const isRange = (o: Range | Range[]): o is Range => typeof o[0] === 'number';
+  if (isRange(arg)) {
+    const keyRange = IDBKeyRange.bound(arg[0], arg[1]);
+    return db.transaction('quest_data', 'readonly').store.getAll(keyRange).then(questDataList => {
+      const promiseArr = [];
+      for (let questData of questDataList) {
+        promiseArr.push(getQuestData(db, questData));
+      }
+      return Promise.all(promiseArr);
+    });
+  } else {
     const promiseArr = [];
-    for (let questData of questDataList) {
-      promiseArr.push(getQuestData(db, questData));
+    for (let item of arg) {
+      promiseArr.push(getQuestList(db, item));
     }
     return Promise.all(promiseArr);
-  });
+  }
 }

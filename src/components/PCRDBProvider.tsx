@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { Fragment, createContext, useRef, useState, useCallback, useEffect } from 'react';
 import { makeStyles, createStyles, Theme } from '@material-ui/core/styles';
 import Backdrop from '@material-ui/core/Backdrop';
 import CircularProgress from '@material-ui/core/CircularProgress';
@@ -6,7 +6,7 @@ import openPCRDB, { PCRDB } from '../db';
 import DBHelper from '../DBHelper';
 import Big from 'big.js';
 
-export const DBHelperContext = React.createContext<DBHelper | null>(null);
+export const DBHelperContext = createContext<DBHelper | null>(null);
 
 const useStyles = makeStyles((theme: Theme) => createStyles({
   backdrop: {
@@ -57,16 +57,16 @@ function PCRDBConnect(props: PCRDBConnectProps) {
   return (
       <Backdrop open={status < 1} className={styles.backdrop}>
         {status === -1 && (
-          <React.Fragment>
+          <Fragment>
             <CircularProgress key={0} size="1.5em" color="inherit" />
             <span>opening...</span>
-          </React.Fragment>
+          </Fragment>
         )}
         {status === 0 && (
-          <React.Fragment>
+          <Fragment>
             <span key={1}>{progress.times(100).round(0, 0).toString()}%</span>
             <span>updating...</span>
-          </React.Fragment>
+          </Fragment>
         )}
       </Backdrop>
   );
@@ -77,15 +77,15 @@ interface PCRDBProviderProps {
 }
 
 function PCRDBProvider(props: PCRDBProviderProps) {
-  const dbRef = React.useRef<PCRDB | null>(null);
-  const [dbHelper, setDBHelper] = React.useState<DBHelper | null>(null);
+  const dbRef = useRef<PCRDB | null>(null);
+  const [dbHelper, setDBHelper] = useState<DBHelper | null>(null);
 
-  const handleSuccess = React.useCallback((db: PCRDB) => {
+  const handleSuccess = useCallback((db: PCRDB) => {
     dbRef.current = db;
     setDBHelper(new DBHelper(db));
   }, []);
 
-  React.useEffect(() => {
+  useEffect(() => {
     return () => dbRef.current?.close();
   }, []);
   

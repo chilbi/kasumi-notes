@@ -35,6 +35,12 @@ export interface SkillAction {
   getDescData(skillLevel: number, property: Property, actionList: SkillAction[]): DescData;
 }
 
+const mapStr: Record<string, string> = {
+  atk: '物攻',
+  magic_str: '魔攻',
+  skill_level: 'Lv',
+};
+
 function getAtkKey(atkType: number) {
   // if(atkType === 2) {
   // let atkStr = '魔法攻撃力';
@@ -60,13 +66,13 @@ function getFormula(
   let calc = Big(constant);
   let flag = false;
   if (skillLevelFactor && skillLevel) {
-    formula = (!calc.eq(0) ? `${formula}+` : '') + `${skillLevelFactor}*skill_level`;
+    formula = (!calc.eq(0) ? `${formula}+` : '') + `${skillLevelFactor}×${mapStr['skill_level']}`;
     calc = Big(skillLevelFactor).times(skillLevel).plus(calc);
     flag = true;
   }
   if (propertyFactor && atkType && property) {
     const atkKey = getAtkKey(atkType);
-    formula = (!calc.eq(0) ? `${formula}+` : '') +  `${propertyFactor}*${atkKey}`;
+    formula = (!calc.eq(0) ? `${formula}+` : '') + `${propertyFactor}×${mapStr[atkKey]}`;
     calc = calc.plus(Big(propertyFactor).times(property[atkKey as keyof typeof property]));
     flag = true;
   }
@@ -180,15 +186,15 @@ function getEffectModified(thisAction: SkillAction, targetAction: SkillAction): 
   const action_value_ = thisAction.action_detail_2;
   let factor = thisAction.action_value_2.toString();
   if (thisAction.action_value_3 !== 0) {
-    factor = `(${factor}+${thisAction.action_value_3}*skill_level)`;
+    factor = `(${factor}+${thisAction.action_value_3}×${mapStr['skill_level']})`;
   }
   let effect = '効果値';
-  let formula = `${factor}*${coefficient}`;
+  let formula = `${factor}×${coefficient}`;
   switch (targetAction.action_type) {
     case 1:
       effect = 'ダメージ';
       if (action_value_ === 2)
-        formula += '*skill_level';
+        formula += `×${mapStr['skill_level']}`;
       else if (action_value_ === 3)
         formula += `*${getAtkKey(targetAction.action_detail_1)}`;
       break;
@@ -198,7 +204,7 @@ function getEffectModified(thisAction: SkillAction, targetAction: SkillAction): 
       break;
     case 10:
       if (action_value_ === 3)
-        formula += '*skill_level';
+        formula += `×${mapStr['skill_level']}`;
       else if (action_value_ === 4)
         effect = '効果時間';
     //   break;
@@ -547,7 +553,7 @@ const actionMap: Record</*action_type*/number, /*getDescription*/(this: SkillAct
   },
   // レイ　構え中に受けたダメージ
   18: function () {
-    const formula = this.action_value_1 + '*受けたダメージ';
+    const formula = this.action_value_1 + '×受けたダメージ';
     const actionNum = getActionNum(this.action_detail_2);
     return [`攻撃前の${this.action_value_3}秒構え中に受けたダメージに応じて、`, getActionObj(actionNum), '与えるダメージが', getFormulaObj(formula), 'アップする。'];
   },

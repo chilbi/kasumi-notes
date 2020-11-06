@@ -21,6 +21,7 @@ const useStyles = makeStyles((theme: Theme) => {
       backgroundColor: '#fff',
     },
     offset: {
+      flexShrink: 0,
       height: h,
     },
   };

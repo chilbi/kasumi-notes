@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef, useEffect } from 'react';
+import React, { useRef, useState, useCallback, useEffect } from 'react';
 import Slider, { SliderProps } from '@material-ui/core/Slider';
 import useDebounced from '../hooks/useDebounced';
 

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Fragment } from 'react';
 import { makeStyles, Theme } from '@material-ui/core/styles';
 import Divider from '@material-ui/core/Divider';
 import SkeletonImage from './SkeletonImage';
@@ -257,11 +257,11 @@ function CharaSkill(props: CharaSkillProps) {
               const stateID = parseInt(match[1]);
               const arr = _value.split(match[0]);
               desc = (
-                <React.Fragment key={stateID}>
+                <Fragment key={stateID}>
                   {arr[0]}
                   {renderDesc({ type: 'state', value: stateID }, stateID)}
                   {arr[1]}
-                </React.Fragment>
+                </Fragment>
               );
             } else {
               desc = _value;
@@ -271,20 +271,20 @@ function CharaSkill(props: CharaSkillProps) {
             );
           case 'action':
             return (
-              <React.Fragment key={key}>
+              <Fragment key={key}>
                 {'「アクション'}
                 <span className={styles.actionNum}>{descData.value}</span>
                 {'」'}
-              </React.Fragment>
+              </Fragment>
             );
           case 'state':
             return (
-              <React.Fragment key={key}>
+              <Fragment key={key}>
                 {state[descData.value as number]}
                 <span className={styles.stateRoot}>
                   <SkeletonImage classes={{ img: styles.stateImg }} src={getPublicImageURL('icon_state', descData.value)} save onlyImg />
                 </span>
-              </React.Fragment>
+              </Fragment>
             );
         }
       }
@@ -367,10 +367,10 @@ function CharaSkill(props: CharaSkillProps) {
   return (
     <div className={styles.root}>
       {unitSkillData.attack_pattern.map((item, i, arr) => (
-        <React.Fragment key={i}>
+        <Fragment key={i}>
           {getPatternItem({ label: '行動パターン' + (arr.length > 1 ? (i + 1) : ''), pattern: item })}
           <Divider />
-        </React.Fragment>
+        </Fragment>
       ))}
       <div key="A" className={styles.item}>
         <div className={styles.label}>A</div>
@@ -384,10 +384,10 @@ function CharaSkill(props: CharaSkillProps) {
         <div className={styles.skillDesc}>敵単体に{atkData.damege.round(0, 1).toString()}の{atkData.name}ダメージを与える。</div>
       </div>
       {skillList.map(item => (
-        <React.Fragment key={item.label}>
+        <Fragment key={item.label}>
           <Divider />
           {getSkillItem(item)}
-        </React.Fragment>
+        </Fragment>
       ))}
     </div>
   );

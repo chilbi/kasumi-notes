@@ -14,12 +14,16 @@ function getProperty(this: PromotionStatusData): Property<number> {
 }
 
 export async function getPromotionStatusData(db: PCRDB, unit_id: number, promotion_level: number): Promise<PromotionStatusData> {
-  const unitPromotionStatus = await db.transaction('unit_promotion_status', 'readonly').store.get([unit_id, promotion_level]);
-  if (!unitPromotionStatus) throw new Error(`objectStore('unit_promotion_status').get(/*unit_id*/[${unit_id}, /*promotion_level*/${promotion_level}]) => undefined`);
+  let unit_promotion_status = {} as PCRStoreValue<'unit_promotion_status'>;
+  if (promotion_level > 1) {
+    const unitPromotionStatus = await db.transaction('unit_promotion_status', 'readonly').store.get([unit_id, promotion_level]);
+    if (!unitPromotionStatus) throw new Error(`objectStore('unit_promotion_status').get(/*unit_id*/[${unit_id}, /*promotion_level*/${promotion_level}]) => undefined`);
+    unit_promotion_status = unitPromotionStatus;
+  }
   return {
     unit_id,
     promotion_level,
-    unit_promotion_status: unitPromotionStatus,
+    unit_promotion_status,
     getProperty,
   };
 }

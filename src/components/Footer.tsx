@@ -42,7 +42,7 @@ function Footer(props: FooterProps) {
     <>
       <div className={styles.offset} />
       <BottomNavigation id="footer" className={styles.root} showLabels value={value} onChange={onChange}>
-        <BottomNavigationAction value="/" label="キャラ" icon={<PeopleAlt />} />
+        <BottomNavigationAction value="/chara" label="キャラ" icon={<PeopleAlt />} />
         <BottomNavigationAction value="/quest" label="クエスト" icon={<Gavel />} />
         <BottomNavigationAction value="/menu" label="メニュー" icon={<Menu />} />
       </BottomNavigation>

@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useLayoutEffect } from 'react';
+import React, { useRef, useState, useCallback, useLayoutEffect } from 'react';
 import { makeStyles, Theme, StyleRules } from '@material-ui/core/styles';
 import Checkbox from '@material-ui/core/Checkbox';
 import Radio from '@material-ui/core/Radio';
@@ -45,7 +45,7 @@ const useStyles = makeStyles((theme: Theme) => {
 
   return {
     root: {
-      padding: '0.25em 0',
+      padding: '0.5em 0',
       textAlign: 'center',
     },
     inner: {
@@ -57,32 +57,42 @@ const useStyles = makeStyles((theme: Theme) => {
     },
     equipItem: {
       margin: '0.5em 0',
+      padding: '0.25em 0.75em',
+      borderRadius: '0.5em',
+      border: '1px solid ' + theme.palette.grey[200],
+      boxShadow: '0 1px 1px ' + theme.palette.grey[100],
     },
     labelBox: {
       display: 'flex',
+      alignItems: 'flex-end',
+      marginBottom: '0.25em',
+      paddingBottom: '0.125em',
+      borderBottom: '2px solid' + theme.palette.primary.main,
     },
     label: {
-      display: 'inline-block',
-      width: '6em',
-      lineHeight: '24px',
-      textAlign: 'center',
-      verticalAlign: 'middle',
-      borderRadius: '0.5em 0.5em 0 0',
-      backgroundColor: 'currentcolor',
+      display: 'inline-flex',
+      '&::before': {
+        content: '""',
+        display: 'inline-block',
+        alignSelf: 'flex-end',
+        margin: '0 4px 4px 0',
+        width: 8,
+        height: 10,
+        borderRadius: '50%',
+        backgroundColor: theme.palette.primary.main,
+        clipPath: 'polygon(50% 0, 100% 50%, 50% 100%, 0 50%)',
+      },
     },
     checkbox: {
-      margin: '0 0.25em 0 auto',
+      margin: '0 0 0 auto',
       padding: 0,
     },
     equipBox: {
       display: 'flex',
       justifyContent: 'flex-start',
-      padding: '0.125rem',
-      border: '1px solid currentcolor',
-      borderRadius: '0 0.5em 0.5em 0.5em',
     },
-    m0125: {
-      margin: '0.125rem',
+    m025: {
+      margin: '0.25rem',
     },
     iconRoot: {
       width: iconSize + 'rem',
@@ -183,9 +193,6 @@ const useStyles = makeStyles((theme: Theme) => {
     invalidColor: {
       color: theme.palette.grey[600],
     },
-    labelColor: {
-      color: '#fff',
-    },
     uniqueColor: {
       color: '#d34bef',
     },
@@ -223,6 +230,7 @@ function CharaEquip(props: CharaEquipProps) {
   const { promotion_level, equip_enhance_status, unique_enhance_level } = userProfile;
   const styles = useStyles();
   
+  const scrollTopRef = useRef(0);
   const [state, setState] = useState<CharaEquipState>();
 
   const handleClose = useCallback(() => {
@@ -230,9 +238,17 @@ function CharaEquip(props: CharaEquipProps) {
   }, []);
   
   useLayoutEffect(() => {
-    if (state) document.body.classList.add(styles.hiddenScroll);
-    else document.body.classList.remove(styles.hiddenScroll);
-    return () => document.body.classList.remove(styles.hiddenScroll);
+    const el = document.documentElement || document.body;
+    if (state) {
+      scrollTopRef.current = el.scrollTop;
+      el.classList.add(styles.hiddenScroll);
+    } else {
+      el.classList.remove(styles.hiddenScroll);
+      el.scrollTo(0, scrollTopRef.current);
+    }
+    return () => {
+      el.classList.remove(styles.hiddenScroll);
+    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state]);
 
@@ -326,11 +342,9 @@ function CharaEquip(props: CharaEquipProps) {
         </div>
 
         <div className={styles.equipList}>
-          <div key="unique" className={clsx(styles.equipItem, styles.uniqueColor)}>
+          <div key="unique" className={styles.equipItem}>
             <div className={styles.labelBox}>
-              <div className={styles.label}>
-                <span className={styles.labelColor}>専用装備</span>
-              </div>
+              <span className={clsx(styles.label, styles.uniqueColor)}>専用装備</span>
               <Checkbox
                 classes={{ root: styles.checkbox }}
                 indeterminate={!hasUnique}
@@ -340,10 +354,10 @@ function CharaEquip(props: CharaEquipProps) {
               />
             </div>
             <div className={styles.equipBox}>
-              <ButtonBase className={styles.m0125} disabled={!hasUnique} onClick={handleChangeUnique}>
+              <ButtonBase className={styles.m025} disabled={!hasUnique} onClick={handleChangeUnique}>
                 <SkeletonImage classes={{ root: styles.iconRoot }} src={getPublicImageURL('icon_equipment', uniqueImgName)} save />
               </ButtonBase>
-              <div className={clsx(styles.uniqueInfo, styles.m0125)}>
+              <div className={clsx(styles.uniqueInfo, styles.m025)}>
                 <span className={clsx(styles.uniqueName, invalidUnique && styles.invalidColor)}>{uniqueName}</span>
                 {!invalidUnique && <span className={styles.uniqueLevel}>Lv{unique_enhance_level}</span>}
               </div>
@@ -353,14 +367,11 @@ function CharaEquip(props: CharaEquipProps) {
             const promotionLevel = promotion.promotion_level;
             const isEqual = promotionLevel === promotion_level;
             return (
-              <div
-                key={promotionLevel}
-                className={clsx(styles.equipItem, styles['rankColor' + getRankPoint(promotionLevel) as keyof typeof styles])}
-              >
+              <div key={promotionLevel} className={styles.equipItem}>
                 <div className={styles.labelBox}>
-                  <div className={styles.label}>
-                    <span className={styles.labelColor}>{'RANK' + promotionLevel}</span>
-                  </div>
+                  <span className={clsx(styles.label, styles['rankColor' + getRankPoint(promotionLevel) as keyof typeof styles])}>
+                    {'RANK' + promotionLevel}
+                  </span>
                   <Radio
                     classes={{ root: styles.checkbox }}
                     checked={isEqual}
@@ -369,7 +380,7 @@ function CharaEquip(props: CharaEquipProps) {
                 </div>
                 <div className={styles.equipBox}>
                   {promotion.equip_slots.map((slot, i) => (
-                    <ButtonBase key={i} className={styles.m0125} disabled={!slot} onClick={slot ? (() => setState({ equipData: slot })) : undefined}>
+                    <ButtonBase key={i} className={styles.m025} disabled={!slot} onClick={slot ? (() => setState({ equipData: slot })) : undefined}>
                       <SkeletonImage
                         classes={{ root: styles.iconRoot }}
                         src={getSlotData(promotionLevel, slot, i).imgSrc}

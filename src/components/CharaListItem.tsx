@@ -1,7 +1,7 @@
 import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import ButtonBase from '@material-ui/core/ButtonBase';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { getPublicImageURL, getValidID } from '../DBHelper/helper';
 import CharaImage from './CharaImage';
 
@@ -25,7 +25,7 @@ interface CharaListItemProps {
 function CharaListItem(props: CharaListItemProps) {
   const { unitID, ...other } = props;
   const styles = useStyles();
-  const history = useHistory();
+  const navigate = useNavigate();
   let src;
   if (unitID) src = getPublicImageURL(other.variant, getValidID(unitID, other.rarity));
   return (
@@ -33,7 +33,7 @@ function CharaListItem(props: CharaListItemProps) {
       className={styles.root}
       component="a"
       disabled={unitID === undefined}
-      onClick={() => history.push(`/chara/detail/${unitID}`)}
+      onClick={() => navigate(`/chara/${unitID}`)}
     >
       <CharaImage src={src} {...other} />
     </ButtonBase>

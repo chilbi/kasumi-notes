@@ -1,5 +1,5 @@
 import { useContext, useState, useCallback, useEffect, DependencyList } from 'react';
-import { DBHelperContext } from '../components/PCRDBProvider';
+import { DBHelperContext } from '../components/Contexts';
 import DBHelper from '../DBHelper';
 
 function useDBHelper<T>(getData: (dbHelper: DBHelper) => Promise<T | undefined>, deps: DependencyList): T | undefined {

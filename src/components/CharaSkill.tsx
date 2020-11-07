@@ -343,7 +343,9 @@ function CharaSkill(props: CharaSkillProps) {
     const isOneEX = ex && len === 1 && evolution.length === 1;
     for (let i = 0; i < len; i++) {
       const n = i + 1;
-      const skillKey = (ex ? 'ex' : n) as keyof SkillEnhanceStatus;
+      let skillKey = n as keyof SkillEnhanceStatus;
+      if (n > 2) skillKey = 'ub';
+      if (ex) skillKey = 'ex';
       const renameLabel = label + (isOneEX ? '' : n);
       skillList.push({
         label: renameLabel,

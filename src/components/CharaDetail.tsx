@@ -4,7 +4,8 @@ import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import IconButton from '@material-ui/core/IconButton';
 import ArrowBack from '@material-ui/icons/ArrowBack';
-import { useHistory } from 'react-router-dom';
+import Done from '@material-ui/icons/Done';
+import { useNavigate } from 'react-router-dom';
 import Header from './Header';
 import CharaBaseInfo from './CharaBaseInfo';
 import CharaUserProfile from './CharaUserProfile';
@@ -13,11 +14,11 @@ import CharaEquip from './CharaEquip';
 import CharaStory from './CharaStory';
 import CharaStatus from './CharaStatus';
 import CharaProfile from './CharaProfile';
-import { DBHelperContext } from './PCRDBProvider';
-import { CharaDetailData } from '../DBHelper';
+import { DBHelperContext, CharaDetailContext, CharaListContext } from './Contexts';
 import { EquipEnhanceStatus } from '../DBHelper/promotion';
 import { PromotionStatusData } from '../DBHelper/promotion_status';
 import { SkillEnhanceStatus } from '../DBHelper/skill';
+import { deepClone, equal } from '../DBHelper/helper';
 import { PCRStoreValue } from '../db';
 import clsx from 'clsx';
 
@@ -41,7 +42,6 @@ const useStyles = makeStyles((theme: Theme) => {
     },
     subtitle: {
       flexGrow: 1,
-      paddingRight: '3rem',
       textAlign: 'center',
       ...theme.typography.h6,
     },
@@ -57,28 +57,50 @@ interface CharaDetailProps {
 
 function CharaDetail(props: CharaDetailProps) {
   const styles = useStyles();
-  const history = useHistory();
+
+  const navigate = useNavigate();
+
   const dbHelper = useContext(DBHelperContext);
+  const [charaList, setCharaList] = useContext(CharaListContext);
+  const [charaDetail, setDetail] = useContext(CharaDetailContext);
+  const detail = charaDetail && charaDetail.charaData.unit_id === props.unitID ? charaDetail : undefined
+
   const userProfileRef = useRef<PCRStoreValue<'user_profile'>>();
-  const [detail, setDetail] = useState<CharaDetailData>();
 
   useEffect(() => {
-    if (dbHelper) dbHelper.getCharaDetailData(props.unitID).then(detailData => {
-      if (detailData) {
-        userProfileRef.current = detailData.userProfile;
-        setDetail(detailData);
-      }
-    });
-  }, [dbHelper, props.unitID]);
-
-  const handleBack = useCallback(() => {
-    history.push('/');
-  }, [history]);
+    if (!userProfileRef.current && charaDetail) {
+      userProfileRef.current = deepClone(charaDetail.userProfile);
+    }
+    if (dbHelper && (!charaDetail || charaDetail.charaData.unit_id !== props.unitID)) {
+      dbHelper.getCharaDetailData(props.unitID, charaList && charaList.find(item => item.charaData.unit_id === props.unitID)).then(detailData => {
+        if (detailData) {
+          userProfileRef.current = deepClone(detailData.userProfile);
+          setDetail(detailData);
+        }
+      });
+    }
+  }, [dbHelper, charaDetail, setDetail, props.unitID, charaList]);
 
   const [tabsValue, setTabsValue] = useState(0);
   const handleChangeTabsValue = useCallback((e: React.SyntheticEvent, newValue: number) => {
     setTabsValue(newValue);
   }, []);
+
+  const handleBack = useCallback(() => {
+    navigate(-1);
+  }, [navigate]);
+
+  const handleUpdate = useCallback(() => {
+    if (dbHelper && detail) dbHelper.setUserProfile(detail.userProfile).then(() => {
+      userProfileRef.current = deepClone(detail.userProfile);
+      charaList && setCharaList(charaList.map(item => {
+        if (item.userProfile.unit_id === props.unitID) {
+          item.userProfile = userProfileRef.current!;
+        }
+        return item;
+      }))
+    });
+  }, [dbHelper, detail, props.unitID, charaList, setCharaList]);
 
   const handleChangeRarity = useCallback((rarity: number) => {
     if (dbHelper && detail && rarity > 0) dbHelper.getRarityData(detail.charaData.unit_id, rarity).then(rarityData => {
@@ -86,7 +108,7 @@ function CharaDetail(props: CharaDetailProps) {
       detail.propertyData[0] = rarityData;
       setDetail({ ...detail });
     });
-  }, [dbHelper, detail]);
+  }, [dbHelper, detail, setDetail]);
 
   const handleChangeLevel = useCallback((level: number) => {
     if (detail) {
@@ -98,7 +120,7 @@ function CharaDetail(props: CharaDetailProps) {
       detail.userProfile.level = level;
       setDetail({ ...detail });
     }
-  }, [detail]);
+  }, [detail, setDetail]);
 
   const handleChangeLove = useCallback((loveLevel: number, charaID: number) => {
     if (detail) {
@@ -107,28 +129,28 @@ function CharaDetail(props: CharaDetailProps) {
       detail.userProfile.love_level_status = love_level_status;
       setDetail({ ...detail });
     }
-  }, [detail]);
+  }, [detail, setDetail]);
 
   const handleChangeEquip = useCallback((equip_enhance_level: number, i: number) => {
     if (detail) {
       detail.userProfile.equip_enhance_status[i] = equip_enhance_level;
       setDetail({ ...detail });
     }
-  }, [detail]);
+  }, [detail, setDetail]);
 
   const handleChangeUnique = useCallback((unique_enhancle_level: number) => {
     if (detail) {
       detail.userProfile.unique_enhance_level = unique_enhancle_level;
       setDetail({ ...detail });
     }
-  }, [detail]);
+  }, [detail, setDetail]);
 
   const handleChangeSkill = useCallback((level: number, skillKey: keyof SkillEnhanceStatus) => {
     if (detail) {
       detail.userProfile.skill_enhance_status[skillKey] = level;
       setDetail({ ...detail });
     }
-  }, [detail]);
+  }, [detail, setDetail]);
 
   const handleChangePromotion = useCallback((promotion_level: number) => {
     if (!detail) return;
@@ -155,7 +177,7 @@ function CharaDetail(props: CharaDetailProps) {
       } as any;
       _change(promotionStatusData);
     }
-  }, [dbHelper, detail]);
+  }, [dbHelper, detail, setDetail]);
 
   const property = useMemo(() => detail && detail.getProperty(), [detail]);
 
@@ -241,6 +263,16 @@ function CharaDetail(props: CharaDetailProps) {
     ),
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }), [detail, detail && detail.userProfile]);
+  
+  const doneIcon = useMemo(() => (
+    <IconButton
+      color="secondary"
+      disabled={detail ? equal(userProfileRef.current, detail.userProfile) : true}
+      onClick={handleUpdate}
+    >
+      <Done />
+    </IconButton>
+  ), [detail, handleUpdate]);
 
   const header = useMemo(() => (
     <Header>
@@ -248,9 +280,10 @@ function CharaDetail(props: CharaDetailProps) {
         <ArrowBack />
       </IconButton>
       <h6 className={styles.subtitle}>キャラ詳細</h6>
+      {doneIcon}
     </Header>
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  ), [handleBack]);
+  ), [doneIcon, handleBack]);
 
   const tabs = useMemo(() => (
     <Tabs

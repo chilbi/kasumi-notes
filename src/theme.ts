@@ -42,7 +42,7 @@ const theme = createMuiTheme({
             src: `url(${UDMarugoOtf}) format("opentype")`,
           },
           'body': {
-            backgroundColor: '#616161',
+            backgroundColor: '#263238',
           },
         },
       },

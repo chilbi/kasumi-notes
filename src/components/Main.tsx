@@ -1,16 +1,10 @@
 import React, { useState, useCallback, useMemo } from 'react';
-import { Redirect, useRouteMatch, useHistory } from 'react-router-dom';
+import { Navigate, useNavigate, useMatch } from 'react-router-dom';
 import { makeStyles, Theme } from '@material-ui/core/styles';
 import Footer from './Footer';
 import CharaList from './CharaList';
 import CharaDetail from './CharaDetail';
-
-function parseParamsUnitID(unit_id: string): number {
-  const len = unit_id.length;
-  if (len <= 4) unit_id = '100'.substr(0, 4 - len) + unit_id + '01';
-  if (len !== 6) unit_id = unit_id.substr(0, 4) + '01';
-  return parseInt(unit_id);
-}
+import { getParamsUnitID } from '../DBHelper/helper';
 
 const useStyles = makeStyles((theme: Theme) => {
   return {
@@ -29,34 +23,34 @@ const useStyles = makeStyles((theme: Theme) => {
 function Main() {
   const styles = useStyles();
 
-  const history = useHistory();
-  const rootMatch = useRouteMatch({
-    path: '/',
-    exact: true,
+  const navigate = useNavigate();
+  const rootMatch = useMatch({
+    path: '/chara',
+    caseSensitive: true,
   });
-  const charaDetailMatch = useRouteMatch<{ unit_id: string }>({
-    path: '/chara/detail/:unit_id',
-    exact: true,
+  const charaDetailMatch = useMatch({
+    path: '/chara/:unit_id',
+    caseSensitive: true,
   });
-  const questMatch = useRouteMatch({
+  const questMatch = useMatch({
     path: '/quest',
-    exact: true,
+    caseSensitive: true,
   });
-  const menuMatch = useRouteMatch({
+  const menuMatch = useMatch({
     path: '/menu',
-    exact: true,
+    caseSensitive: true,
   });
   const noMatch = !rootMatch && !charaDetailMatch && !questMatch && !menuMatch;
 
-  const [value, setValue] = useState(() => rootMatch ? '/' : questMatch ? '/quest' : '/menu');
-  const handleChange = useCallback((e: React.SyntheticEvent, newValue: string) => {
-    history.push(newValue);
-    setValue(newValue);
-  }, [history]);
+  const [path, setPath] = useState(() => '/chara');
+  const handleChange = useCallback((e: React.SyntheticEvent, newPath: string) => {
+    navigate(newPath);
+    setPath(newPath);
+  }, [navigate]);
 
   const footer = useMemo(() => !charaDetailMatch && (
-    <Footer value={value} onChange={handleChange} />
-  ), [value, charaDetailMatch, handleChange]);
+    <Footer value={path} onChange={handleChange} />
+  ), [path, charaDetailMatch, handleChange]);
 
   return (
     <div className={styles.root}>
@@ -64,16 +58,16 @@ function Main() {
         <CharaList />
       </div>
       <div id="chara-detail" className={charaDetailMatch ? undefined : styles.hidden}>
-        {charaDetailMatch && <CharaDetail unitID={parseParamsUnitID(charaDetailMatch.params.unit_id)} />}
+        {charaDetailMatch && <CharaDetail unitID={getParamsUnitID(charaDetailMatch.params.unit_id)} />}
       </div>
       <div id="quest" className={questMatch ? undefined : styles.hidden}>
-        quest
+        未完成
       </div>
       <div id="menu" className={menuMatch ? undefined : styles.hidden}>
-        menu
+        未完成
       </div>
       {footer}
-      {noMatch && <Redirect to="/" />}
+      {noMatch && <Navigate to="/chara" replace />}
     </div>
   );
 }

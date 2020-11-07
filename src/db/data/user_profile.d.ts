@@ -7,7 +7,7 @@ export interface UserProfile {
   unique_equip_id: number;
   unique_enhance_level: number;
   skill_enhance_status: Record</*skill*/'ub' | 1 | 2 | 'ex', /*enhance_level*/number>;
-  equip_enhance_status: Record</*equipment_id*/number, /*enhance_level*/number>;
+  equip_enhance_status: Record</*0-5*/number, /*enhance_level*/number>;
   love_level_status: Record</*chara_id*/number, /*love_level*/number>;
 }
 

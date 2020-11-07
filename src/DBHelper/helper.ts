@@ -57,8 +57,11 @@ export function getCharaID(unitID: number) {
   return parseInt(getSubID(unitID));
 }
 
-export function compareSubID(a: number, b: number): boolean {
-  return getSubID(a) === getSubID(b);
+export function getParamsUnitID(unitID: string): number {
+  const len = unitID.length;
+  if (len <= 4) unitID = '100'.substr(0, 4 - len) + unitID + '01';
+  if (len !== 6) unitID = unitID.substr(0, 4) + '01';
+  return parseInt(unitID);
 }
 
 export function getValidID(unitID: number, rarity = 3, min = 1, last = 1): string {
@@ -163,5 +166,39 @@ export function mapQuestType(arg: number | QuestType): QuestType | Range {
       case 'S':
         return [18001001, 20000000];
     }
+  }
+}
+
+export function deepClone<T>(target: T): T {
+  let result: any;
+  if (typeof target === 'object') {
+    if (Array.isArray(target)) {
+      result = [];
+      for (let i in target) {
+        result[i] = deepClone(target[i]);
+      }
+      return result;
+    } else if (target === null) {
+      result = null;
+    } else {
+      result = {};
+      for (let i in target) {
+        result[i] = deepClone(target[i]);
+      }
+    }
+  } else {
+    result = target;
+  }
+  return result;
+}
+
+export function equal<T>(a: T, b: T): boolean {
+  if (typeof a === 'object') {
+    for (let i in a) {
+      if (!equal(a[i], b[i])) return false;
+    }
+    return true;
+  } else {
+    return a === b;
   }
 }

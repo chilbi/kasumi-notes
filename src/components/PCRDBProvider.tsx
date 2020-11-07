@@ -1,12 +1,11 @@
-import React, { Fragment, createContext, useRef, useState, useCallback, useEffect } from 'react';
+import React, { Fragment, useRef, useState, useCallback, useEffect } from 'react';
 import { makeStyles, createStyles, Theme } from '@material-ui/core/styles';
 import Backdrop from '@material-ui/core/Backdrop';
 import CircularProgress from '@material-ui/core/CircularProgress';
+import { DBHelperContext } from './Contexts';
 import openPCRDB, { PCRDB } from '../db';
 import DBHelper from '../DBHelper';
 import Big from 'big.js';
-
-export const DBHelperContext = createContext<DBHelper | null>(null);
 
 const useStyles = makeStyles((theme: Theme) => createStyles({
   backdrop: {

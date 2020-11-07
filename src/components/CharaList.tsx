@@ -1,13 +1,13 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useContext, useMemo } from 'react';
 import { makeStyles, Theme } from '@material-ui/core/styles';
 import IconButton from '@material-ui/core/IconButton';
 import ViewModule from '@material-ui/icons/ViewModule';
 import ViewStream from '@material-ui/icons/ViewStream';
 import Header from './Header';
 import CharaListItem from './CharaListItem';
-import useDBHelper from '../hooks/useDBHelper';
 import { CharaBaseData } from '../DBHelper';
 import clsx from 'clsx';
+import { CharaListContext } from './Contexts';
 
 const VARIANT_KEY = 'VARIANT_KEY';
 
@@ -32,6 +32,9 @@ const useStyles = makeStyles((theme: Theme) => {
 
 function CharaList() {
   const styles = useStyles();
+
+  const [charaList] = useContext(CharaListContext);
+  const nullableCharaList: (CharaBaseData | undefined)[] = charaList || Array.from(Array(130));
 
   const [variant, setVariant] = useState(() => {
     let _variant = window.localStorage.getItem(VARIANT_KEY) as 'icon_unit' | 'unit_plate' | null;
@@ -62,14 +65,11 @@ function CharaList() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   ), [variant]);
 
-  const allBaseData = useDBHelper(dbHelper => dbHelper.getAllCharaBaseData(), []);
-  const nullableAllBaseData: (CharaBaseData | undefined)[] = allBaseData || Array.from(Array(130));
-
   return (
     <>
       {header}
       <div className={clsx(styles.list, styles.spaceEvenly)}>
-        {nullableAllBaseData.map((base, i) => (
+        {nullableCharaList.map((base, i) => (
           <CharaListItem
             key={i}
             variant={variant}

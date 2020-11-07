@@ -1,6 +1,6 @@
 import { useRef, useEffect, useContext } from 'react';
 import useUpdate from './useUpdate';
-import { DBHelperContext } from '../components/PCRDBProvider';
+import { DBHelperContext } from '../components/Contexts';
 
 function useImage(src?: string, save?: boolean): string | undefined {
   const srcRef = useRef<Record<string, string | undefined>>({});

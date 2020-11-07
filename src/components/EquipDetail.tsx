@@ -56,6 +56,7 @@ const useStyles = makeStyles((theme: Theme) => {
     },
     flexBox: {
       display: 'flex',
+      alignItems: 'center',
     },
     nameBox: {
       flexGrow: 1,
@@ -66,15 +67,19 @@ const useStyles = makeStyles((theme: Theme) => {
     },
     control: {
       flexGrow: 1,
-      alignSelf: 'center',
       margin: '0 0.5em 0 0',
+      padding: 0,
     },
     name: {
+      display: 'inline-block',
       fontSize: '1.1em',
     },
     genre: {
+      display: 'inline-block',
       fontSize: '0.9em',
-      margin: '0 0.25em',
+      margin: '0 0.5em 0 0',
+      minWidth: '2rem',
+      textAlign: 'center',
       color: theme.palette.grey[600],
     },
     desc: {
@@ -132,7 +137,9 @@ const useStyles = makeStyles((theme: Theme) => {
       fontFamily: '"Arial","Microsoft YaHei",sans-serif',
     },
     uniqueCraftList: {
+      maxHeight: 350,
       marginTop: '0.25em',
+      overflow: 'auto',
     },
     uniqueCraftItem: {
       display: 'flex',
@@ -316,12 +323,12 @@ function EquipDetail(props: EquipDetailProps) {
         <div className={styles.nameBox}>
           <div>
             <span className={styles.name}>{name}</span>
-            <span className={styles.genre}>（{genre}）</span>
             <IconButton className={clsx(styles.expandless, descExpand && styles.rotate)} onClick={handleToggleDesc}>
               <ExpandLess />
             </IconButton>
           </div>
           <div className={styles.flexBox}>
+            <span className={styles.genre}>{genre}</span>
             {equipData && equipData.max_enhance_level > 0 && (
               <Rarities
                 classes={{ root: styles.control }}

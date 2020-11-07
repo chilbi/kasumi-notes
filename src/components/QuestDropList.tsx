@@ -129,8 +129,8 @@ function QuestDropList(props: QuestDropListProps) {
               {drop_gold > 0 && <span className={styles.mana}>{drop_gold}</span>}
             </div>
             <div className={styles.dropList}>
-              {drop_reward.map(drop => (
-                <div key={drop.reward_id} className={clsx(styles.dropItem, search.has(drop.reward_id) && styles.selected)}>
+              {drop_reward.map((drop, i) => (
+                <div key={i} className={clsx(styles.dropItem, search.has(drop.reward_id) && styles.selected)}>
                   <SkeletonImage classes={{ root: styles.dropIcon }} src={getPublicImageURL(drop.reward_type === 4 ? 'icon_equipment' : 'icon_item', drop.reward_id)} />
                   <span className={styles.odds}>{drop.odds}%</span>
                 </div>

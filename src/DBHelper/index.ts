@@ -11,7 +11,7 @@ import { getQuestList, QuestData } from './quest';
 import { plus, Property } from './property';
 import ImageData from './ImageData';
 import maxUserProfile from './maxUserProfile';
-import { Range } from './helper';
+import { deepClone, Range } from './helper';
 import Big from 'big.js';
 
 export type PropertyData = [RarityData, PromotionStatusData, PromotionData, StoryStatusData, UniqueEquipData | undefined];
@@ -54,10 +54,10 @@ class DBHelper extends ImageData {
     super(db);
   }
 
-  async getCharaDetailData(unit_id: number, user_name = this.default_user): Promise<CharaDetailData | undefined> {
+  async getCharaDetailData(unit_id: number, base?: CharaBaseData, user_name = this.default_user): Promise<CharaDetailData | undefined> {
     const [charaData, userProfile, unitProfile, promotions, unitSkillData] = await Promise.all([
-      this.db.transaction('chara_data', 'readonly').store.get(unit_id),
-      this.db.transaction('user_profile', 'readonly').store.get([user_name, unit_id]),
+      base ? base.charaData : this.db.transaction('chara_data', 'readonly').store.get(unit_id),
+      base ? deepClone(base.userProfile) : this.db.transaction('user_profile', 'readonly').store.get([user_name, unit_id]),
       this.db.transaction('unit_profile', 'readonly').store.get(unit_id),
       this.getPromotions(unit_id),
       getUnitSkillData(this.db, unit_id),
@@ -72,7 +72,7 @@ class DBHelper extends ImageData {
         promotions: promotions!,
       }));
     }
-    const propertyData = await this.getCharaPropertyData(userProfile);
+    const propertyData = base ? base.propertyData : await this.getCharaPropertyData(userProfile);
     return {
       charaData,
       userProfile,
@@ -114,13 +114,13 @@ class DBHelper extends ImageData {
   }
 
   getCharaPropertyData(userProfile: PCRStoreValue<'user_profile'>, memo?: StoryStatusMemo): Promise<PropertyData> {
-    const { unit_id, rarity, promotion_level, unique_equip_id, unique_enhance_level } = userProfile;
+    const { unit_id, rarity, promotion_level, unique_equip_id } = userProfile;
     return Promise.all([
       getRarityData(this.db, unit_id, rarity),
       getPromotionStatusData(this.db, unit_id, promotion_level),
       getPromotionData(this.db, unit_id, promotion_level),
       getStoryStatusData(this.db, unit_id, memo),
-      unique_enhance_level > 0 ? getUniqueEquipData(this.db, unit_id, unique_equip_id) : undefined
+      unique_equip_id !== maxUserProfile.unique_equip_id ? getUniqueEquipData(this.db, unit_id, unique_equip_id) : undefined
     ]);
   }
 
@@ -140,6 +140,10 @@ class DBHelper extends ImageData {
   getQuestList(ranges: Range[]): Promise<QuestData[][]>
   getQuestList(arg: Range | Range[]): Promise<QuestData[] | QuestData[][]> {
     return getQuestList(this.db, arg as any);
+  }
+
+  setUserProfile(userProfile: PCRStoreValue<'user_profile'>): Promise<void> {
+    return this.db.transaction('user_profile', 'readwrite').store.put(userProfile) as any;
   }
 
   protected getPromotions(unit_id: number): Promise<PromotionData[]> {

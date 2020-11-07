@@ -175,13 +175,11 @@ function CharaImage(props: CharaImageProps) {
       uniqueRef.current.classList.remove(styles.fadeIn);
       timer = window.setTimeout(() => {
         if (raritiesRef.current && positionRef.current && uniqueRef.current) {
-          //[styles.fadeOut]: maxRarity === 6 || hasUnique
-          if (maxRarity === 6 || hasUnique)
+          const isUnit6 = variant === 'icon_unit' && maxRarity === 6;
+          if (isUnit6 || hasUnique)
             raritiesRef.current.classList.add(styles.fadeOut);
-          //icon_unit { [styles.fadeIn]: maxRarity === 6 }
-          if (variant === 'icon_unit' && maxRarity === 6)
+          if (isUnit6)
             positionRef.current.classList.add(styles.fadeIn);
-          //[styles.fadeIn]: hasUnique
           if (hasUnique)
             uniqueRef.current.classList.add(styles.fadeIn);
         }

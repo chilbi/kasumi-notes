@@ -4,6 +4,7 @@ import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import IconButton from '@material-ui/core/IconButton';
 import ArrowBack from '@material-ui/icons/ArrowBack';
+import Clear from '@material-ui/icons/Clear';
 import Done from '@material-ui/icons/Done';
 import { useNavigate } from 'react-router-dom';
 import Header from './Header';
@@ -16,7 +17,6 @@ import CharaStatus from './CharaStatus';
 import CharaProfile from './CharaProfile';
 import { DBHelperContext, CharaDetailContext, CharaListContext } from './Contexts';
 import { EquipEnhanceStatus } from '../DBHelper/promotion';
-import { PromotionStatusData } from '../DBHelper/promotion_status';
 import { SkillEnhanceStatus } from '../DBHelper/skill';
 import { deepClone, equal } from '../DBHelper/helper';
 import { PCRStoreValue } from '../db';
@@ -66,13 +66,14 @@ function CharaDetail(props: CharaDetailProps) {
   const detail = charaDetail && charaDetail.charaData.unit_id === props.unitID ? charaDetail : undefined
 
   const userProfileRef = useRef<PCRStoreValue<'user_profile'>>();
+  if (!userProfileRef.current && charaDetail) {
+    userProfileRef.current = deepClone(charaDetail.userProfile);
+  }
 
   useEffect(() => {
-    if (!userProfileRef.current && charaDetail) {
-      userProfileRef.current = deepClone(charaDetail.userProfile);
-    }
     if (dbHelper && (!charaDetail || charaDetail.charaData.unit_id !== props.unitID)) {
-      dbHelper.getCharaDetailData(props.unitID, charaList && charaList.find(item => item.charaData.unit_id === props.unitID)).then(detailData => {
+      const base = charaList && charaList.find(item => item.charaData.unit_id === props.unitID);
+      dbHelper.getCharaDetailData(props.unitID, base).then(detailData => {
         if (detailData) {
           userProfileRef.current = deepClone(detailData.userProfile);
           setDetail(detailData);
@@ -86,98 +87,105 @@ function CharaDetail(props: CharaDetailProps) {
     setTabsValue(newValue);
   }, []);
 
-  const handleBack = useCallback(() => {
-    navigate(-1);
-  }, [navigate]);
-
-  const handleUpdate = useCallback(() => {
+  const handleSaveUserProfile = useCallback(() => {
     if (dbHelper && detail) dbHelper.setUserProfile(detail.userProfile).then(() => {
       userProfileRef.current = deepClone(detail.userProfile);
-      charaList && setCharaList(charaList.map(item => {
+      setCharaList((prevCharaList = []) => prevCharaList.map(item => {
         if (item.userProfile.unit_id === props.unitID) {
           item.userProfile = userProfileRef.current!;
         }
         return item;
-      }))
+      }));
     });
-  }, [dbHelper, detail, props.unitID, charaList, setCharaList]);
+  }, [dbHelper, detail, props.unitID, setCharaList]);
 
   const handleChangeRarity = useCallback((rarity: number) => {
-    if (dbHelper && detail && rarity > 0) dbHelper.getRarityData(detail.charaData.unit_id, rarity).then(rarityData => {
-      detail.userProfile.rarity = rarity;
-      detail.propertyData[0] = rarityData;
-      setDetail({ ...detail });
+    if (dbHelper && rarity > 0) dbHelper.getRarityData(props.unitID, rarity).then(rarityData => {
+      setDetail(prevDetail => {
+        if (prevDetail) {
+          prevDetail.userProfile.rarity = rarity;
+          prevDetail.propertyData[0] = rarityData;
+          return { ...prevDetail };
+        }
+      });
     });
-  }, [dbHelper, detail, setDetail]);
+  }, [dbHelper, setDetail, props.unitID]);
 
   const handleChangeLevel = useCallback((level: number) => {
-    if (detail) {
-      const skill_enhance_status = detail.userProfile.skill_enhance_status;
-      skill_enhance_status['ub'] = level;
-      skill_enhance_status[1] = level;
-      skill_enhance_status[2] = level;
-      skill_enhance_status['ex'] = level;
-      detail.userProfile.level = level;
-      setDetail({ ...detail });
-    }
-  }, [detail, setDetail]);
+    setDetail(prevDetail => {
+      if (prevDetail) {
+        const skill_enhance_status = prevDetail.userProfile.skill_enhance_status;
+        skill_enhance_status['ub'] = level;
+        skill_enhance_status[1] = level;
+        skill_enhance_status[2] = level;
+        skill_enhance_status['ex'] = level;
+        prevDetail.userProfile.level = level;
+        return { ...prevDetail };
+      }
+    });
+  }, [setDetail]);
 
   const handleChangeLove = useCallback((loveLevel: number, charaID: number) => {
-    if (detail) {
-      const love_level_status = { ...detail.userProfile.love_level_status };
-      love_level_status[charaID] = loveLevel;
-      detail.userProfile.love_level_status = love_level_status;
-      setDetail({ ...detail });
-    }
-  }, [detail, setDetail]);
+    setDetail(prevDetail => {
+      if (prevDetail) {
+        const love_level_status = { ...prevDetail.userProfile.love_level_status };
+        love_level_status[charaID] = loveLevel;
+        prevDetail.userProfile.love_level_status = love_level_status;
+        return { ...prevDetail };
+      }
+    });
+  }, [setDetail]);
 
   const handleChangeEquip = useCallback((equip_enhance_level: number, i: number) => {
-    if (detail) {
-      detail.userProfile.equip_enhance_status[i] = equip_enhance_level;
-      setDetail({ ...detail });
-    }
-  }, [detail, setDetail]);
+    setDetail(prevDetail => {
+      if (prevDetail) {
+        const equip_enhance_status = { ...prevDetail.userProfile.equip_enhance_status };
+        equip_enhance_status[i] = equip_enhance_level;
+        prevDetail.userProfile.equip_enhance_status = equip_enhance_status;
+        return { ...prevDetail };
+      }
+    });
+  }, [setDetail]);
 
   const handleChangeUnique = useCallback((unique_enhancle_level: number) => {
-    if (detail) {
-      detail.userProfile.unique_enhance_level = unique_enhancle_level;
-      setDetail({ ...detail });
-    }
-  }, [detail, setDetail]);
+    setDetail(prevDetail => {
+      if (prevDetail) {
+        prevDetail.userProfile.unique_enhance_level = unique_enhancle_level;
+        return { ...prevDetail };
+      }
+    });
+  }, [setDetail]);
 
   const handleChangeSkill = useCallback((level: number, skillKey: keyof SkillEnhanceStatus) => {
-    if (detail) {
-      detail.userProfile.skill_enhance_status[skillKey] = level;
-      setDetail({ ...detail });
-    }
-  }, [detail, setDetail]);
+    setDetail(prevDetail => {
+      if (prevDetail) {
+        const skill_enhance_status = { ...prevDetail.userProfile.skill_enhance_status };
+        skill_enhance_status[skillKey] = level;
+        prevDetail.userProfile.skill_enhance_status = skill_enhance_status;
+        return { ...prevDetail };
+      }
+    });
+  }, [setDetail]);
 
   const handleChangePromotion = useCallback((promotion_level: number) => {
-    if (!detail) return;
-    const _change = (promotionStatusData: PromotionStatusData) => {
-      const promotionData = detail.promotions.find(item => item.promotion_level === promotion_level)!;
-      const equip_enhance_status: EquipEnhanceStatus = {};
-      for (let i = 0; i < 6; i++) {
-        const slot = promotionData.equip_slots[i];
-        if (slot) equip_enhance_status[i] = slot.max_enhance_level;
-      }
-      detail.userProfile.equip_enhance_status = equip_enhance_status;
-      detail.userProfile.promotion_level = promotion_level;
-      detail.propertyData[1] = promotionStatusData;
-      detail.propertyData[2] = promotionData;
-      setDetail({ ...detail });
-    };
-    if (promotion_level > 1 && dbHelper) {
-      dbHelper.getPromotionStatusData(detail.charaData.unit_id, promotion_level).then(promotionStatusData => {
-        _change(promotionStatusData);
+    if (dbHelper) dbHelper.getPromotionStatusData(props.unitID, promotion_level).then(promotionStatusData => {
+      setDetail(prevDetail => {
+        if (prevDetail) {
+          const promotionData = prevDetail.promotions.find(item => item.promotion_level === promotion_level)!;
+          const equip_enhance_status: EquipEnhanceStatus = {};
+          for (let i = 0; i < 6; i++) {
+            const slot = promotionData.equip_slots[i];
+            if (slot) equip_enhance_status[i] = slot.max_enhance_level;
+          }
+          prevDetail.userProfile.equip_enhance_status = equip_enhance_status;
+          prevDetail.userProfile.promotion_level = promotion_level;
+          prevDetail.propertyData[1] = promotionStatusData;
+          prevDetail.propertyData[2] = promotionData;
+          return { ...prevDetail };
+        }
       });
-    } else {
-      const promotionStatusData = {
-        getProperty() { return {}; }
-      } as any;
-      _change(promotionStatusData);
-    }
-  }, [dbHelper, detail, setDetail]);
+    });
+  }, [dbHelper, setDetail, props.unitID]);
 
   const property = useMemo(() => detail && detail.getProperty(), [detail]);
 
@@ -264,31 +272,46 @@ function CharaDetail(props: CharaDetailProps) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }), [detail, detail && detail.userProfile]);
   
-  const doneIcon = useMemo(() => (
-    <IconButton
-      color="secondary"
-      disabled={detail ? equal(userProfileRef.current, detail.userProfile) : true}
-      onClick={handleUpdate}
-    >
-      <Done />
-    </IconButton>
-  ), [detail, handleUpdate]);
+  const isEqual = useMemo(() => {
+    return detail ? equal(userProfileRef.current, detail.userProfile) : true;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userProfileRef.current, detail]);
+
+  const handleBack = useCallback(() => {
+    if (!isEqual) {
+      setDetail(prevDetail => {
+        if (prevDetail && userProfileRef.current) {
+          prevDetail.userProfile = deepClone(userProfileRef.current);
+          return { ...prevDetail };
+        }
+      });
+    } else {
+      navigate(-1);
+    }
+  }, [isEqual, setDetail, navigate]);
 
   const header = useMemo(() => (
     <Header>
-      <IconButton color="primary" onClick={handleBack}>
-        <ArrowBack />
+      <IconButton color={isEqual ? 'primary' : 'secondary'} onClick={handleBack}>
+        {isEqual ? <ArrowBack /> : <Clear />}
       </IconButton>
       <h6 className={styles.subtitle}>キャラ詳細</h6>
-      {doneIcon}
+      <IconButton
+        color="secondary"
+        disabled={isEqual}
+        onClick={handleSaveUserProfile}
+      >
+        <Done />
+      </IconButton>
     </Header>
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  ), [doneIcon, handleBack]);
+  ), [isEqual, handleBack, handleSaveUserProfile]);
 
   const tabs = useMemo(() => (
     <Tabs
       className={styles.tabs}
       variant="scrollable"
+      scrollButtons={true}
       textColor="secondary"
       indicatorColor="secondary"
       value={tabsValue}

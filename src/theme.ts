@@ -41,9 +41,6 @@ const theme = createMuiTheme({
             fontWeight: 700,
             src: `url(${UDMarugoOtf}) format("opentype")`,
           },
-          'body': {
-            backgroundColor: '#263238',
-          },
         },
       },
     },

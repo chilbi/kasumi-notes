@@ -7,24 +7,17 @@ import Gavel from '@material-ui/icons/Gavel';
 import Menu from '@material-ui/icons/Menu';
 
 const useStyles = makeStyles((theme: Theme) => {
-  const h = '3.5rem';
-
   return {
     root: {
       zIndex: theme.zIndex.appBar,
-      position: 'fixed',
+      position: 'sticky',
       top: 'auto',
       right: 0,
       bottom: 0,
       left: 0,
-      margin: '0 auto',
-      maxWidth: theme.maxWidth,
-      height: h,
+      height: '3.5rem',
+      flex: '0 0 auto',
       borderTop: '1px solid ' + theme.palette.grey[100],
-    },
-    offset: {
-      flexShrink: 0,
-      height: h,
     },
   };
 });
@@ -39,14 +32,11 @@ function Footer(props: FooterProps) {
   const styles = useStyles();
 
   return (
-    <>
-      <div className={styles.offset} />
-      <BottomNavigation id="footer" className={styles.root} showLabels value={value} onChange={onChange}>
-        <BottomNavigationAction value="/chara" label="キャラ" icon={<PeopleAlt />} />
-        <BottomNavigationAction value="/quest" label="クエスト" icon={<Gavel />} />
-        <BottomNavigationAction value="/menu" label="メニュー" icon={<Menu />} />
-      </BottomNavigation>
-    </>
+    <BottomNavigation className={styles.root} showLabels value={value} onChange={onChange}>
+      <BottomNavigationAction value="/chara" label="キャラ" icon={<PeopleAlt />} />
+      <BottomNavigationAction value="/quest" label="クエスト" icon={<Gavel />} disabled />
+      <BottomNavigationAction value="/menu" label="メニュー" icon={<Menu />} disabled />
+    </BottomNavigation>
   );
 }
 

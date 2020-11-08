@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { makeStyles, alpha, Theme } from '@material-ui/core/styles'
+import LinearProgress from '@material-ui/core/LinearProgress';
 import SkeletonImage from './SkeletonImage';
 import QuestLabel from './QuestLabel';
 import useDBHelper from '../hooks/useDBHelper';
@@ -88,9 +89,14 @@ function QuestDropList(props: QuestDropListProps) {
   const { classes = {}, search, types } = props;
   const styles = useStyles();
 
+  const [loading, setLoading] = useState(true);
+
   const questList = useDBHelper(dbHelper => {
-    if (search.size < 1 || types.length < 1)
+    setLoading(true);
+    if (search.size < 1 || types.length < 1) {
+      setLoading(false);
       return Promise.resolve(undefined);
+    }
     const ranges: Range[] = [];
     const values: number[] = [];
     for (let type of types) {
@@ -99,7 +105,10 @@ function QuestDropList(props: QuestDropListProps) {
         values.push(rewardID);
       }
     }
-    if (ranges.length < 1) return Promise.resolve(undefined);
+    if (ranges.length < 1) {
+      setLoading(false);
+      return Promise.resolve(undefined);
+    }
     return dbHelper.getQuestList(mergeRanges(ranges)).then(data => {
       const result: QuestData[] = [];
       for (let list of data) {
@@ -109,11 +118,13 @@ function QuestDropList(props: QuestDropListProps) {
           }
         }
       }
+      setLoading(false);
       return result.sort((a, b) => b.quest_id - a.quest_id);
     });
   }, [search, types]);
 
-  if (!questList) return null;
+  if (loading || !questList)
+    return <LinearProgress color="secondary" />;
 
   return (
     <div className={classes.root}>

@@ -175,10 +175,9 @@ function CharaImage(props: CharaImageProps) {
       uniqueRef.current.classList.remove(styles.fadeIn);
       timer = window.setTimeout(() => {
         if (raritiesRef.current && positionRef.current && uniqueRef.current) {
-          const isUnit6 = variant === 'icon_unit' && maxRarity === 6;
-          if (isUnit6 || hasUnique)
+          if (hasUnique || (variant === 'icon_unit' && maxRarity === 6))
             raritiesRef.current.classList.add(styles.fadeOut);
-          if (isUnit6)
+          if (variant === 'icon_unit' && maxRarity === 6)
             positionRef.current.classList.add(styles.fadeIn);
           if (hasUnique)
             uniqueRef.current.classList.add(styles.fadeIn);
@@ -186,8 +185,8 @@ function CharaImage(props: CharaImageProps) {
       }, 0);
     }
     return () => window.clearTimeout(timer);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [variant]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [variant, hasUnique, maxRarity]);
 
   let
     rootClassName = '',

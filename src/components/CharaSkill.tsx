@@ -1,9 +1,9 @@
 import React, { Fragment } from 'react';
 import { makeStyles, Theme } from '@material-ui/core/styles';
 import Divider from '@material-ui/core/Divider';
+import LinearProgress from '@material-ui/core/LinearProgress';
 import SkeletonImage from './SkeletonImage';
-import ButtonPopover from './ButtonPopover';
-import DebouncedSlider, { marks } from './DebouncedSlider';
+import ComboSlider, { marks } from './ComboSlider';
 import { AttackPattern, SkillData, UnitSkillData, SkillEnhanceStatus } from '../DBHelper/skill';
 import { DescData } from '../DBHelper/skill_action';
 import { getPublicImageURL } from '../DBHelper/helper';
@@ -147,11 +147,6 @@ const useStyles = makeStyles((theme: Theme) => {
       top: 0,
       left: 0,
     },
-    sliderPaper: {
-      padding: '0.5em 0',
-      height: 250,
-      overflow: 'unset',
-    },
   };
 });
 
@@ -180,8 +175,8 @@ function CharaSkill(props: CharaSkillProps) {
   const { skill_enhance_status = { ub: 1, 1: 1, 2: 1, ex: 1 }, unique_enhance_level = 0 } = userProfile;
   const styles = useStyles();
 
-  if (!unitSkillData || !atkType || !atkCastTime || !property) return null;
-  // console.log(charaSkill);
+  if (!unitSkillData || !atkType || !atkCastTime || !property)
+    return <LinearProgress color="secondary" />;
 
   const atkData = atkType === 1
     ? {
@@ -298,20 +293,17 @@ function CharaSkill(props: CharaSkillProps) {
       <div key={label} className={styles.item}>
         <div className={styles.flexBox}>
           <div className={styles.label}>{label}</div>
-          <ButtonPopover 
-            classes={{ button: styles.level, popover: styles.sliderPaper }}
+          <ComboSlider 
+            classes={{ button: styles.level }}
             position="left"
-            content={
-              <DebouncedSlider
-                marks={marks.level}
-                min={1}
-                max={maxUserProfile.level}
-                defaultValue={skillLevel}
-                onDebouncedChange={onChangeSkill && (value => onChangeSkill(value, skillKey))}
-              />
-            }
-            children={'Lv' + skillLevel}
-          />
+            marks={marks.level}
+            min={1}
+            max={maxUserProfile.level}
+            defaultValue={skillLevel}
+            onDebouncedChange={onChangeSkill && (value => onChangeSkill(value, skillKey))} 
+          >
+            <span>{'Lv' + skillLevel}</span>
+          </ComboSlider>
         </div>
         <div className={styles.flexBox}>
           <SkeletonImage classes={{ root: styles.imgRoot }} src={getPublicImageURL('icon_skill', skillData.icon_type)} save />

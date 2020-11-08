@@ -2,27 +2,21 @@ import React from 'react';
 import { makeStyles, Theme } from '@material-ui/core/styles';
 
 const useStyles = makeStyles((theme: Theme) => {
-  const h = '3rem';
 
   return {
     root: {
       zIndex: theme.zIndex.appBar,
-      position: 'fixed',
-      margin: '0 auto',
-      maxWidth: theme.maxWidth,
+      position: 'sticky',
       top: 0,
       right: 0,
       bottom: 'auto',
       left: 0,
-      height: h,
+      height: '3rem',
+      flex: '0 0 auto',
       display: 'flex',
       alignItems: 'center',
       borderBottom: '1px solid ' + theme.palette.grey[100],
       backgroundColor: '#fff',
-    },
-    offset: {
-      flexShrink: 0,
-      height: h,
     },
   };
 });
@@ -36,12 +30,9 @@ function Header(props: HeaderProps) {
   const styles = useStyles();
 
   return (
-    <>
-      <div id="header" className={styles.root}>
-        {children}
-      </div>
-      <div className={styles.offset} />
-    </>
+    <div className={styles.root}>
+      {children}
+    </div>
   );
 }
 

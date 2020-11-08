@@ -5,14 +5,23 @@ import Footer from './Footer';
 import CharaList from './CharaList';
 import CharaDetail from './CharaDetail';
 import { getParamsUnitID } from '../DBHelper/helper';
+import clsx from 'clsx';
 
 const useStyles = makeStyles((theme: Theme) => {
   return {
     root: {
+      backgroundColor: '#263238',
+    },
+    container: {
+      display: 'flex',
+      flexDirection: 'column',
       margin: '0 auto',
       maxWidth: theme.maxWidth,
       minHeight: '100vh',
       backgroundColor: theme.palette.grey[100],
+    },
+    item: {
+      flex: '1 0 auto',
     },
     hidden: {
       display: 'none',
@@ -54,20 +63,22 @@ function Main() {
 
   return (
     <div className={styles.root}>
-      <div id="chara-list" className={rootMatch ? undefined : styles.hidden}>
-        <CharaList />
+      <div className={styles.container}>
+        <div id="chara-list" className={clsx(styles.item, !rootMatch && styles.hidden)}>
+          <CharaList />
+        </div>
+        <div id="chara-detail" className={clsx(styles.item, !charaDetailMatch && styles.hidden)}>
+          {charaDetailMatch && <CharaDetail unitID={getParamsUnitID(charaDetailMatch.params.unit_id)} />}
+        </div>
+        <div id="quest" className={clsx(styles.item, !questMatch && styles.hidden)}>
+          未完成
       </div>
-      <div id="chara-detail" className={charaDetailMatch ? undefined : styles.hidden}>
-        {charaDetailMatch && <CharaDetail unitID={getParamsUnitID(charaDetailMatch.params.unit_id)} />}
+        <div id="menu" className={clsx(styles.item, !menuMatch && styles.hidden)}>
+          未完成
       </div>
-      <div id="quest" className={questMatch ? undefined : styles.hidden}>
-        未完成
+        {footer}
+        {noMatch && <Navigate to="/chara" replace />}
       </div>
-      <div id="menu" className={menuMatch ? undefined : styles.hidden}>
-        未完成
-      </div>
-      {footer}
-      {noMatch && <Navigate to="/chara" replace />}
     </div>
   );
 }

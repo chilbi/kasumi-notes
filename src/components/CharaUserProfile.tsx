@@ -2,8 +2,7 @@ import React, { useRef, useState, useCallback } from 'react';
 import { makeStyles, Theme, StyleRules } from '@material-ui/core/styles';
 import ButtonBase from '@material-ui/core/ButtonBase';
 import Popover from '@material-ui/core/Popover';
-import ButtonPopover from './ButtonPopover';
-import DebouncedSlider, { marks } from './DebouncedSlider';
+import ComboSlider, { marks } from './ComboSlider';
 import Rarities from './Rarities';
 import Infobar from './Infobar';
 import { getCharaID, getRankPoint } from '../DBHelper/helper';
@@ -83,11 +82,6 @@ const useStyles = makeStyles((theme: Theme) => {
         marginTop: 0,
       },
     },
-    sliderPaper: {
-      padding: '0.5em 0',
-      height: 250,
-      overflow: 'unset',
-    },
     promotionPaper: {
       borderRadius: 10,
     },
@@ -148,53 +142,39 @@ function CharaUserProfile(props: CharaUserProfileProps) {
         onChange={onChangeRarity}
       />
 
-      <ButtonPopover
-        classes={{ button: styles.level, popover: styles.sliderPaper }}
-        content={
-          <DebouncedSlider
-            marks={marks.level}
-            min={1}
-            max={maxUserProfile.level}
-            defaultValue={userProfile.level}
-            onDebouncedChange={onChangeLevel}
-          />
-        }
-        children={
-          <Infobar className={styles.p0} width={100} size="small" label="Lv" value={userProfile.level} />
-        }
-      />
+      <ComboSlider
+        classes={{ button: styles.level }}
+        marks={marks.level}
+        min={1}
+        max={maxUserProfile.level}
+        defaultValue={userProfile.level}
+        onDebouncedChange={onChangeLevel}
+      >
+        <Infobar className={styles.p0} width={100} size="small" label="Lv" value={userProfile.level} />
+      </ComboSlider>
 
-      <ButtonPopover
-        classes={{ button: styles.love, popover: styles.sliderPaper }}
-        content={userProfile.unit_id && (
-          <DebouncedSlider
-            marks={marks.love}
-            min={1}
-            max={maxRarity === 6 ? 12 : 8}
-            defaultValue={userProfile.love_level_status[chara_id]}
-            onDebouncedChange={onChangeLove && (value => onChangeLove(value, chara_id))}
-          />
-        )}
-        children={love_level}
-      />
+      <ComboSlider
+        classes={{ button: styles.love }}
+        marks={marks.love}
+        min={1}
+        max={maxRarity === 6 ? 12 : 8}
+        defaultValue={userProfile.unit_id ? userProfile.love_level_status[chara_id] : love_level}
+        onDebouncedChange={onChangeLove && (value => userProfile.unit_id && onChangeLove(value, chara_id))}
+      >
+        <span>{love_level}</span>
+      </ComboSlider>
 
       {userProfile.unique_equip_id !== maxUserProfile.unique_equip_id && (
-        <ButtonPopover
-          classes={{
-            button: clsx(styles.unique, userProfile.unique_enhance_level < 1 && styles.disableUnique),
-            popover: styles.sliderPaper
-          }}
-          content={
-            <DebouncedSlider
-              marks={marks.unique}
-              min={0}
-              max={maxUserProfile.unique_enhance_level}
-              defaultValue={userProfile.unique_enhance_level}
-              onDebouncedChange={onChangeUnique}
-            />
-          }
-          children={userProfile.unique_enhance_level}
-        />
+        <ComboSlider
+          classes={{ button: clsx(styles.unique, userProfile.unique_enhance_level < 1 && styles.disableUnique) }}
+          marks={marks.unique}
+          min={0}
+          max={maxUserProfile.unique_enhance_level}
+          defaultValue={userProfile.unique_enhance_level}
+          onDebouncedChange={onChangeUnique}
+        >
+          <span>{userProfile.unique_enhance_level}</span>
+        </ComboSlider>
       )}
 
       <ButtonBase

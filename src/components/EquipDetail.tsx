@@ -9,7 +9,8 @@ import ExpandLess from '@material-ui/icons/ExpandLess';
 import Header from './Header';
 import SkeletonImage from './SkeletonImage';
 import Rarities from './Rarities';
-import DebouncedSlider, { marks } from './DebouncedSlider';
+import DebouncedSlider from './DebouncedSlider';
+import { marks } from './ComboSlider';
 import QuestDropList from './QuestDropList';
 import QuestLabel from './QuestLabel';
 import CharaStatus from './CharaStatus';
@@ -48,8 +49,7 @@ const useStyles = makeStyles((theme: Theme) => {
       backgroundColor: theme.palette.grey[100],
     },
     paper: {
-      flexGrow: 0,
-      flexShrink: 0,
+      flex: '0 0 auto',
       marginTop: '0.25em',
       padding: '0.25em 0.5em',
       backgroundColor: '#fff',
@@ -156,8 +156,7 @@ const useStyles = makeStyles((theme: Theme) => {
       margin: '0 0 0 auto',
     },
     dropList: {
-      flexGrow: 1,
-      flexShrink: 1,
+      flex: '1 1 auto',
       overflowY: 'auto',
     },
     dropLabel: {

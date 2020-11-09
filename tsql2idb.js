@@ -566,7 +566,7 @@ function main() {
   }
   waveGroupObj.records = newWGRecords;
 
-  const excludeUnitID = [106701/*ホマレ*/, 110201/*ミサキ（サマー）*/, 900103/*ヒヨリ（不明）*/, 906601/*イノリ（不明）*/];
+  const excludeUnitID = [106701/*ホマレ*/, 110201/*ミサキ（サマー）*/, 900103/*ヒヨリ（不明）*/, 906601/*イノリ（不明）*/, 114301/*トモ（マジカル）*/];
   const unitProfileObj = sqlRawObjs.find(obj => obj.tableName === 'unit_profile');
   const newUPRecords = [];
   for (let record of unitProfileObj.records) {
@@ -705,7 +705,7 @@ function main() {
 
   if (!fs.existsSync(dbDir)) fs.mkdirSync(dbDir);
   const createStr = writeData(sqlRawObjs, dbDir + '/data/');
-  writeOpenDB(dbDir + '/', dbName, dbVersion + 2, createStr);
+  writeOpenDB(dbDir + '/', dbName, dbVersion, createStr);
 }
 
 main();

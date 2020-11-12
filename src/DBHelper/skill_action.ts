@@ -196,7 +196,7 @@ function getEffectModified(thisAction: SkillAction, targetAction: SkillAction): 
       if (action_value_ === 2)
         formula += `×${mapStr['skill_level']}`;
       else if (action_value_ === 3)
-        formula += `*${getAtkKey(targetAction.action_detail_1)}`;
+        formula += `×${mapStr[getAtkKey(targetAction.action_detail_1)]}`;
       break;
     case 8:
       if (action_value_ === 3)

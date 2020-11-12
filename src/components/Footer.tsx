@@ -34,7 +34,7 @@ function Footer(props: FooterProps) {
   return (
     <BottomNavigation className={styles.root} showLabels value={value} onChange={onChange}>
       <BottomNavigationAction value="/chara" label="キャラ" icon={<PeopleAlt />} />
-      <BottomNavigationAction value="/quest" label="クエスト" icon={<Gavel />} disabled />
+      <BottomNavigationAction value="/quest" label="クエスト" icon={<Gavel />} />
       <BottomNavigationAction value="/menu" label="メニュー" icon={<Menu />} disabled />
     </BottomNavigation>
   );

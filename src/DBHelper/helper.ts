@@ -109,7 +109,7 @@ export type Range = [number, number];
 
 export type QuestType = 'N'/*Normal*/ | 'H'/*Hard*/ | 'VH'/*Very Hard*/ | 'S'/*Survey*/;
 
-const mapRange: Record<string, Range> = {
+const mapRange: Record<string, Range | undefined> = {
   'N1': [11001001, 11004013],
   'N2': [11001008, 11008015],
   'N3': [11004003, 11013017],
@@ -141,10 +141,23 @@ export function mergeRanges(ranges: Range[], a = 0, b = 1, length = ranges.lengt
   }
 }
 
-export function getRange(type: QuestType, rewardID: number): Range {
-  if (type === 'VH' || type === 'S') return mapQuestType(type);
-  const rewardRarity = getRewardRarity(rewardID);
-  return mapRange[type + rewardRarity];
+export function getRange(type: QuestType, rewardID: number): Range | undefined {
+  if (type === 'VH' || type === 'S')
+    return mapQuestType(type);
+  if (rewardID > 33000) {
+    if (rewardID === 140001) {
+      return mapQuestType('S');
+    } else {
+      const rewardRarity = getRewardRarity(rewardID);
+      return mapRange[type + rewardRarity];
+    }
+  } else if (rewardID > 32000) {
+    return mapQuestType('VH');
+  } else if (rewardID > 31000) {
+    return mapQuestType('H');
+  } else if (rewardID === 25001) {
+    return mapQuestType('S');
+  }
 }
 
 export function mapQuestType(questID: number): QuestType;

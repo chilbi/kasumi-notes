@@ -171,8 +171,8 @@ interface CharaSkillProps {
 }
 
 function CharaSkill(props: CharaSkillProps) {
-  const { atkType, atkCastTime, property, unitSkillData, userProfile = {} as Partial<PCRStoreValue<'user_profile'>>, onChangeSkill } = props;
-  const { skill_enhance_status = { ub: 1, 1: 1, 2: 1, ex: 1 }, unique_enhance_level = 0 } = userProfile;
+  const { atkType, atkCastTime, property, unitSkillData, userProfile = maxUserProfile, onChangeSkill } = props;
+  const { skill_enhance_status, unique_enhance_level } = userProfile;
   const styles = useStyles();
 
   if (!unitSkillData || !atkType || !atkCastTime || !property)

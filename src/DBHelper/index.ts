@@ -47,14 +47,12 @@ function getProperty(this: CharaBaseData): Property<Big> {
 }
 
 class DBHelper extends ImageData {
-  readonly default_user = 'MAX';
-
   // eslint-disable-next-line @typescript-eslint/no-useless-constructor
   constructor(db: PCRDB) {
     super(db);
   }
 
-  async getCharaDetailData(unit_id: number, base?: CharaBaseData, user_name = this.default_user): Promise<CharaDetailData | undefined> {
+  async getCharaDetailData(unit_id: number, base?: CharaBaseData, user_name = maxUserProfile.user_name): Promise<CharaDetailData | undefined> {
     const [charaData, userProfile, unitProfile, promotions, unitSkillData] = await Promise.all([
       base ? base.charaData : this.db.transaction('chara_data', 'readonly').store.get(unit_id),
       base ? deepClone(base.userProfile) : this.db.transaction('user_profile', 'readonly').store.get([user_name, unit_id]),
@@ -85,7 +83,7 @@ class DBHelper extends ImageData {
     };
   }
 
-  async getAllCharaBaseData(user_name = this.default_user): Promise<CharaBaseData[]> {
+  async getAllCharaBaseData(user_name = maxUserProfile.user_name): Promise<CharaBaseData[]> {
     let [allCharaData, userProfiles] = await Promise.all([
       this.db.transaction('chara_data', 'readonly').store.getAll(),
       this.db.transaction('user_profile', 'readonly').store.index('user_profile_0_user_name').getAll(user_name)

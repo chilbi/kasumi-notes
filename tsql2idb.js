@@ -451,6 +451,46 @@ function writeOpenDB(dbDir, dbName, dbVersion, createStr) {
   fs.writeFileSync(dbDir + 'index.d.ts', dtsStr, { encoding: 'utf-8' });
 }
 
+/**
+ * @param {string} sqlFilesDir
+ * @param {SQLRawObj[]} sqlRawObjs
+ */
+function writeMaxUserProfile(sqlFilesDir, sqlRawObjs) {
+  const experienceTeamRaw = fs.readFileSync(sqlFilesDir + '/experience_team.sql', { encoding: 'utf-8' });
+  const experienceTeamObj = getSqlRawObj(experienceTeamRaw);
+  const maxLevel = experienceTeamObj.records.length - 1;
+
+  const unitPromotionObj = sqlRawObjs.find(obj => obj.tableName === 'unit_promotion');
+  let maxPromotionLevel = 0;
+  for (let record of unitPromotionObj.records) {
+    const idIdx = record.indexOf('unit_id');
+    if (record[idIdx + 1] === '100101') maxPromotionLevel += 1;
+    else break;
+  }
+
+  const uniqueEquipmentEnhanceDataRaw = fs.readFileSync(sqlFilesDir + '/unique_equipment_enhance_data.sql', { encoding: 'utf-8' });
+  const uniqueEquipmentEnhanceDataObj = getSqlRawObj(uniqueEquipmentEnhanceDataRaw);
+  const maxUniqueEnhanceLevel = uniqueEquipmentEnhanceDataObj.records.length + 1;
+
+  let str = '';
+  str += "import { PCRStoreValue } from '../db';\n\n";
+  str += "const maxUserProfile: PCRStoreValue<'user_profile'> = {\n";
+  str += "  user_name: 'MAX',\n";
+  str += '  unit_id: undefined as any,\n';
+  str += `  level: ${maxLevel},\n`;
+  str += '  rarity: 5,\n';
+  str += `  promotion_level: ${maxPromotionLevel},\n`;
+  str += '  unique_equip_id: 999999,\n';
+  str += `  unique_enhance_level: ${maxUniqueEnhanceLevel},\n`;
+  str += `  skill_enhance_status: { ub: ${maxLevel}, 1: ${maxLevel}, 2: ${maxLevel}, ex: ${maxLevel} },\n`;
+  str += '  equip_enhance_status: {},\n';
+  str += '  love_level_status: {},\n';
+  str += '};\n\n';
+  str += 'export default maxUserProfile;\n';
+
+  fs.writeFileSync('./src/DBHelper/maxUserProfile.ts', str, { encoding: 'utf-8' });
+}
+
 function main() {
   const dbName = 'pcr';
 
@@ -706,6 +746,7 @@ function main() {
   if (!fs.existsSync(dbDir)) fs.mkdirSync(dbDir);
   const createStr = writeData(sqlRawObjs, dbDir + '/data/');
   writeOpenDB(dbDir + '/', dbName, dbVersion, createStr);
+  writeMaxUserProfile(sqlFilesDir, sqlRawObjs);
 }
 
 main();

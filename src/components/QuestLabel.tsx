@@ -33,15 +33,16 @@ const useStyles = makeStyles(() => {
 interface QuestLabelProps {
   className?: string;
   type: QuestType;
+  getLabel?: (type: QuestType) => string;
   component?: React.ElementType;
   [x: string]: any;
 }
 
 function QuestLabel(props: QuestLabelProps) {
-  const { className, type, component: Component = 'span' } = props;
+  const { className, type, getLabel = tyep => type, component: Component = 'span' } = props;
   const styles = useStyles();
   return (
-    <Component className={clsx(styles.root, styles[type as keyof typeof styles], className)}>{type}</Component>
+    <Component className={clsx(styles.root, styles[type as keyof typeof styles], className)}>{getLabel(type)}</Component>
   );
 }
 

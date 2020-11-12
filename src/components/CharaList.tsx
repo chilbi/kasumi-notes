@@ -11,27 +11,10 @@ import ViewModule from '@material-ui/icons/ViewModule';
 import ViewStream from '@material-ui/icons/ViewStream';
 import Header from './Header';
 import CharaListItem from './CharaListItem';
-import { CharaBaseData } from '../DBHelper';
-import clsx from 'clsx';
 import { DBHelperContext, CharaListContext } from './Contexts';
-
-const VARIANT_KEY = 'VARIANT_KEY';
-const SORT_KEY = 'SORT_KEY';
-const ORDER_KEY = 'ORDER_KEY';
-const FILTER_ATK_TYPE_KEY = 'FILTER_ATK_TYPE_KEY';
-const FILTER_POSITION_KEY = 'FILTER_POSITION_KEY';
-
-function getLocalValue<T>(key: string, defaultValue: T): T {
-  const requireParse = typeof defaultValue !== 'string';
-  let value: unknown = window.localStorage.getItem(key);
-  if (value === null) {
-    value = defaultValue;
-    window.localStorage.setItem(key, requireParse ? JSON.stringify(value) : value as string);
-  } else if (requireParse) {
-    value = JSON.parse(value as string);
-  }
-  return value as T;
-}
+import { CharaBaseData } from '../DBHelper';
+import localValue from '../localValue';
+import clsx from 'clsx';
 
 function filterCharaList(charaList: CharaBaseData[], order: string, sort: string, atkTypeArr: number[], positionArr: number[]): CharaBaseData[] {
   const list: CharaBaseData[] = [];
@@ -62,6 +45,7 @@ const useStyles = makeStyles((theme: Theme) => {
     },
     subtitle: {
       flexGrow: 1,
+      margin: 0,
       textAlign: 'center',
       ...theme.typography.h6,
     },
@@ -75,11 +59,11 @@ const useStyles = makeStyles((theme: Theme) => {
     label: {
     },
     sort: {
-      transform: 'rotate(0)',
+      transform: 'rotateX(0)',
       transition: 'transform 0.2s',
     },
-    rotate: {
-      transform: 'rotate(180deg)',
+    sortRotate: {
+      transform: 'rotateX(180deg)',
     },
     loading: {
       zIndex: theme.zIndex.tooltip,
@@ -98,18 +82,12 @@ function CharaList() {
   const dbHelper = useContext(DBHelperContext);
   const [charaList] = useContext(CharaListContext);
 
-  const [variant, setVariant] = useState(() => {
-    return getLocalValue<'icon_unit' | 'unit_plate'>(VARIANT_KEY, 'unit_plate');
-  });
+  const [variant, setVariant] = useState(() => localValue.charaList.variant.get());
   const handleChangeVariant = useCallback(() => {
     setVariant(prevValue => {
-      if (prevValue === 'icon_unit') {
-        window.localStorage.setItem(VARIANT_KEY, 'unit_plate');
-        return 'unit_plate';
-      } else {
-        window.localStorage.setItem(VARIANT_KEY, 'icon_unit');
-        return 'icon_unit';
-      }
+      const value = prevValue === 'icon_unit' ? 'unit_plate' : 'icon_unit';
+      localValue.charaList.variant.set(value);
+      return value;
     });
   }, []);
 
@@ -123,74 +101,62 @@ function CharaList() {
     setAnchorEl(null);
   }, []);
 
-  const [sort, setSort] = useState(() => {
-    return getLocalValue(SORT_KEY, 'asc');
-  });
-
-  const [order, setOrder] = useState(() => {
-    return getLocalValue(ORDER_KEY, 'unit_id');
-  });
-
-  const [atkTypeArr, setAtkTypeArr] = useState(() => {
-    return getLocalValue(FILTER_ATK_TYPE_KEY, [1, 2]);
-  });
-
-  const [positionArr, setPositionArr] = useState(() => {
-    return getLocalValue(FILTER_POSITION_KEY, [1, 2, 3]);
-  });
-
+  const [sort, setSort] = useState(() => localValue.charaList.sort.get());
   const handleToggleSort = useCallback(() => {
     setSort(prev => {
       const value = prev === 'asc' ? 'desc' : 'asc';
-      window.localStorage.setItem(SORT_KEY, value);
+      localValue.charaList.sort.set(value);
       return value;
-    })
+    });
   }, []);
 
+  const [order, setOrder] = useState(() => localValue.charaList.order.get());
   const handleChangeOrder = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    window.localStorage.setItem(ORDER_KEY, value);
+    localValue.charaList.order.set(value);
     setOrder(value);
   }, []);
+
+  const [atkTypeArr, setAtkTypeArr] = useState(() => localValue.charaList.atkTypeArr.get());
+  const [handleToggleAtkType1, handleToggleAtkType2] = [1, 2].map(atkType => {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    return useCallback(() => {
+      setAtkTypeArr(prev => {
+        let value: number[];
+        if (prev.indexOf(atkType) > -1) {
+          value = prev.filter(value => value !== atkType);
+        } else {
+          value = [...prev, atkType];
+        }
+        localValue.charaList.atkTypeArr.set(value);
+        return value;
+      });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+  });
+
+  const [positionArr, setPositionArr] = useState(() => localValue.charaList.positionArr.get());
+  const [handleTogglePosition1, handleTogglePosition2, handleTogglePosition3] = [1, 2, 3].map(position => {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    return useCallback(() => {
+      setPositionArr(prev => {
+        let value: number[];
+        if (prev.indexOf(position) > -1) {
+          value = prev.filter(value => value !== position);
+        } else {
+          value = [...prev, position];
+        }
+        localValue.charaList.positionArr.set(value);
+        return value;
+      });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+  });
 
   const nullableCharaList: (CharaBaseData | undefined)[] = useMemo(() => {
     return (charaList && filterCharaList(charaList, order, sort, atkTypeArr, positionArr)) || Array.from(Array(130));
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [charaList, sort, order, atkTypeArr.length, positionArr.length]);
-
-  const [handleToggleAtkType1, handleToggleAtkType2] = [1, 2].map(atkType => {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    return useCallback(() => {
-      setAtkTypeArr(prev => {
-        let newArr: number[];
-        if (prev.indexOf(atkType) > -1) {
-          newArr = prev.filter(value => value !== atkType);
-        } else {
-          newArr = [...prev, atkType];
-        }
-        window.localStorage.setItem(FILTER_ATK_TYPE_KEY, JSON.stringify(newArr));
-        return newArr;
-      })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
-  });
-
-  const [handleTogglePosition1, handleTogglePosition2, handleTogglePosition3] = [1, 2, 3].map(position => {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    return useCallback(() => {
-      setPositionArr(prev => {
-        let newArr: number[];
-        if (prev.indexOf(position) > -1) {
-          newArr = prev.filter(value => value !== position);
-        } else {
-          newArr = [...prev, position];
-        }
-        window.localStorage.setItem(FILTER_POSITION_KEY, JSON.stringify(newArr));
-        return newArr;
-      });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
-  });
 
   return (
     <>
@@ -264,7 +230,13 @@ function CharaList() {
               checked={order === 'search_area_width'}
               onChange={handleChangeOrder}
             />
-            <IconButton className={clsx(styles.sort, sort === 'asc' && styles.rotate)} color="secondary" onClick={handleToggleSort}>
+            <label htmlFor="sort-chara-list">{sort==='asc' ? '昇順' : '降順'}</label>
+            <IconButton
+              id="sort-chara-list"
+              className={clsx(styles.sort, sort === 'asc' && styles.sortRotate)}
+              color="secondary"
+              onClick={handleToggleSort}
+            >
               <SortRounded />
             </IconButton>
           </div>

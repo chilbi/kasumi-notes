@@ -4,6 +4,7 @@ import { makeStyles, Theme } from '@material-ui/core/styles';
 import Footer from './Footer';
 import CharaList from './CharaList';
 import CharaDetail from './CharaDetail';
+import Quest from './Quest';
 import { getParamsUnitID } from '../DBHelper/helper';
 import clsx from 'clsx';
 
@@ -71,7 +72,7 @@ function Main() {
           {charaDetailMatch && <CharaDetail unitID={getParamsUnitID(charaDetailMatch.params.unit_id)} />}
         </div>
         <div id="quest" className={clsx(styles.item, !questMatch && styles.hidden)}>
-          未完成
+          {questMatch && <Quest /> }
       </div>
         <div id="menu" className={clsx(styles.item, !menuMatch && styles.hidden)}>
           未完成

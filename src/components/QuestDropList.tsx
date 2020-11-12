@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { makeStyles, alpha, Theme } from '@material-ui/core/styles'
 import LinearProgress from '@material-ui/core/LinearProgress';
 import SkeletonImage from './SkeletonImage';
@@ -81,54 +81,71 @@ const useStyles = makeStyles((theme: Theme) => {
 
 interface QuestDropListProps {
   classes?: Partial<Record<'root', string>>;
+  sort?: 'asc' | 'desc';
   search: Set<number>;
-  types: QuestType[];
+  rangeTypes: QuestType[] | Range;
 }
 
 function QuestDropList(props: QuestDropListProps) {
-  const { classes = {}, search, types } = props;
+  const { classes = {}, sort, search, rangeTypes } = props;
   const styles = useStyles();
 
   const [loading, setLoading] = useState(true);
 
   const questList = useDBHelper(dbHelper => {
     setLoading(true);
-    if (search.size < 1 || types.length < 1) {
+    const resolveUndefiend = () => {
       setLoading(false);
       return Promise.resolve(undefined);
-    }
-    const ranges: Range[] = [];
-    const values: number[] = [];
-    for (let type of types) {
-      for (let rewardID of search) {
-        ranges.push(getRange(type, rewardID));
-        values.push(rewardID);
-      }
-    }
-    if (ranges.length < 1) {
-      setLoading(false);
-      return Promise.resolve(undefined);
-    }
-    return dbHelper.getQuestList(mergeRanges(ranges)).then(data => {
-      const result: QuestData[] = [];
-      for (let list of data) {
-        for (let item of list) {
-          if (values.some(value => item.hasReward(value))) {
-            result.push(item);
-          }
+    };
+    const isMapMode = typeof rangeTypes[0] === 'number';
+    if ((search.size < 1 && !isMapMode) || rangeTypes.length < 1)
+      return resolveUndefiend();
+    if (isMapMode) {
+      return dbHelper.getQuestList(rangeTypes as Range).then(result => {
+        setLoading(false);
+        return result;
+      });
+    } else {
+      const ranges: Range[] = [];
+      const values: number[] = [];
+      for (let type of rangeTypes as QuestType[]) {
+        for (let rewardID of search) {
+          const range = getRange(type, rewardID);
+          if (range) ranges.push(range);
+          values.push(rewardID);
         }
       }
-      setLoading(false);
-      return result.sort((a, b) => b.quest_id - a.quest_id);
-    });
-  }, [search, types]);
+      if (ranges.length < 1)
+        return resolveUndefiend();
+      return dbHelper.getQuestList(mergeRanges(ranges)).then(data => {
+        const result: QuestData[] = [];
+        for (let list of data) {
+          for (let item of list) {
+            if (values.some(value => item.hasReward(value))) {
+              result.push(item);
+            }
+          }
+        }
+        setLoading(false);
+        return result;
+      });
+    }
+  }, [search, rangeTypes]);
 
-  if (loading || !questList)
+  const sortedList = useMemo(() => {
+    return questList && questList.sort(sort === 'asc'
+      ? (a, b) => a.quest_id - b.quest_id
+      : (a, b) => b.quest_id - a.quest_id
+    );
+  }, [sort, questList]);
+
+  if (loading || !sortedList)
     return <LinearProgress color="secondary" />;
 
   return (
     <div className={classes.root}>
-      {questList.map(quest => {
+      {sortedList.map(quest => {
         const { drop_gold, drop_reward } = quest.drop_data;
         if (drop_reward.length < 1) return null;
         const type = mapQuestType(quest.quest_id);

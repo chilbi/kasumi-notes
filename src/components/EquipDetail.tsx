@@ -4,6 +4,7 @@ import ButtonBase from '@material-ui/core/ButtonBase';
 import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
 import ArrowBack from '@material-ui/icons/ArrowBack';
+import SortRounded from '@material-ui/icons/SortRounded';
 import Checkbox from '@material-ui/core/Checkbox';
 import ExpandLess from '@material-ui/icons/ExpandLess';
 import Header from './Header';
@@ -21,8 +22,9 @@ import { CraftData } from '../DBHelper/equip_craft';
 import { getPublicImageURL, QuestType } from '../DBHelper/helper';
 import { propertyKeys, Property } from '../DBHelper/property';
 import maxUserProfile from '../DBHelper/maxUserProfile';
-import Big from 'big.js';
 import useDBHelper from '../hooks/useDBHelper';
+import localValue from '../localValue';
+import Big from 'big.js';
 import clsx from 'clsx';
 
 const useStyles = makeStyles((theme: Theme) => {
@@ -101,6 +103,7 @@ const useStyles = makeStyles((theme: Theme) => {
     },
     subtitle: {
       flexGrow: 1,
+      margin: 0,
       paddingRight: '3rem',
       textAlign: 'center',
       ...theme.typography.h6,
@@ -176,8 +179,20 @@ const useStyles = makeStyles((theme: Theme) => {
       transform: 'rotate(0)',
       transition: 'transform 0.2s',
     },
-    rotate: {
+    expandlessRotate: {
       transform: 'rotate(180deg)',
+    },
+    sortLabel: {
+      display: 'inline-block',
+      margin: '0 0 0 0.5em',
+    },
+    sort: {
+      padding: 0,
+      transform: 'rotateX(0)',
+      transition: 'transform 0.2s',
+    },
+    sortRotate: {
+      transform: 'rotateX(180deg)',
     },
     hidden: {
       display: 'none',
@@ -204,17 +219,32 @@ function EquipDetail(props: EquipDetailProps) {
   const [craftExpand, setCraftExpand] = useState(true);
   const handleToggleCraft = useCallback(() => setCraftExpand(prev => !prev), []);
 
-  const [nChecked, setNChecked] = useState(true);
-  const handleToggleN = useCallback(() => setNChecked(prev => !prev), []);
+  const [types, setTypes] = useState(() => localValue.equipDetail.types.get());
+  const [handleToggleN, handleToggleH, handleToggleVH, handleToggleS] = (['N', 'H', 'VH', 'S'] as const).map(type => {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    return useCallback(() => {
+      setTypes(prev => {
+        let value: QuestType[];
+        if (prev.indexOf(type) > -1) {
+          value = prev.filter(value => value !== type);
+        } else {
+          value = [...prev, type];
+        }
+        localValue.equipDetail.types.set(value);
+        return value;
+      })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+  })
 
-  const [hChecked, setHChecked] = useState(true);
-  const handleToggleH = useCallback(() => setHChecked(prev => !prev), []);
-
-  const [vhChecked, setVHChecked] = useState(true);
-  const handleToggleVH = useCallback(() => setVHChecked(prev => !prev), []);
-
-  const [sChecked, setSChecked] = useState(true);
-  const handleToggleS = useCallback(() => setSChecked(prev => !prev), []);
+  const [sort, setSort] = useState(() => localValue.equipDetail.sort.get());
+  const handleToggleSort = useCallback(() => {
+    setSort(prev => {
+      const value = prev === 'asc' ? 'desc' : 'asc';
+      localValue.equipDetail.sort.set(value);
+      return value;
+    });
+  }, []);
 
   const equipCraft = useDBHelper(dbHelper => {
     return equipData && equipData.equipment_data.craft_flg === 1
@@ -244,15 +274,6 @@ function EquipDetail(props: EquipDetailProps) {
 
   const genre = isUnique ? level.toString() : equipData!.equipment_enhance_rate.description;
 
-  const types = useMemo(() => {
-    const result: QuestType[] = [];
-    if (sChecked) result.push('S');
-    if (vhChecked) result.push('VH');
-    if (hChecked) result.push('H');
-    if (nChecked) result.push('N');
-    return result;
-  }, [sChecked, vhChecked, hChecked, nChecked]);
-
   const property = useMemo(() => {
     const result: Partial<Property<Big>> = {};
     const _property = isUnique ? uniqueEquipData!.getProperty(level > 0 ? level : 1) : equipData!.getProperty(level);
@@ -278,21 +299,33 @@ function EquipDetail(props: EquipDetailProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   ), [onBack]);
 
-
   const renderCraftItem = (item: CraftData, i: number) => {
     const { material_id, consume_num } = item;
-    const selected = search.has(material_id);
+    const isHeart = material_id === 140000 || material_id === 140001;
+    const selected = search.has(material_id) || (isHeart && search.has(140001));
     return (
       <ButtonBase
         key={i}
         className={clsx(styles.craftItem, selected && styles.selected)}
         onClick={() => {
           if (selected) {
-            search.delete(material_id);
+            if (isHeart) {
+              search.delete(140001);
+              if (types.indexOf('S') > -1) handleToggleS();
+            } else {
+              search.delete(material_id);
+            }
             setSearch(new Set(search));
             if (isUnique) setCraftExpand(true);
-          } else if (material_id !== 140000 && material_id !== 140001) {
-            search.add(material_id);
+          } else {
+            if (isHeart) {
+              search.add(140001);
+              if (types.indexOf('S') < 0) handleToggleS();
+            } else {
+              if (material_id > 32000 && material_id < 33000 && types.indexOf('VH') < 0) handleToggleVH();
+              else if (material_id > 31000 && material_id < 32000 && types.indexOf('H') < 0) handleToggleH();
+              search.add(material_id);
+            }
             setSearch(new Set(search));
             if (isUnique) setCraftExpand(false);
           }
@@ -322,7 +355,7 @@ function EquipDetail(props: EquipDetailProps) {
         <div className={styles.nameBox}>
           <div>
             <span className={styles.name}>{name}</span>
-            <IconButton className={clsx(styles.expandless, descExpand && styles.rotate)} onClick={handleToggleDesc}>
+            <IconButton className={clsx(styles.expandless, descExpand && styles.expandlessRotate)} onClick={handleToggleDesc}>
               <ExpandLess />
             </IconButton>
           </div>
@@ -380,7 +413,7 @@ function EquipDetail(props: EquipDetailProps) {
         <div className={clsx(styles.paper, styles.craft)}>
           <div className={styles.labelBox}>
             <div className={styles.label}>合成素材</div>
-            <IconButton className={clsx(styles.expandless, craftExpand && styles.rotate)} onClick={handleToggleCraft}>
+            <IconButton className={clsx(styles.expandless, craftExpand && styles.expandlessRotate)} onClick={handleToggleCraft}>
               <ExpandLess />
             </IconButton>
           </div>
@@ -420,16 +453,25 @@ function EquipDetail(props: EquipDetailProps) {
             <div className={styles.label}>入手場所</div>
             <div className={styles.types}>
               <QuestLabel type="N" component="label" htmlFor="equip-detail-N" />
-              <Checkbox id="equip-detail-N" classes={{ root: styles.checkbox }} checked={nChecked} onChange={handleToggleN} />
+              <Checkbox id="equip-detail-N" classes={{ root: styles.checkbox }} checked={types.indexOf('N') > -1} onChange={handleToggleN} />
               <QuestLabel type="H" component="label" htmlFor="equip-detail-H" />
-              <Checkbox id="equip-detail-H" classes={{ root: styles.checkbox }} checked={hChecked} onChange={handleToggleH} />
+              <Checkbox id="equip-detail-H" classes={{ root: styles.checkbox }} checked={types.indexOf('H') > -1} onChange={handleToggleH} />
               <QuestLabel type="VH" component="label" htmlFor="equip-detail-VH" />
-              <Checkbox id="equip-detail-VH" classes={{ root: styles.checkbox }} checked={vhChecked} onChange={handleToggleVH} />
+              <Checkbox id="equip-detail-VH" classes={{ root: styles.checkbox }} checked={types.indexOf('VH') > -1} onChange={handleToggleVH} />
               <QuestLabel type="S" component="label" htmlFor="equip-detail-S" />
-              <Checkbox id="equip-detail-S" classes={{ root: styles.checkbox }} checked={sChecked} onChange={handleToggleS} />
+              <Checkbox id="equip-detail-S" classes={{ root: styles.checkbox }} checked={types.indexOf('S') > -1} onChange={handleToggleS} />
+              <label className={styles.sortLabel} htmlFor="sort-chara-list">{sort === 'asc' ? '昇順' : '降順'}</label>
+              <IconButton
+                id="sort-chara-list"
+                className={clsx(styles.sort, sort === 'asc' && styles.sortRotate)}
+                color="secondary"
+                onClick={handleToggleSort}
+              >
+                <SortRounded />
+              </IconButton>
             </div>
           </div>
-          <QuestDropList classes={{ root: styles.dropList }} search={search} types={types} />
+          <QuestDropList classes={{ root: styles.dropList }} sort={sort} search={search} rangeTypes={types} />
         </>
       )}
     </div>

@@ -7,6 +7,7 @@ import SkeletonImage from './SkeletonImage';
 import CharaStatus from './CharaStatus';
 import { StoryStatus, StoryStatusData } from '../DBHelper/story_status';
 import { getPublicImageURL } from '../DBHelper/helper';
+import maxUserProfile from '../DBHelper/maxUserProfile';
 import { PCRStoreValue } from '../db';
 import Big from 'big.js';
 
@@ -100,8 +101,8 @@ interface CharaStoryProps {
 }
 
 function CharaStory(props: CharaStoryProps) {
-  const { storyStatus = {} as Partial<StoryStatusData>, userProfile, onChangeLove: onChangeLoveLevel } = props;
-  const loveLevelStatus = userProfile ? userProfile.love_level_status : {};
+  const { storyStatus = {} as Partial<StoryStatusData>, userProfile = maxUserProfile, onChangeLove: onChangeLoveLevel } = props;
+  const { love_level_status } = userProfile;
   const styles = useStyles();
 
   const [tabsValue, setTabsValue] = useState(0);
@@ -115,7 +116,7 @@ function CharaStory(props: CharaStoryProps) {
     const infoArr: { chara_id: number; label: string, imgSrc: string }[] = [];
     const getStoryView = (storyStatus: StoryStatus) => {
       const charaID = storyStatus.chara_id;
-      const loveLevel = loveLevelStatus[charaID] || 1;
+      const loveLevel = love_level_status[charaID] || 1;
       const isMax4 = storyStatus.stories.length < 8;
       const unlockCount = isMax4 ? Math.max(Math.floor(loveLevel / 2), 1) : loveLevel;
       return storyStatus.stories.map((story, i) => {
@@ -161,7 +162,7 @@ function CharaStory(props: CharaStoryProps) {
     };
     const getImgSrc = (charaID: number) => {
       let rarity = '3';
-      const loveLevel = loveLevelStatus[charaID];
+      const loveLevel = love_level_status[charaID];
       if (loveLevel) {
         if (loveLevel > 8) rarity = '6';
         if (loveLevel < 5) rarity = '1';
@@ -189,7 +190,7 @@ function CharaStory(props: CharaStoryProps) {
       infoArr,
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [storyStatus, loveLevelStatus]);
+  }, [storyStatus, love_level_status]);
 
   const tabsValueMemo = useMemo(() => ({
     tabs: dataStatusMemo.infoArr.length > 0 && (

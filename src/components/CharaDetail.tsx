@@ -42,6 +42,7 @@ const useStyles = makeStyles((theme: Theme) => {
     },
     subtitle: {
       flexGrow: 1,
+      margin: 0,
       textAlign: 'center',
       ...theme.typography.h6,
     },

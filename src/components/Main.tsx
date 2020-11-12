@@ -52,11 +52,17 @@ function Main() {
   });
   const noMatch = !rootMatch && !charaDetailMatch && !questMatch && !menuMatch;
 
-  const [path, setPath] = useState(() => '/chara');
+  const [path, setPath] = useState('/chara');
   const handleChange = useCallback((e: React.SyntheticEvent, newPath: string) => {
     navigate(newPath);
     setPath(newPath);
   }, [navigate]);
+
+  if (rootMatch && path !== '/chara') {
+    setPath('/chara');
+  } else if (questMatch && path !== '/quest') {
+    setPath('/quest');
+  }
 
   const footer = useMemo(() => !charaDetailMatch && (
     <Footer value={path} onChange={handleChange} />

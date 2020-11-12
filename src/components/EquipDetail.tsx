@@ -211,7 +211,7 @@ function EquipDetail(props: EquipDetailProps) {
   const { equipData, uniqueEquipData, enhanceLevel, onChangeEnhance, onBack } = props;
   const styles = useStyles();
 
-  const [search, setSearch] = useState<Set<number>>(new Set());
+  const [search, setSearch] = useState<Set<number>>(() => new Set());
 
   const [descExpand, setDescExpand] = useState(true);
   const handleToggleDesc = useCallback(() => setDescExpand(prev => !prev), []);

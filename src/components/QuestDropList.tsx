@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { makeStyles, alpha, Theme } from '@material-ui/core/styles'
 import LinearProgress from '@material-ui/core/LinearProgress';
+import ButtonBase from '@material-ui/core/ButtonBase';
 import SkeletonImage from './SkeletonImage';
 import QuestLabel from './QuestLabel';
 import useDBHelper from '../hooks/useDBHelper';
@@ -84,11 +85,14 @@ interface QuestDropListProps {
   sort?: 'asc' | 'desc';
   search: Set<number>;
   rangeTypes: QuestType[] | Range;
+  onRewardClick?: (rewardID: number) => void;
 }
 
 function QuestDropList(props: QuestDropListProps) {
-  const { classes = {}, sort, search, rangeTypes } = props;
+  const { classes = {}, sort, search, rangeTypes, onRewardClick } = props;
   const styles = useStyles();
+
+    const isMapMode = typeof rangeTypes[0] === 'number';
 
   const [loading, setLoading] = useState(true);
 
@@ -98,7 +102,6 @@ function QuestDropList(props: QuestDropListProps) {
       setLoading(false);
       return Promise.resolve(undefined);
     };
-    const isMapMode = typeof rangeTypes[0] === 'number';
     if ((search.size < 1 && !isMapMode) || rangeTypes.length < 1)
       return resolveUndefiend();
     if (isMapMode) {
@@ -131,7 +134,7 @@ function QuestDropList(props: QuestDropListProps) {
         return result;
       });
     }
-  }, [search, rangeTypes]);
+  }, [rangeTypes, isMapMode ? undefined : search]);
 
   const sortedList = useMemo(() => {
     return questList && questList.sort(sort === 'asc'
@@ -158,10 +161,14 @@ function QuestDropList(props: QuestDropListProps) {
             </div>
             <div className={styles.dropList}>
               {drop_reward.map((drop, i) => (
-                <div key={i} className={clsx(styles.dropItem, search.has(drop.reward_id) && styles.selected)}>
+                <ButtonBase
+                  key={i}
+                  className={clsx(styles.dropItem, search.has(drop.reward_id) && styles.selected)}
+                  onClick={onRewardClick && (() => onRewardClick(drop.reward_id))}
+                >
                   <SkeletonImage classes={{ root: styles.dropIcon }} src={getPublicImageURL(drop.reward_type === 4 ? 'icon_equipment' : 'icon_item', drop.reward_id)} />
                   <span className={styles.odds}>{drop.odds}%</span>
-                </div>
+                </ButtonBase>
               ))}
             </div>
           </div>

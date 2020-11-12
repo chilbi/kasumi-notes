@@ -68,7 +68,7 @@ function QuestMapList() {
     setAnchorEl(null);
   }, []);
 
-  const [search] = useState<Set<number>>(new Set());
+  const [search, setSearch] = useState<Set<number>>(new Set());
 
   const [sort, setSort] = useState(() => localValue.questMapList.sort.get());
   const handleToggleSort = useCallback(() => {
@@ -168,7 +168,16 @@ function QuestMapList() {
           onChange={handleChangeArea}
         />
       )}
-      <QuestDropList sort={sort} search={search} rangeTypes={range} />
+      <QuestDropList
+        sort={sort}
+        search={search}
+        rangeTypes={range}
+        onRewardClick={rewardID => {
+          if (search.has(rewardID)) search.delete(rewardID);
+          else search.add(rewardID);
+          setSearch(new Set(search));
+        }}
+      />
     </>
   );
 }

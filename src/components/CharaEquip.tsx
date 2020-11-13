@@ -1,4 +1,4 @@
-import React, { useContext, useRef, useCallback, useLayoutEffect } from 'react';
+import React, { useContext, useCallback } from 'react';
 import { makeStyles, Theme, StyleRules } from '@material-ui/core/styles';
 import Checkbox from '@material-ui/core/Checkbox';
 import Radio from '@material-ui/core/Radio';
@@ -197,14 +197,6 @@ const useStyles = makeStyles((theme: Theme) => {
     uniqueColor: {
       color: '#d34bef',
     },
-    hiddenScroll: {
-      position: 'fixed',
-      top: 0,
-      right: 0,
-      bottom: 'auto',
-      left: 0,
-      overflow: 'hidden',
-    },
     ...rankStyles,
   };
 });
@@ -226,24 +218,6 @@ function CharaEquip(props: CharaEquipProps) {
   const location = useLocation();
   const url = location.pathname + location.search;
   const setEquipDetail = useContext(EquipDetailContext)[1];
-  
-  const scrollTopRef = useRef(0);
-  const state = false;
-  
-  useLayoutEffect(() => {
-    const el = document.documentElement || document.body;
-    if (state) {
-      scrollTopRef.current = el.scrollTop;
-      el.classList.add(styles.hiddenScroll);
-    } else {
-      el.classList.remove(styles.hiddenScroll);
-      el.scrollTo(0, scrollTopRef.current);
-    }
-    return () => {
-      el.classList.remove(styles.hiddenScroll);
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state]);
 
   const equipSlots: (EquipData | undefined)[] = promotions.length < 1
     ? Array(6).fill(undefined)

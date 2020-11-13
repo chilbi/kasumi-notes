@@ -220,22 +220,19 @@ function EquipDetail(props: EquipDetailProps) {
   const handleToggleCraft = useCallback(() => setCraftExpand(prev => !prev), []);
 
   const [types, setTypes] = useState(() => localValue.equipDetail.types.get());
-  const [handleToggleN, handleToggleH, handleToggleVH, handleToggleS] = (['N', 'H', 'VH', 'S'] as const).map(type => {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    return useCallback(() => {
-      setTypes(prev => {
-        let value: QuestType[];
-        if (prev.indexOf(type) > -1) {
-          value = prev.filter(value => value !== type);
-        } else {
-          value = [...prev, type];
-        }
-        localValue.equipDetail.types.set(value);
-        return value;
-      })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
-  })
+  const handleChangeTypes = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const type = (e.target.value) as QuestType;
+    setTypes(prev => {
+      let value: QuestType[];
+      if (prev.indexOf(type) > -1) {
+        value = prev.filter(value => value !== type);
+      } else {
+        value = [...prev, type];
+      }
+      localValue.equipDetail.types.set(value);
+      return value;
+    });
+  }, []);
 
   const [sort, setSort] = useState(() => localValue.equipDetail.sort.get());
   const handleToggleSort = useCallback(() => {
@@ -311,7 +308,7 @@ function EquipDetail(props: EquipDetailProps) {
           if (selected) {
             if (isHeart) {
               search.delete(140001);
-              if (types.indexOf('S') > -1) handleToggleS();
+              if (types.indexOf('S') > -1) handleChangeTypes({ target: { value: 'S' } } as any);
             } else {
               search.delete(material_id);
             }
@@ -320,10 +317,10 @@ function EquipDetail(props: EquipDetailProps) {
           } else {
             if (isHeart) {
               search.add(140001);
-              if (types.indexOf('S') < 0) handleToggleS();
+              if (types.indexOf('S') < 0) handleChangeTypes({ target: { value: 'S' } } as any);
             } else {
-              if (material_id > 32000 && material_id < 33000 && types.indexOf('VH') < 0) handleToggleVH();
-              else if (material_id > 31000 && material_id < 32000 && types.indexOf('H') < 0) handleToggleH();
+              if (material_id > 32000 && material_id < 33000 && types.indexOf('VH') < 0) handleChangeTypes({ target: { value: 'VH' } } as any);
+              else if (material_id > 31000 && material_id < 32000 && types.indexOf('H') < 0) handleChangeTypes({ target: { value: 'H' } } as any);
               search.add(material_id);
             }
             setSearch(new Set(search));
@@ -452,14 +449,15 @@ function EquipDetail(props: EquipDetailProps) {
           <div className={clsx(styles.paper, styles.labelBox)}>
             <div className={styles.label}>入手場所</div>
             <div className={styles.types}>
-              <QuestLabel type="N" component="label" htmlFor="equip-detail-N" />
-              <Checkbox id="equip-detail-N" classes={{ root: styles.checkbox }} checked={types.indexOf('N') > -1} onChange={handleToggleN} />
-              <QuestLabel type="H" component="label" htmlFor="equip-detail-H" />
-              <Checkbox id="equip-detail-H" classes={{ root: styles.checkbox }} checked={types.indexOf('H') > -1} onChange={handleToggleH} />
-              <QuestLabel type="VH" component="label" htmlFor="equip-detail-VH" />
-              <Checkbox id="equip-detail-VH" classes={{ root: styles.checkbox }} checked={types.indexOf('VH') > -1} onChange={handleToggleVH} />
-              <QuestLabel type="S" component="label" htmlFor="equip-detail-S" />
-              <Checkbox id="equip-detail-S" classes={{ root: styles.checkbox }} checked={types.indexOf('S') > -1} onChange={handleToggleS} />
+              {(['N', 'H', 'VH', 'S'] as const).map(value => {
+                const id = 'equip-detail-types-' + value;
+                return (
+                  <Fragment key={value}>
+                    <QuestLabel type={value} component="label" htmlFor={id} />
+                    <Checkbox id={id} classes={{ root: styles.checkbox }} value={value} checked={types.indexOf(value) > -1} onChange={handleChangeTypes} />
+                  </Fragment>
+                )
+              })}
               <label className={styles.sortLabel} htmlFor="sort-chara-list">{sort === 'asc' ? '昇順' : '降順'}</label>
               <IconButton
                 id="sort-chara-list"

@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useContext, useMemo } from 'react';
+import React, { Fragment, useState, useCallback, useContext, useMemo } from 'react';
 import { makeStyles, Theme } from '@material-ui/core/styles';
 import IconButton from '@material-ui/core/IconButton';
 import Popover from '@material-ui/core/Popover';
@@ -12,6 +12,7 @@ import ViewStream from '@material-ui/icons/ViewStream';
 import Header from './Header';
 import CharaListItem from './CharaListItem';
 import { DBHelperContext, CharaListContext } from './Contexts';
+import { getPositionText } from '../DBHelper/helper';
 import { CharaBaseData } from '../DBHelper';
 import localValue from '../localValue';
 import clsx from 'clsx';
@@ -46,6 +47,7 @@ const useStyles = makeStyles((theme: Theme) => {
     subtitle: {
       flexGrow: 1,
       margin: 0,
+      paddingRight: 24,
       textAlign: 'center',
       ...theme.typography.h6,
     },
@@ -118,40 +120,34 @@ function CharaList() {
   }, []);
 
   const [atkTypeArr, setAtkTypeArr] = useState(() => localValue.charaList.atkTypeArr.get());
-  const [handleToggleAtkType1, handleToggleAtkType2] = [1, 2].map(atkType => {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    return useCallback(() => {
-      setAtkTypeArr(prev => {
-        let value: number[];
-        if (prev.indexOf(atkType) > -1) {
-          value = prev.filter(value => value !== atkType);
-        } else {
-          value = [...prev, atkType];
-        }
-        localValue.charaList.atkTypeArr.set(value);
-        return value;
-      });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
-  });
+  const handleChangeAtkType = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const atkType = parseInt(e.target.value);
+    setAtkTypeArr(prev => {
+      let value: number[];
+      if (prev.indexOf(atkType) > -1) {
+        value = prev.filter(value => value !== atkType);
+      } else {
+        value = [...prev, atkType];
+      }
+      localValue.charaList.atkTypeArr.set(value);
+      return value;
+    });
+  }, []);
 
   const [positionArr, setPositionArr] = useState(() => localValue.charaList.positionArr.get());
-  const [handleTogglePosition1, handleTogglePosition2, handleTogglePosition3] = [1, 2, 3].map(position => {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    return useCallback(() => {
-      setPositionArr(prev => {
-        let value: number[];
-        if (prev.indexOf(position) > -1) {
-          value = prev.filter(value => value !== position);
-        } else {
-          value = [...prev, position];
-        }
-        localValue.charaList.positionArr.set(value);
-        return value;
-      });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
-  });
+  const handleChangePosition = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const position = parseInt(e.target.value);
+    setPositionArr(prev => {
+      let value: number[];
+      if (prev.indexOf(position) > -1) {
+        value = prev.filter(value => value !== position);
+      } else {
+        value = [...prev, position];
+      }
+      localValue.charaList.positionArr.set(value);
+      return value;
+    });
+  }, []);
 
   const nullableCharaList: (CharaBaseData | undefined)[] = useMemo(() => {
     return (charaList && filterCharaList(charaList, order, sort, atkTypeArr, positionArr)) || Array.from(Array(130));
@@ -169,82 +165,68 @@ function CharaList() {
           keepMounted
           anchorEl={anchorEl}
           open={!!anchorEl}
-          anchorOrigin={{
-            vertical: 'bottom',
-            horizontal: 'left',
-          }}
-          transformOrigin={{
-            vertical: 'top',
-            horizontal: 'left',
-          }}
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+          transformOrigin={{ vertical: 'top', horizontal: 'left' }}
           onClose={handleClose}
         >
           <div className={styles.form}>
-            <label htmlFor="filter-atk_type_1">物理</label>
-            <Checkbox
-              id="filter-atk_type_1"
-              checked={atkTypeArr.indexOf(1) > -1}
-              onChange={handleToggleAtkType1}
-            />
-            <label htmlFor="filter-atk_type_2">魔法</label>
-            <Checkbox
-              id="filter-atk_type_2"
-              checked={atkTypeArr.indexOf(2) > -1}
-              onChange={handleToggleAtkType2}
-            />
+            {([[1, '物理'], [2, '魔法']] as [number, string][]).map(item => {
+              const [value, label] = item
+              const id = 'chara-list-filter-atk_type_' + value;
+              return (
+                <Fragment key={value}>
+                  <label htmlFor={id}>{label}</label>
+                  <Checkbox id={id} value={value} checked={atkTypeArr.indexOf(value) > -1} onChange={handleChangeAtkType} />
+                </Fragment>
+              );
+            })}
           </div>
           <div className={styles.form}>
-            <label htmlFor="filter-position_1">前衛</label>
-            <Checkbox
-              id="filter-position_1"
-              checked={positionArr.indexOf(1) > -1}
-              onChange={handleTogglePosition1}
-            />
-            <label htmlFor="filter-position_2">中衛</label>
-            <Checkbox
-              id="filter-position_2"
-              checked={positionArr.indexOf(2) > -1}
-              onChange={handleTogglePosition2}
-            />
-            <label htmlFor="filter-position_3">後衛</label>
-            <Checkbox
-              id="filter-position_3"
-              checked={positionArr.indexOf(3) > -1}
-              onChange={handleTogglePosition3}
-            />
+            {[[1, 2, 3].map(value => {
+              const label = getPositionText(value);
+              const id = 'chara-list-filter-position_' + value;
+              return (
+                <Fragment key={value}>
+                  <label htmlFor={id}>{label}</label>
+                  <Checkbox id={id} value={value} checked={positionArr.indexOf(value) > -1} onChange={handleChangePosition} />
+                </Fragment>
+              )
+            })]}
           </div>
           <div className={styles.form}>
-            <label htmlFor="order-unit_id">ID</label>
-            <Radio
-              id="order-unit_id"
-              name="chara-list-order"
-              value="unit_id"
-              checked={order === 'unit_id'}
-              onChange={handleChangeOrder}
-            />
-            <label htmlFor="order-search_area_width">攻撃距離</label>
-            <Radio
-              id="order-search_area_width"
-              name="chara-list-order"
-              value="search_area_width"
-              checked={order === 'search_area_width'}
-              onChange={handleChangeOrder}
-            />
-            <label htmlFor="sort-chara-list">{sort==='asc' ? '昇順' : '降順'}</label>
+            {[['unit_id', 'ID'], ['search_area_width', '攻撃距離']].map(item => {
+              const [value, label] = item;
+              const name = 'chara-list-order';
+              const id = name + '-' + value;
+              return (
+                <Fragment key={value}>
+                  <label htmlFor={id}>{label}</label>
+                  <Radio id={id} name={name} value={value} checked={order === value} onChange={handleChangeOrder} />
+                </Fragment>
+              )
+            })}
+          </div>
+          <div className={styles.form}>
+            <label htmlFor="chara-list-sort">{sort==='asc' ? '昇順' : '降順'}</label>
             <IconButton
-              id="sort-chara-list"
+              id="chara-list-sort"
               className={clsx(styles.sort, sort === 'asc' && styles.sortRotate)}
               color="secondary"
               onClick={handleToggleSort}
             >
               <SortRounded />
             </IconButton>
+            <label htmlFor="chara-list-variant">{variant === 'icon_unit' ? '小' : '大'}</label>
+            <IconButton
+              id="chara-list-variant"
+              color="secondary"
+              onClick={handleChangeVariant}
+            >
+              {variant === 'icon_unit' ? <ViewModule /> : <ViewStream />}
+            </IconButton>
           </div>
         </Popover>
         <h6 className={styles.subtitle}>キャラ一覧</h6>
-        <IconButton color="primary" onClick={handleChangeVariant}>
-          {variant === 'icon_unit' ? <ViewModule /> : <ViewStream />}
-        </IconButton>
       </Header>
       <div className={clsx(styles.list, styles.spaceEvenly)}>
         {nullableCharaList.map((base, i) => (

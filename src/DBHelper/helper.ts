@@ -33,6 +33,12 @@
 //   ].reduce((calc, item) => calc.plus(Big(item[0]).times(item[1])), Big(0)).toNumber();
 // }
 
+export function getPositionText(position: number): string {
+  if (position === 1) return '前衛';
+  else if (position === 2) return '中衛';
+  else return '後衛';
+}
+
 export function getRankPoint(p: number) {
   if (p >= 18) {
     return 18;

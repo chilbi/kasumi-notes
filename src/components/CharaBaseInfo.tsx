@@ -1,14 +1,12 @@
 import React, { makeStyles, Theme } from '@material-ui/core/styles';
 import SkeletonImage from './SkeletonImage';
-import { getPublicImageURL, getValidID } from '../DBHelper/helper';
+import { getPositionText, getPublicImageURL, getValidID } from '../DBHelper/helper';
 import { PCRStoreValue } from '../db';
 import Big from 'big.js';
 import clsx from 'clsx';
 import positionBorder1Png from '../images/position_border_1.png';
 import positionBorder2Png from '../images/position_border_2.png';
 import positionBorder3Png from '../images/position_border_3.png';
-
-const PositionText = ['前衛', '中衛', '後衛'];
 
 const defaultCharaData: PCRStoreValue<'chara_data'> = {
   unit_name: '???',
@@ -113,7 +111,7 @@ function CharaBaseInfo(props: CharaBaseInfoProps) {
           <span className={styles.actualName}>{charaData.actual_name}</span>
         </div>
         <div className={clsx(styles.position, styles['position' + position as keyof typeof styles])}>
-          {PositionText[position - 1]}
+          {getPositionText(position)}
         </div>
       </div>
     </>

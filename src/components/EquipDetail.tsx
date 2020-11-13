@@ -1,4 +1,4 @@
-import React, { Fragment, useState, useCallback, useMemo } from 'react';
+import React, { Fragment, useContext, useState, useCallback, useMemo, useEffect } from 'react';
 import { makeStyles, alpha, Theme } from '@material-ui/core/styles';
 import ButtonBase from '@material-ui/core/ButtonBase';
 import Button from '@material-ui/core/Button';
@@ -7,6 +7,7 @@ import ArrowBack from '@material-ui/icons/ArrowBack';
 import SortRounded from '@material-ui/icons/SortRounded';
 import Checkbox from '@material-ui/core/Checkbox';
 import ExpandLess from '@material-ui/icons/ExpandLess';
+import { useNavigate } from 'react-router-dom';
 import Header from './Header';
 import SkeletonImage from './SkeletonImage';
 import Rarities from './Rarities';
@@ -15,8 +16,8 @@ import { marks } from './ComboSlider';
 import QuestDropList from './QuestDropList';
 import QuestLabel from './QuestLabel';
 import CharaStatus from './CharaStatus';
-import { EquipData } from '../DBHelper/equip';
-import { UniqueEquipData } from '../DBHelper/unique_equip';
+import { DBHelperContext, EquipDetailContext } from './Contexts';
+import useQuery from '../hooks/useQuery';
 import { getUniqueCraft } from '../DBHelper/unique_craft';
 import { CraftData } from '../DBHelper/equip_craft';
 import { getPublicImageURL, QuestType } from '../DBHelper/helper';
@@ -35,21 +36,6 @@ const useStyles = makeStyles((theme: Theme) => {
     iconRadius = Big(12).times(scalage).div(rem);
 
   return {
-    root: {
-      zIndex: theme.zIndex.modal,
-      position: 'fixed',
-      top: 0,
-      right: 0,
-      bottom: 'auto',
-      left: 0,
-      display: 'flex',
-      flexDirection: 'column',
-      margin: '0 auto',
-      maxWidth: theme.maxWidth,
-      height: '100vh',
-      textAlign: 'left',
-      backgroundColor: theme.palette.grey[100],
-    },
     paper: {
       flex: '0 0 auto',
       marginTop: '0.25em',
@@ -140,9 +126,7 @@ const useStyles = makeStyles((theme: Theme) => {
       fontFamily: '"Arial","Microsoft YaHei",sans-serif',
     },
     uniqueCraftList: {
-      maxHeight: 350,
       marginTop: '0.25em',
-      overflow: 'auto',
     },
     uniqueCraftItem: {
       display: 'flex',
@@ -157,10 +141,6 @@ const useStyles = makeStyles((theme: Theme) => {
       display: 'flex',
       alignItems: 'center',
       margin: '0 0 0 auto',
-    },
-    dropList: {
-      flex: '1 1 auto',
-      overflowY: 'auto',
     },
     dropLabel: {
       display: 'inline-block',
@@ -199,17 +179,30 @@ const useStyles = makeStyles((theme: Theme) => {
     },
   };
 });
-interface EquipDetailProps {
-  equipData?: EquipData;
-  uniqueEquipData?: UniqueEquipData;
-  enhanceLevel?: number;
-  onChangeEnhance?: (enhanceLevel: number) => void;
-  onBack?: () => void;
-}
 
-function EquipDetail(props: EquipDetailProps) {
-  const { equipData, uniqueEquipData, enhanceLevel, onChangeEnhance, onBack } = props;
+function EquipDetail() {
   const styles = useStyles();
+  const navigate = useNavigate();
+  const query = useQuery();
+  const equipID = parseInt(query.get('equip_id') || '0');
+  const isUnique = !!parseInt(query.get('is_unique') || '0');
+  
+  const dbHelper = useContext(DBHelperContext);
+  const [equipDetail, setEquipDetail] = useContext(EquipDetailContext);
+
+  useEffect(() => {
+    if (dbHelper && (!equipDetail || (isUnique ? equipDetail.uniqueEquipData!.equipment_id : equipDetail.equipData!.equipment_id) !== equipID)) {
+      if (isUnique) {
+        dbHelper.getUniqueEquipData(equipID).then(uniqueEquipData => {
+          if(uniqueEquipData) setEquipDetail({ uniqueEquipData });
+        });
+      } else {
+        dbHelper.getEquipData(equipID).then(equipData => {
+          if (equipData) setEquipDetail({ equipData });
+        });
+      }
+    }
+  }, [dbHelper, equipDetail, setEquipDetail, equipID, isUnique]);
 
   const [search, setSearch] = useState<Set<number>>(() => new Set());
 
@@ -243,37 +236,40 @@ function EquipDetail(props: EquipDetailProps) {
     });
   }, []);
 
+  const { equipData, uniqueEquipData, enhanceLevel, onChangeEnhance } = equipDetail || {};
+
   const equipCraft = useDBHelper(dbHelper => {
     return equipData && equipData.equipment_data.craft_flg === 1
       ? dbHelper.getEquipCraft(equipData.equipment_id)
       : Promise.resolve(undefined);
   }, [equipData]);
 
-  const isUnique = !equipData;
   let min: number, max: number, id: number, name: string, desc: string;
   if (isUnique) {
     min = 0;
     max = maxUserProfile.unique_enhance_level;
-    id = uniqueEquipData!.equipment_id;
-    name = uniqueEquipData!.unique_equipment_data.equipment_name;
-    desc = uniqueEquipData!.unique_equipment_data.description;
+    id = uniqueEquipData ? uniqueEquipData.equipment_id : 999999;
+    name = uniqueEquipData ? uniqueEquipData.unique_equipment_data.equipment_name : '???';
+    desc = uniqueEquipData ? uniqueEquipData.unique_equipment_data.description : '???';
   } else {
     min = -1;
-    max = equipData!.max_enhance_level;
-    id = equipData!.equipment_id;
-    name = equipData!.equipment_data.equipment_name;
-    desc = equipData!.equipment_data.description;
+    max = equipData ? equipData.max_enhance_level : 5;
+    id = equipData ? equipData.equipment_id : 999999;
+    name = equipData ? equipData.equipment_data.equipment_name : '???';
+    desc = equipData ? equipData.equipment_data.description: '???';
   }
 
   const [level, setLevel] = useState(() => {
     return enhanceLevel !== undefined ? enhanceLevel : max;
   });
 
-  const genre = isUnique ? level.toString() : equipData!.equipment_enhance_rate.description;
+  const genre = isUnique ? level.toString() : equipData ? equipData.equipment_enhance_rate.description : '???';
 
   const property = useMemo(() => {
     const result: Partial<Property<Big>> = {};
-    const _property = isUnique ? uniqueEquipData!.getProperty(level > 0 ? level : 1) : equipData!.getProperty(level);
+    const _property: Partial<Property<Big>> = isUnique
+      ? (uniqueEquipData ? uniqueEquipData.getProperty(level > 0 ? level : 1) : {})
+      : (equipData ? equipData.getProperty(level) : {});
     for (let key of propertyKeys) {
       const value = _property[key];
       if (value && value.gt(0)) result[key] = value;
@@ -285,16 +281,21 @@ function EquipDetail(props: EquipDetailProps) {
     if (!uniqueEquipData) return null;
     return getUniqueCraft(uniqueEquipData.equipment_id);
   }, [uniqueEquipData]);
+
+  const handleBack = useCallback(() => {
+    navigate(-1);
+    setEquipDetail(undefined);
+  }, [navigate, setEquipDetail]);
   
   const header = useMemo(() => (
     <Header>
-      <IconButton color="primary" onClick={onBack}>
+      <IconButton color="primary" onClick={handleBack}>
         <ArrowBack />
       </IconButton>
       <h6 className={styles.subtitle}>装備詳細</h6>
     </Header>
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  ), [onBack]);
+  ), [handleBack]);
 
   const renderCraftItem = (item: CraftData, i: number) => {
     const { material_id, consume_num } = item;
@@ -341,7 +342,7 @@ function EquipDetail(props: EquipDetailProps) {
   };
 
   return (
-    <div className={styles.root}>
+    <>
       {header}
       <div className={clsx(styles.paper, styles.flexBox)}>
         <SkeletonImage
@@ -469,10 +470,10 @@ function EquipDetail(props: EquipDetailProps) {
               </IconButton>
             </div>
           </div>
-          <QuestDropList classes={{ root: styles.dropList }} sort={sort} search={search} rangeTypes={types} />
+          <QuestDropList sort={sort} search={search} rangeTypes={types} />
         </>
       )}
-    </div>
+    </>
   );
 }
 

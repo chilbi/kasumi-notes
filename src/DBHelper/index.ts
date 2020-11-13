@@ -3,6 +3,7 @@ import { getAllInit } from './init';
 import { getRarityData, RarityData } from './rarity';
 import { getPromotionStatusData, PromotionStatusData } from './promotion_status';
 import { getUnitSkillData, UnitSkillData } from './skill';
+import { getEquipData, EquipData } from './equip';
 import { getUniqueEquipData, UniqueEquipData } from './unique_equip';
 import { getPromotionData, PromotionData } from './promotion';
 import { getStoryStatusData, StoryStatusMemo, StoryStatusData } from './story_status';
@@ -28,6 +29,13 @@ export interface CharaDetailData extends CharaBaseData {
   unitProfile: PCRStoreValue<'unit_profile'>;
   unitSkillData: UnitSkillData;
   promotions: PromotionData[];
+}
+
+export interface EquipDetailData {
+  equipData?: EquipData;
+  uniqueEquipData?: UniqueEquipData;
+  enhanceLevel?: number;
+  onChangeEnhance?: (enhanceLevel: number) => void;
 }
 
 function getPosition(this: CharaBaseData): number {
@@ -128,6 +136,14 @@ class DBHelper extends ImageData {
 
   getPromotionStatusData(unit_id: number, promotion_level: number): Promise<PromotionStatusData> {
     return getPromotionStatusData(this.db, unit_id, promotion_level);
+  }
+
+  getEquipData(equipment_id: number): Promise<EquipData | undefined> {
+    return getEquipData(this.db, equipment_id).catch(() => undefined);
+  }
+
+  getUniqueEquipData(unique_equip_id: number): Promise<UniqueEquipData | undefined> {
+    return getUniqueEquipData(this.db, 0, unique_equip_id).catch(() => undefined);
   }
 
   getEquipCraft(equipment_id: number): Promise<EquipCraft> {

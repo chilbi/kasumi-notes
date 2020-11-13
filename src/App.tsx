@@ -5,6 +5,7 @@ import { HashRouter } from 'react-router-dom';
 import PCRDBProvider from './components/PCRDBProvider';
 import CharaListProvider from './components/CharaListProvider';
 import CharaDetailProvider from './components/CharaDetailProvider';
+import EquipDetailProvider from './components/EquipDetailProvider';
 import Main from './components/Main';
 import theme from './theme';
 
@@ -16,7 +17,9 @@ function App() {
         <PCRDBProvider>
           <CharaListProvider>
             <CharaDetailProvider>
-              <Main />
+              <EquipDetailProvider>
+                <Main />
+              </EquipDetailProvider>
             </CharaDetailProvider>
           </CharaListProvider>
         </PCRDBProvider>

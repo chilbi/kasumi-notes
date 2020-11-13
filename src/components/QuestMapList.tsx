@@ -26,7 +26,7 @@ const useStyles = makeStyles((theme: Theme) => {
     nav: {
       zIndex: theme.zIndex.appBar,
       position: 'sticky',
-      top: 48,
+      top: '3rem',
       right: 0,
       bottom: 'auto',
       left: 0,

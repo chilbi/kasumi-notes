@@ -16,9 +16,10 @@ import CharaStory from './CharaStory';
 import CharaStatus from './CharaStatus';
 import CharaProfile from './CharaProfile';
 import { DBHelperContext, CharaDetailContext, CharaListContext } from './Contexts';
+import useQuery from '../hooks/useQuery';
 import { EquipEnhanceStatus } from '../DBHelper/promotion';
 import { SkillEnhanceStatus } from '../DBHelper/skill';
-import { deepClone, equal } from '../DBHelper/helper';
+import { deepClone, equal, getParamsUnitID } from '../DBHelper/helper';
 import { PCRStoreValue } from '../db';
 import clsx from 'clsx';
 
@@ -52,19 +53,16 @@ const useStyles = makeStyles((theme: Theme) => {
   };
 });
 
-interface CharaDetailProps {
-  unitID: number;
-}
-
-function CharaDetail(props: CharaDetailProps) {
+function CharaDetail() {
   const styles = useStyles();
-
   const navigate = useNavigate();
+  const query = useQuery();
+  const unitID = getParamsUnitID(query.get('unit_id') || '0');
 
   const dbHelper = useContext(DBHelperContext);
   const [charaList, setCharaList] = useContext(CharaListContext);
   const [charaDetail, setDetail] = useContext(CharaDetailContext);
-  const detail = charaDetail && charaDetail.charaData.unit_id === props.unitID ? charaDetail : undefined
+  const detail = charaDetail && charaDetail.charaData.unit_id === unitID ? charaDetail : undefined
 
   const userProfileRef = useRef<PCRStoreValue<'user_profile'>>();
   if (!userProfileRef.current && charaDetail) {
@@ -72,16 +70,16 @@ function CharaDetail(props: CharaDetailProps) {
   }
 
   useEffect(() => {
-    if (dbHelper && (!charaDetail || charaDetail.charaData.unit_id !== props.unitID)) {
-      const base = charaList && charaList.find(item => item.charaData.unit_id === props.unitID);
-      dbHelper.getCharaDetailData(props.unitID, base).then(detailData => {
+    if (dbHelper && (!charaDetail || charaDetail.charaData.unit_id !== unitID)) {
+      const base = charaList && charaList.find(item => item.charaData.unit_id === unitID);
+      dbHelper.getCharaDetailData(unitID, base).then(detailData => {
         if (detailData) {
           userProfileRef.current = deepClone(detailData.userProfile);
           setDetail(detailData);
         }
       });
     }
-  }, [dbHelper, charaDetail, setDetail, props.unitID, charaList]);
+  }, [dbHelper, charaDetail, setDetail, unitID, charaList]);
 
   const [tabsValue, setTabsValue] = useState(0);
   const handleChangeTabsValue = useCallback((e: React.SyntheticEvent, newValue: number) => {
@@ -92,16 +90,16 @@ function CharaDetail(props: CharaDetailProps) {
     if (dbHelper && detail) dbHelper.setUserProfile(detail.userProfile).then(() => {
       userProfileRef.current = deepClone(detail.userProfile);
       setCharaList((prevCharaList = []) => prevCharaList.map(item => {
-        if (item.userProfile.unit_id === props.unitID) {
+        if (item.userProfile.unit_id === unitID) {
           item.userProfile = userProfileRef.current!;
         }
         return item;
       }));
     });
-  }, [dbHelper, detail, props.unitID, setCharaList]);
+  }, [dbHelper, detail, unitID, setCharaList]);
 
   const handleChangeRarity = useCallback((rarity: number) => {
-    if (dbHelper && rarity > 0) dbHelper.getRarityData(props.unitID, rarity).then(rarityData => {
+    if (dbHelper && rarity > 0) dbHelper.getRarityData(unitID, rarity).then(rarityData => {
       setDetail(prevDetail => {
         if (prevDetail) {
           prevDetail.userProfile.rarity = rarity;
@@ -110,7 +108,7 @@ function CharaDetail(props: CharaDetailProps) {
         }
       });
     });
-  }, [dbHelper, setDetail, props.unitID]);
+  }, [dbHelper, setDetail, unitID]);
 
   const handleChangeLevel = useCallback((level: number) => {
     setDetail(prevDetail => {
@@ -169,7 +167,7 @@ function CharaDetail(props: CharaDetailProps) {
   }, [setDetail]);
 
   const handleChangePromotion = useCallback((promotion_level: number) => {
-    if (dbHelper) dbHelper.getPromotionStatusData(props.unitID, promotion_level).then(promotionStatusData => {
+    if (dbHelper) dbHelper.getPromotionStatusData(unitID, promotion_level).then(promotionStatusData => {
       setDetail(prevDetail => {
         if (prevDetail) {
           const promotionData = prevDetail.promotions.find(item => item.promotion_level === promotion_level)!;
@@ -186,7 +184,7 @@ function CharaDetail(props: CharaDetailProps) {
         }
       });
     });
-  }, [dbHelper, setDetail, props.unitID]);
+  }, [dbHelper, setDetail, unitID]);
 
   const property = useMemo(() => detail && detail.getProperty(), [detail]);
 

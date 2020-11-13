@@ -18,13 +18,22 @@ const useStyles = makeStyles((theme: Theme) => ({
     overflow: 'hidden',
   },
   value: {
+    position: 'relative',
     display: 'inline-flex',
     alignItems: 'center',
     justifyContent: 'flex-end',
     flexGrow: 1,
     paddingLeft: '0.25em',
     textAlign: 'right',
-    borderBottom: '1px dashed ' + theme.palette.primary.main,
+    '&::after': {
+      content: '""',
+      position: 'absolute',
+      top: 'auto',
+      right: 0,
+      bottom: 0,
+      left: -2,
+      borderBottom: '1px dashed ' + theme.palette.primary.main,
+    },
   },
   small: {
     width: '2em',

@@ -4,6 +4,7 @@ import Pagination from '@material-ui/core/Pagination';
 import IconButton from '@material-ui/core/IconButton';
 import Popover from '@material-ui/core/Popover';
 import Radio from '@material-ui/core/Radio';
+import Divider from '@material-ui/core/Divider';
 import FilterList from '@material-ui/icons/FilterList';
 import SortRounded from '@material-ui/icons/SortRounded';
 import QuestDropList from './QuestDropList';
@@ -109,6 +110,7 @@ function QuestMapList() {
         <Popover
           classes={{ paper: styles.popover }}
           keepMounted
+          marginThreshold={0}
           anchorEl={anchorEl}
           open={!!anchorEl}
           anchorOrigin={{
@@ -122,17 +124,6 @@ function QuestMapList() {
           onClose={handleClose}
         >
           <div className={styles.form}>
-            <label htmlFor="sort-chara-list">{sort === 'asc' ? '昇順' : '降順'}</label>
-            <IconButton
-              id="sort-chara-list"
-              className={clsx(styles.sort, sort === 'asc' && styles.sortRotate)}
-              color="secondary"
-              onClick={handleToggleSort}
-            >
-              <SortRounded />
-            </IconButton>
-          </div>
-          <div className={styles.form}>
             {(['N', 'H', 'VH', 'S'] as const).map(value => {
               const name = 'quest-map-list-type';
               const id = name + '-' + value;
@@ -143,6 +134,18 @@ function QuestMapList() {
                 </Fragment>
               );
             })}
+          </div>
+          <Divider />
+          <div className={styles.form}>
+            <label htmlFor="sort-chara-list">{sort === 'asc' ? '昇順' : '降順'}</label>
+            <IconButton
+              id="sort-chara-list"
+              className={clsx(styles.sort, sort === 'asc' && styles.sortRotate)}
+              color="secondary"
+              onClick={handleToggleSort}
+            >
+              <SortRounded />
+            </IconButton>
           </div>
         </Popover>
         <h6 className={styles.subtitle}>クエスト一覧</h6>

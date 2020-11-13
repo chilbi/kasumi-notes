@@ -16,7 +16,7 @@ const useStyles = makeStyles((theme: Theme) => {
     iScalage = 0.5,
     positionSize = Big(32).times(iScalage).div(rem),
     starSize = Big(24).times(iScalage).div(rem),
-    uniqueSize = Big(24).times(iScalage).div(rem),
+    uniqueSize = Big(32).times(iScalage).div(rem),
     iconImageSize = Big(128).times(iScalage).div(rem),
     iconBorderSlice = 12,
     iconBorderRadius = Big(iconBorderSlice).times(iScalage).div(rem),

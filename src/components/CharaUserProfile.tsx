@@ -16,10 +16,12 @@ import uniquePng from '../images/unique.png';
 const useStyles = makeStyles((theme: Theme) => {
   const
     rem = 16,
-    scalage = 0.625,
+    scalage = 0.75,
     LoveLevelWidth = Big(28).times(scalage).div(rem),
     LoveLevelHeight = Big(24).times(scalage).div(rem),
-    uniqueSize = Big(24).times(scalage).div(rem);
+    uniqueSize = LoveLevelHeight,
+    padding = Big(4).div(rem),
+    height = LoveLevelHeight.plus(padding.times(2));
 
   const bgStyles = {} as StyleRules<string>;
   const rankColorKeys = Object.keys(theme.rankColor) as any as (keyof typeof theme.rankColor)[];
@@ -34,7 +36,9 @@ const useStyles = makeStyles((theme: Theme) => {
       display: 'flex',
       justifyContent: 'space-between',
       alignItems: 'center',
-      padding: '0.25em',
+      padding: padding + 'rem',
+      height: height + 'rem',
+      lineHeight: LoveLevelHeight + 'rem',
       backgroundColor: '#fff',
     },
     level: {
@@ -45,7 +49,6 @@ const useStyles = makeStyles((theme: Theme) => {
       fontFamily: 'inherit',
       flexBasis: '2.5rem',
       paddingLeft: LoveLevelWidth + 'rem',
-      lineHeight: 1.25,
       backgroundImage: `url(${loveLevelPng})`,
       backgroundRepeat: 'no-repeat',
       backgroundSize: LoveLevelWidth + 'rem ' + LoveLevelHeight + 'rem',
@@ -55,7 +58,6 @@ const useStyles = makeStyles((theme: Theme) => {
       fontFamily: 'inherit',
       flexBasis: '3rem',
       paddingLeft: uniqueSize + 'rem',
-      lineHeight: 1.25,
       backgroundImage: `url(${uniquePng})`,
       backgroundRepeat: 'no-repeat',
       backgroundSize: uniqueSize + 'rem ' + uniqueSize + 'rem',
@@ -65,6 +67,7 @@ const useStyles = makeStyles((theme: Theme) => {
       margin: '0',
       padding: '0',
       width: '6em',
+      height: LoveLevelHeight + 'rem',
       textAlign: 'center',
       borderRadius: 10,
       color: '#fff',

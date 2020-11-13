@@ -4,6 +4,7 @@ import IconButton from '@material-ui/core/IconButton';
 import Popover from '@material-ui/core/Popover';
 import Checkbox from '@material-ui/core/Checkbox';
 import Radio from '@material-ui/core/Radio';
+import Divider from '@material-ui/core/Divider';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import SortRounded from '@material-ui/icons/SortRounded';
 import FilterList from '@material-ui/icons/FilterList';
@@ -163,24 +164,13 @@ function CharaList() {
         <Popover
           classes={{ paper: styles.popover }}
           keepMounted
+          marginThreshold={0}
           anchorEl={anchorEl}
           open={!!anchorEl}
           anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
           transformOrigin={{ vertical: 'top', horizontal: 'left' }}
           onClose={handleClose}
         >
-          <div className={styles.form}>
-            {([[1, '物理'], [2, '魔法']] as [number, string][]).map(item => {
-              const [value, label] = item
-              const id = 'chara-list-filter-atk_type_' + value;
-              return (
-                <Fragment key={value}>
-                  <label htmlFor={id}>{label}</label>
-                  <Checkbox id={id} value={value} checked={atkTypeArr.indexOf(value) > -1} onChange={handleChangeAtkType} />
-                </Fragment>
-              );
-            })}
-          </div>
           <div className={styles.form}>
             {[[1, 2, 3].map(value => {
               const label = getPositionText(value);
@@ -193,6 +183,20 @@ function CharaList() {
               )
             })]}
           </div>
+          <Divider />
+          <div className={styles.form}>
+            {([[1, '物理'], [2, '魔法']] as [number, string][]).map(item => {
+              const [value, label] = item
+              const id = 'chara-list-filter-atk_type_' + value;
+              return (
+                <Fragment key={value}>
+                  <label htmlFor={id}>{label}</label>
+                  <Checkbox id={id} value={value} checked={atkTypeArr.indexOf(value) > -1} onChange={handleChangeAtkType} />
+                </Fragment>
+              );
+            })}
+          </div>
+          <Divider />
           <div className={styles.form}>
             {[['unit_id', 'ID'], ['search_area_width', '攻撃距離']].map(item => {
               const [value, label] = item;
@@ -206,6 +210,7 @@ function CharaList() {
               )
             })}
           </div>
+          <Divider />
           <div className={styles.form}>
             <label htmlFor="chara-list-sort">{sort==='asc' ? '昇順' : '降順'}</label>
             <IconButton

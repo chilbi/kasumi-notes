@@ -80,6 +80,10 @@ function getFormula(
   return calc.toString() === formula ? [calc.toNumber()] : [calc.toNumber(), formula];
 }
 
+function getOdds(value: number): string {
+  return value === 100 ? '' : `${value}%確率で`;
+}
+
 function getEffectTime(time: number): string {
   return `、効果時間${time}秒。`;
 }
@@ -470,10 +474,10 @@ const actionMap: Record</*action_type*/number, /*getDescription*/(this: SkillAct
     if (this.action_detail_1 === 1) {
       let odds = this.action_value_3; // アユミ UB
       if (odds <= 1) odds = odds * 100; // カスミ Main2
-      desc = desc.replace('混乱させる', odds + '%確率で混乱状態にする');
+      desc = desc.replace('混乱させる', getOdds(odds) + '混乱状態にする');
     } else {
       // ユキ Main+、イオ UB
-      desc = desc.replace('誘惑する', this.action_value_3 + '%確率で誘惑状態にする');
+      desc = desc.replace('誘惑する', getOdds(this.action_value_3) + '誘惑状態にする');
     }
     return desc + getEffectTime(this.action_value_1);
   },
@@ -483,13 +487,13 @@ const actionMap: Record</*action_type*/number, /*getDescription*/(this: SkillAct
     if (this.target_range > 0 && this.target_range < 2160/* && this.target_count > 1*/) {
       desc = desc.replace('範囲内', this.target_range + '範囲内');
     }
-    desc = desc.replace('暗闇', this.action_value_3 + '%確率で暗闇');
+    desc = desc.replace('暗闇', getOdds(this.action_value_3) + '暗闇');
     return desc + getEffectTime(this.action_value_1);
     // const actionObj = getActionObj(getActionNum(this.action_id) - 1);
     // return [
     //   actionObj,
-    //   `にダメージを与えられたターゲットを${this.action_value_3}%確率で${this.description + getEffectTime(this.action_value_1)}` +
-    //   `物理攻撃は${100 - this.action_detail_1}%確率でミスする。`
+    //   `にダメージを与えられたターゲットを${getOdds(this.action_value_3)}${this.description + getEffectTime(this.action_value_1)}` +
+    //   `物理攻撃は${getOdds(100 - this.action_detail_1)}ミスする。`
     // ];
   },
   // ムイミ UB
@@ -702,7 +706,7 @@ const actionMap: Record</*action_type*/number, /*getDescription*/(this: SkillAct
       return ['対象の敵が既に行動不能状態だった場合', actionA, 'を使う。'];
     } else { // this.action_detail_1 < 100
       // スズメ UB action_detail_1: 33
-      return [`${this.action_detail_1}%確率で`, actionA, `を使う、${100 - this.action_detail_1}%確率で`, actionB, 'を使う。'];
+      return [getOdds(this.action_detail_1), actionA, 'を使う、' + getOdds(100 - this.action_detail_1), actionB, 'を使う。'];
     }
     return this.description;
   },
@@ -804,7 +808,7 @@ const actionMap: Record</*action_type*/number, /*getDescription*/(this: SkillAct
   // アキノ Main1
   42: function () {
     const actionNum = getActionNum(this.action_detail_2);
-    return [`${this.action_value_4}秒内ダメージを受けた場合、${this.action_value_1}%確率で`, getActionObj(actionNum), 'を使う。'];
+    return [`${this.action_value_4}秒内ダメージを受けた場合、${getOdds(this.action_value_1)}`, getActionObj(actionNum), 'を使う。'];
   },
   // リマ Main1
   44: function () {
@@ -890,7 +894,7 @@ const actionMap: Record</*action_type*/number, /*getDescription*/(this: SkillAct
   },
   // 恐慌
   61: function () {
-    return this.action_value_3 + '%確率で' + this.description + getEffectTime(this.action_value_1);
+    return getOdds(this.action_value_3) + this.description + getEffectTime(this.action_value_1);
   },
   // ぺコリーヌ（プリンセス）
   71: function (skillLevel) {

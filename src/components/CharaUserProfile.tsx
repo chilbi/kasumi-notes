@@ -20,8 +20,7 @@ const useStyles = makeStyles((theme: Theme) => {
     LoveLevelWidth = Big(28).times(scalage).div(rem),
     LoveLevelHeight = Big(24).times(scalage).div(rem),
     uniqueSize = LoveLevelHeight,
-    padding = Big(4).div(rem),
-    height = LoveLevelHeight.plus(padding.times(2));
+    h = LoveLevelHeight + 'rem';
 
   const bgStyles = {} as StyleRules<string>;
   const rankColorKeys = Object.keys(theme.rankColor) as any as (keyof typeof theme.rankColor)[];
@@ -34,20 +33,22 @@ const useStyles = makeStyles((theme: Theme) => {
   return {
     root: {
       display: 'flex',
+      flexWrap: 'wrap',
       justifyContent: 'space-between',
-      alignItems: 'center',
-      padding: padding + 'rem',
-      height: height + 'rem',
-      lineHeight: LoveLevelHeight + 'rem',
+      padding: '0.25em',
+      lineHeight: h,
       backgroundColor: '#fff',
     },
     level: {
-      fontFamily: 'inherit',
       flexBasis: '4rem',
+      alignItems: 'stretch',
+      height: h,
+      lineHeight: 'inherit',
     },
     love: {
-      fontFamily: 'inherit',
       flexBasis: '2.5rem',
+      height: h,
+      lineHeight: 'inherit',
       paddingLeft: LoveLevelWidth + 'rem',
       backgroundImage: `url(${loveLevelPng})`,
       backgroundRepeat: 'no-repeat',
@@ -55,8 +56,9 @@ const useStyles = makeStyles((theme: Theme) => {
       backgroundPosition: 'left center',
     },
     unique: {
-      fontFamily: 'inherit',
       flexBasis: '3rem',
+      height: h,
+      lineHeight: 'inherit',
       paddingLeft: uniqueSize + 'rem',
       backgroundImage: `url(${uniquePng})`,
       backgroundRepeat: 'no-repeat',
@@ -67,7 +69,8 @@ const useStyles = makeStyles((theme: Theme) => {
       margin: '0',
       padding: '0',
       width: '6em',
-      height: LoveLevelHeight + 'rem',
+      height: h,
+      lineHeight: 'inherit',
       textAlign: 'center',
       borderRadius: 10,
       color: '#fff',
@@ -91,7 +94,7 @@ const useStyles = makeStyles((theme: Theme) => {
     disableUnique: {
       filter: 'grayscale(100%)',
     },
-    p0: {
+    infobar: {
       padding: 0,
     },
     ...bgStyles,
@@ -153,7 +156,7 @@ function CharaUserProfile(props: CharaUserProfileProps) {
         defaultValue={userProfile.level}
         onDebouncedChange={onChangeLevel}
       >
-        <Infobar className={styles.p0} width={100} size="small" label="Lv" value={userProfile.level} />
+        <Infobar className={styles.infobar} width={100} size="small" label="Lv" value={userProfile.level} />
       </ComboSlider>
 
       <ComboSlider
@@ -181,7 +184,6 @@ function CharaUserProfile(props: CharaUserProfileProps) {
       )}
 
       <ButtonBase
-        component="div"
         className={clsx(
           styles.promotion,
           styles['bg' + getRankPoint(userProfile.promotion_level) as keyof typeof styles]

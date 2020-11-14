@@ -47,6 +47,7 @@ const useStyles = makeStyles((theme: Theme) => {
     },
     infoBox: {
       display: 'flex',
+      flexWrap: 'wrap',
       padding: '0.25em',
       backgroundColor: '#fff',
     },

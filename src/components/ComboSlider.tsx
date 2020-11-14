@@ -53,7 +53,7 @@ function ComboSlider(props: ComboSliderProps) {
 
   return (
     <>
-      <ButtonBase component="div" className={classes.button} onClick={handleOpenLevel}>
+      <ButtonBase className={classes.button} onClick={handleOpenLevel}>
         {children}
       </ButtonBase>
       <Popover

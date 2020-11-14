@@ -44,6 +44,20 @@ const theme = createMuiTheme({
         },
       },
     },
+    MuiButtonBase: {
+      styleOverrides: {
+        root: {
+          fontFamily: 'inherit',
+        },
+      }
+    },
+    MuiTab: {
+      styleOverrides: {
+        root: {
+          fontFamily: 'inherit',
+        },
+      }
+    },
   },
 });
 

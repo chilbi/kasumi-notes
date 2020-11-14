@@ -1,8 +1,10 @@
-import React, { useContext, useCallback } from 'react';
+import React, { useContext, useState, useCallback } from 'react';
 import { makeStyles, Theme, StyleRules } from '@material-ui/core/styles';
 import Checkbox from '@material-ui/core/Checkbox';
 import Radio from '@material-ui/core/Radio';
 import ButtonBase from '@material-ui/core/ButtonBase';
+import IconButton from '@material-ui/core/IconButton';
+import EditLocation from '@material-ui/icons/EditLocation';
 import { Link, useLocation } from 'react-router-dom';
 import SkeletonImage from './SkeletonImage';
 import RankBorder from './RankBorder';
@@ -14,6 +16,7 @@ import { UniqueEquipData } from '../DBHelper/unique_equip';
 import { getPublicImageURL, getRankPoint, getValidID } from '../DBHelper/helper';
 import maxUserProfile from '../DBHelper/maxUserProfile';
 import { PCRStoreValue } from '../db';
+import localValue from '../localValue';
 import Big from 'big.js';
 import clsx from 'clsx';
 
@@ -46,11 +49,22 @@ const useStyles = makeStyles((theme: Theme) => {
 
   return {
     root: {
-      padding: '0.5em 0',
+      padding: '0.25em 0',
       textAlign: 'center',
     },
     inner: {
+      position: 'relative',
       display: 'inline-block',
+      minWidth: iconSize.plus(0.5).times(6).plus(1.5).plus(Big(2).div(rem)) + 'rem',
+    },
+    quickButton: {
+      position: 'absolute',
+      top: 0,
+      right: 0,
+    },
+    quickIcon: {
+      width: '1.25em',
+      height: '1.25em',
     },
     equipList: {
       paddingTop: '0.25em',
@@ -137,7 +151,7 @@ const useStyles = makeStyles((theme: Theme) => {
     dish: {
       display: 'inline-block',
       position: 'relative',
-      margin: `${y}rem ${len}rem`,
+      margin: `${y.plus(0.25)}rem ${len.plus(0.25)}rem`,
       width: iconSize + 'rem',
       height: iconSize + 'rem',
     },
@@ -219,6 +233,15 @@ function CharaEquip(props: CharaEquipProps) {
   const url = location.pathname + location.search;
   const setEquipDetail = useContext(EquipDetailContext)[1];
 
+  const [quick, setQuick] = useState(() => localValue.charaEquip.quick.get());
+  const handleToggleQuick = useCallback(() => {
+    setQuick(prev => {
+      const value = !prev;
+      localValue.charaEquip.quick.set(value);
+      return value;
+    });
+  }, []);
+
   const equipSlots: (EquipData | undefined)[] = promotions.length < 1
     ? Array(6).fill(undefined)
     : promotions.find(item => item.promotion_level === promotion_level)!.equip_slots;
@@ -258,10 +281,20 @@ function CharaEquip(props: CharaEquipProps) {
   const handleChangeUnique = useCallback(() => {
     setEquipDetail({ uniqueEquipData: uniqueEquip, enhanceLevel: unique_enhance_level, onChangeEnhance: onChangeUnique })
   }, [setEquipDetail, onChangeUnique, uniqueEquip, unique_enhance_level]);
+  const handleToggleUnique = useCallback(() => {
+    onChangeUnique && onChangeUnique(invalidUnique ? maxUserProfile.unique_enhance_level : 0);
+  }, [invalidUnique, onChangeUnique]);
 
   return (
     <div className={styles.root}>
       <div className={styles.inner}>
+        <IconButton
+          className={styles.quickButton}
+          color={quick ? 'secondary' : 'default'}
+          onClick={handleToggleQuick}
+        >
+          <EditLocation className={styles.quickIcon} />
+        </IconButton>
         <div className={styles.dish}>
           <SkeletonImage
             key="chara"
@@ -277,8 +310,8 @@ function CharaEquip(props: CharaEquipProps) {
             className={clsx(styles.dishItem, styles.bottom)}
             component={Link}
             disabled={!hasUnique}
-            to={uniqueEquip ? `${url}&equip_id=${uniqueEquip.equipment_id}&is_unique=1` : url}
-            onClick={handleChangeUnique}
+            to={quick || !uniqueEquip ? location :  `${url}&equip_id=${uniqueEquip.equipment_id}&is_unique=1`}
+            onClick={quick ? handleToggleUnique : handleChangeUnique}
           >
             <SkeletonImage
               classes={{ root: styles.iconRoot }}
@@ -296,20 +329,27 @@ function CharaEquip(props: CharaEquipProps) {
           />
           {equipSlots.map((slot, i) => {
             const { imgSrc, invalid, maxEnhanceLevel, enhanceLevel } = getSlotData(promotion_level, slot, i);
-            const handleClick = () => {
-              setEquipDetail({
-                equipData: slot,
-                enhanceLevel: enhanceLevel,
-                onChangeEnhance: onChangeEquip && (enhanceLevel => onChangeEquip(enhanceLevel, i)),
-              });
-            };
+            let handleClick;
+            if (quick) {
+              handleClick = () => {
+                onChangeEquip && onChangeEquip(enhanceLevel > -1 ? -1 : maxEnhanceLevel, i);
+              };
+            } else {
+              handleClick = () => {
+                setEquipDetail({
+                  equipData: slot,
+                  enhanceLevel: enhanceLevel,
+                  onChangeEnhance: onChangeEquip && (enhanceLevel => onChangeEquip(enhanceLevel, i)),
+                });
+              };
+            }
             return (
               <ButtonBase
                 key={'equip' + i}
                 className={clsx(styles.dishItem, styles[dishMap[i]])}
                 component={Link}
                 disabled={!slot}
-                to={slot ? `${url}&equip_id=${slot.equipment_id}` : url}
+                to={quick || !slot ? location : `${url}&equip_id=${slot.equipment_id}`}
                 onClick={handleClick}
               >
                 <SkeletonImage classes={{ root: styles.iconRoot }} src={imgSrc} save>
@@ -331,7 +371,7 @@ function CharaEquip(props: CharaEquipProps) {
                 indeterminate={!hasUnique}
                 disabled={!hasUnique}
                 checked={!invalidUnique}
-                onChange={onChangeUnique && (() => onChangeUnique(invalidUnique ? maxUserProfile.unique_enhance_level : 0))}
+                onChange={handleToggleUnique}
               />
             </div>
             <div className={styles.equipBox}>
@@ -339,7 +379,7 @@ function CharaEquip(props: CharaEquipProps) {
                 className={styles.m025}
                 component={Link}
                 disabled={!hasUnique}
-                to={uniqueEquip ? `${url}&equip_id=${uniqueEquip.equipment_id}&is_unique=1` : url}
+                to={uniqueEquip ? `${url}&equip_id=${uniqueEquip.equipment_id}&is_unique=1` : location}
                 onClick={handleChangeUnique}
               >
                 <SkeletonImage classes={{ root: styles.iconRoot }} src={getPublicImageURL('icon_equipment', uniqueImgName)} save />
@@ -372,7 +412,7 @@ function CharaEquip(props: CharaEquipProps) {
                       className={styles.m025}
                       component={Link}
                       disabled={!slot}
-                      to={slot ? `${url}&equip_id=${slot.equipment_id}` : url}
+                      to={slot ? `${url}&equip_id=${slot.equipment_id}` : location}
                       onClick={slot ? (() => setEquipDetail({ equipData: slot })) : undefined}
                     >
                       <SkeletonImage

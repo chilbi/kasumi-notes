@@ -284,8 +284,7 @@ function EquipDetail() {
 
   const handleBack = useCallback(() => {
     navigate(-1);
-    setEquipDetail(undefined);
-  }, [navigate, setEquipDetail]);
+  }, [navigate]);
   
   const header = useMemo(() => (
     <Header>
@@ -347,7 +346,7 @@ function EquipDetail() {
       <div className={clsx(styles.paper, styles.flexBox)}>
         <SkeletonImage
           classes={{ root: styles.iconRoot }}
-          src={getPublicImageURL('icon_equipment', (level > min ? '' : 'invalid_') + id)}
+          src={id === 999999 ? undefined : getPublicImageURL('icon_equipment', (level > min ? '' : 'invalid_') + id)}
           save
         />
         <div className={styles.nameBox}>

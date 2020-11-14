@@ -36,6 +36,9 @@ const localValue = (() => {
       sort: createlocalValue<'asc' | 'desc'>('EQUIP_DETAIL_SORT_KEY', 'desc'),
       types: createlocalValue<QuestType[]>('EQUIP_DETAIL_TYPES_KEY', ['N']),
     },
+    charaEquip: {
+      quick: createlocalValue('CHARA_EQUIP_QUICK_KEY', true),
+    },
   };
 })();
 

@@ -96,9 +96,9 @@ function QuestMapList() {
   const range: Range = useMemo(() => {
     if (type === 'VH' || type === 'S')
       return mapQuestType(type);
-    const getAreaStr = (_area: number) => (_area < 10 ? '0' : '') + _area;
+    const areaStr = (area < 10 ? '0' : '') + area;
     const typeStr = type === 'N' ? '110' : type === 'H' ? '120' : '130';
-    return [parseInt(typeStr + getAreaStr(area) + '001'), parseInt(typeStr + getAreaStr(area + 1) + '000')];
+    return [parseInt(typeStr + areaStr + '001'), parseInt(typeStr + areaStr + '015')];
   }, [type, area]);
 
   return (

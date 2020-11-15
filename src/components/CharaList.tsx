@@ -53,7 +53,7 @@ const useStyles = makeStyles((theme: Theme) => {
       ...theme.typography.h6,
     },
     popover: {
-      padding: '0.5em 0.75em',
+      padding: '0.5rem 0.75rem',
     },
     form: {
       display: 'flex',

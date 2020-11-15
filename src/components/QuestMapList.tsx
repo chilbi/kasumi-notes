@@ -31,7 +31,7 @@ const useStyles = makeStyles((theme: Theme) => {
       bottom: 'auto',
       left: 0,
       margin: 0,
-      padding: '0.25em',
+      padding: '0.25rem',
       backgroundColor: '#fff',
       borderBottom: '1px solid ' + theme.palette.grey[100],
     },
@@ -39,7 +39,7 @@ const useStyles = makeStyles((theme: Theme) => {
       justifyContent: 'center',
     },
     popover: {
-      padding: '0.5em 0.75em',
+      padding: '0.5rem 0.75rem',
     },
     form: {
       display: 'flex',

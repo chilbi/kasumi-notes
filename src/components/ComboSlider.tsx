@@ -27,7 +27,7 @@ const useStyles = makeStyles(() => {
       overflow: 'unset',
     },
     iconButton: {
-      margin: '0.25em 0',
+      margin: '0.25rem 0',
       padding: 0,
     },
   };

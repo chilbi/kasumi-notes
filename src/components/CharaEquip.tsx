@@ -49,7 +49,7 @@ const useStyles = makeStyles((theme: Theme) => {
 
   return {
     root: {
-      padding: '0.25em 0',
+      padding: '0.25rem 0',
       textAlign: 'center',
     },
     inner: {
@@ -63,25 +63,25 @@ const useStyles = makeStyles((theme: Theme) => {
       right: 0,
     },
     quickIcon: {
-      width: '1.25em',
-      height: '1.25em',
+      width: '1.25rem',
+      height: '1.25rem',
     },
     equipList: {
-      paddingTop: '0.25em',
+      paddingTop: '0.25rem',
       textAlign: 'left',
     },
     equipItem: {
-      margin: '0.5em 0',
-      padding: '0.25em 0.75em',
-      borderRadius: '0.5em',
+      margin: '0.5rem 0',
+      padding: '0.25rem 0.75rem',
+      borderRadius: '0.5rem',
       border: '1px solid ' + theme.palette.grey[200],
       boxShadow: '0 1px 1px ' + theme.palette.grey[100],
     },
     labelBox: {
       display: 'flex',
       alignItems: 'flex-end',
-      marginBottom: '0.25em',
-      paddingBottom: '0.125em',
+      marginBottom: '0.25rem',
+      paddingBottom: '0.125rem',
       borderBottom: '2px solid' + theme.palette.primary.main,
     },
     label: {
@@ -142,7 +142,7 @@ const useStyles = makeStyles((theme: Theme) => {
       flexDirection: 'column',
     },
     uniqueName: {
-      fontSize: '1.2em',
+      fontSize: '1.2rem',
       color: theme.palette.primary.dark,
     },
     uniqueLevel: {

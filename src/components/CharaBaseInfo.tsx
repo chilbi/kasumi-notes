@@ -35,7 +35,7 @@ const useStyles = makeStyles((theme: Theme) => {
         left: '50%',
         display: 'inline-block',
         color: theme.palette.grey[800],
-        fontSize: '2.5em',
+        fontSize: '2.5rem',
         transform: 'translate(-50%, -50%)',
       },
     },
@@ -48,13 +48,13 @@ const useStyles = makeStyles((theme: Theme) => {
     infoBox: {
       display: 'flex',
       flexWrap: 'wrap',
-      padding: '0.25em',
+      padding: '0.25rem',
       backgroundColor: '#fff',
     },
     position: {
       alignSelf: 'center',
       marginLeft: 'auto',
-      paddingLeft: '0.25em',
+      paddingLeft: '0.25rem',
       lineHeight: borderWidth[3].minus(borderWidth[0]) + 'rem',
       borderWidth: borderWidth.map(v => v + 'rem').join(' '),
       borderStyle: 'solid',
@@ -77,10 +77,10 @@ const useStyles = makeStyles((theme: Theme) => {
       flexDirection: 'column',
       justifyContent: 'space-around',
       flexGrow: 1,
-      margin: '0.25em',
+      margin: '0.25rem',
     },
     unitName: {
-      fontSize: '1.2em',
+      fontSize: '1.2rem',
       color: theme.palette.primary.dark,
     },
     actualName: {

@@ -21,9 +21,9 @@ const useStyles = makeStyles(() => {
   return {
     root: {
       display: 'inline-block',
-      margin: '0 0 0 0.5em',
-      padding: '0 0.25em',
-      borderRadius: '0.25em',
+      margin: '0 0 0 0.5rem',
+      padding: '0 0.25rem',
+      borderRadius: '0.25rem',
       color: '#fff',
     },
     ...bgStyles,

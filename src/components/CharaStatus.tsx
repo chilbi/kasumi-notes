@@ -66,6 +66,7 @@ const keyAbbrLabel = {
 
 interface CharaStatusProps {
   property?: Partial<Property<Big>>;
+  refProperty?: Partial<Property<Big>>;
   partial?: boolean;
   abbr?: boolean;
   // showFightingCapacity?: boolean;
@@ -91,14 +92,6 @@ function CharaStatus(props: CharaStatusProps) {
           value={isNullable ? property[key] as any as string : property[key]!.round(0, 1).toString()}
         />
       ))}
-      {/* {props.showFightingCapacity && (
-        <Infobar
-          key="fighting_capacity"
-          size="large"
-          label="戦力"
-          value={props.property ? getFightingCapacity(props.property as Property) : '???'}
-        />
-      )} */}
     </>
   );
 }

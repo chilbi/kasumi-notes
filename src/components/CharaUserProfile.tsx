@@ -20,7 +20,8 @@ const useStyles = makeStyles((theme: Theme) => {
     LoveLevelWidth = Big(28).times(scalage).div(rem),
     LoveLevelHeight = Big(24).times(scalage).div(rem),
     uniqueSize = LoveLevelHeight,
-    h = LoveLevelHeight + 'rem';
+    h = LoveLevelHeight + 'rem',
+    r = LoveLevelHeight.div(2) + 'rem';
 
   const bgStyles = {} as StyleRules<string>;
   const rankColorKeys = Object.keys(theme.rankColor) as any as (keyof typeof theme.rankColor)[];
@@ -35,7 +36,7 @@ const useStyles = makeStyles((theme: Theme) => {
       display: 'flex',
       flexWrap: 'wrap',
       justifyContent: 'space-between',
-      padding: '0.25em',
+      padding: '0.25rem',
       lineHeight: h,
       backgroundColor: '#fff',
     },
@@ -68,11 +69,11 @@ const useStyles = makeStyles((theme: Theme) => {
     promotion: {
       margin: '0',
       padding: '0',
-      width: '6em',
+      width: '3rem',
       height: h,
       lineHeight: 'inherit',
       textAlign: 'center',
-      borderRadius: 10,
+      borderRadius: r,
       color: '#fff',
     },
     list: {
@@ -89,7 +90,8 @@ const useStyles = makeStyles((theme: Theme) => {
       },
     },
     promotionPaper: {
-      borderRadius: 10,
+      borderRadius: r,
+      overflow: 'hidden',
     },
     disableUnique: {
       filter: 'grayscale(100%)',
@@ -190,7 +192,7 @@ function CharaUserProfile(props: CharaUserProfileProps) {
         )}
         onClick={handleOpenPromotionLevel}
       >
-        {'RANK' + userProfile.promotion_level}
+        {'R' + userProfile.promotion_level}
       </ButtonBase>
       <Popover
         classes={{ paper: styles.promotionPaper }}
@@ -217,7 +219,7 @@ function CharaUserProfile(props: CharaUserProfileProps) {
                   setPromotionLevelEl(null);
                 })}
               >
-                {'RANK' + promotionLevel}
+                {'R' + promotionLevel}
               </ButtonBase>
             )
           })}

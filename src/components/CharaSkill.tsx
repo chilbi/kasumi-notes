@@ -24,38 +24,38 @@ const useStyles = makeStyles((theme: Theme) => {
 
   return {
     root: {
-      padding: '0.25em',
+      padding: '0.25rem',
     },
     item: {
-      padding: '0.5em 0',
+      padding: '0.5rem 0',
     },
     flexBox: {
       display: 'flex',
-      margin: '0.25em 0',
+      margin: '0.25rem 0',
     },
     label: {
       display: 'inline-block',
-      padding: '0 0.5em',
+      padding: '0 0.5rem',
       lineHeight: 1.5,
-      borderRadius: '0.25em',
+      borderRadius: '0.25rem',
       color: '#fff',
       backgroundColor: theme.palette.primary.dark,
     },
     level: {
       display: 'inline-block',
-      margin: '0 0.25em 0 auto',
+      margin: '0 0.25rem 0 auto',
       width: '3.5rem',
-      paddingLeft: '0.25em',
+      paddingLeft: '0.25rem',
       color: theme.palette.secondary.main,
     },
     patternBox: {
       display: 'flex',
       flexWrap: 'wrap',
-      margin: '0.25em 0',
+      margin: '0.25rem 0',
       justifyContent: 'flex-start',
     },
     patternItem: {
-      marginRight: '0.5em',
+      marginRight: '0.5rem',
       lineHeight: '1rem',
       textAlign: 'center',
       wordBreak: 'keep-all',
@@ -84,10 +84,10 @@ const useStyles = makeStyles((theme: Theme) => {
       flexDirection: 'column',
       justifyContent: 'space-around',
       flexGrow: 1,
-      margin: '0.25em',
+      margin: '0.25rem',
     },
     name: {
-      fontSize: '1.2em',
+      fontSize: '1.2rem',
     },
     castTime: {
       color: theme.palette.grey[600],
@@ -96,7 +96,7 @@ const useStyles = makeStyles((theme: Theme) => {
       wordBreak: 'break-all',
     },
     actionLabel: {
-      margin: '0.5em 0 0.25em 0',
+      margin: '0.5rem 0 0.25rem 0',
       color: theme.palette.grey[600],
     },
     actionList: {
@@ -106,15 +106,15 @@ const useStyles = makeStyles((theme: Theme) => {
     },
     actionItem: {
       position: 'relative',
-      margin: '0.25em 0',
-      paddingLeft: descObjSize.plus(0.25) + 'em',
-      lineHeight: descObjSize + 'em',
+      margin: '0.25rem 0',
+      paddingLeft: descObjSize.plus(0.25) + 'rem',
+      lineHeight: descObjSize + 'rem',
       wordBreak: 'break-all',
     },
     actionNum: {
       display: 'inline-block',
-      width: descObjSize + 'em',
-      height: descObjSize + 'em',
+      width: descObjSize + 'rem',
+      height: descObjSize + 'rem',
       fontFamily: '"Arial","Microsoft YaHei",sans-serif',
       fontWeight: 700,
       textAlign: 'center',
@@ -126,18 +126,18 @@ const useStyles = makeStyles((theme: Theme) => {
     stateRoot: {
       position: 'relative',
       display: 'inline-block',
-      width: descObjSize + 'em',
-      height: '1em',
+      width: descObjSize + 'rem',
+      height: '1rem',
     },
     stateImg: {
       position: 'absolute',
-      top: descObjSize.minus(1).div(-2) + 'em',
+      top: descObjSize.minus(1).div(-2) + 'rem',
       left: 0,
-      width: descObjSize + 'em',
-      height: descObjSize + 'em',
+      width: descObjSize + 'rem',
+      height: descObjSize + 'rem',
     },
     formula: {
-      padding: '0 0.25em',
+      padding: '0 0.25rem',
       borderBottom: '2px dotted ' + theme.palette.primary.main,
       wordBreak: 'inherit',
     },

@@ -8,7 +8,7 @@ import CharaImage from './CharaImage';
 const useStyles = makeStyles({
   root: {
     display: 'inline-block',
-    margin: '0.25em',
+    margin: '0.25rem',
   },
 });
 

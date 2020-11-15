@@ -20,17 +20,17 @@ const useStyles = makeStyles((theme: Theme) => {
 
   return {
     item: {
-      margin: '0.5em 0.25em',
+      margin: '0.5rem 0.25rem',
       lineHeight: 1.5,
     },
     titleBox: {
       display: 'flex',
-      padding: '0.5em 0',
+      padding: '0.5rem 0',
     },
     contentBox: {
       display: 'flex',
       alignItems: 'flex-start',
-      borderRadius: '0.5em',
+      borderRadius: '0.5rem',
       height: thumbHeight + 'rem',
       border: '1px solid ' + theme.palette.grey[200],
       boxShadow: '0 1px 1px ' + theme.palette.grey[100],
@@ -38,20 +38,20 @@ const useStyles = makeStyles((theme: Theme) => {
     },
     title: {
       display: 'inline-block',
-      padding: '0 0.5em',
+      padding: '0 0.5rem',
       borderBottom: '1px solid ' + theme.palette.primary.dark,
-      borderRadius: '0.5em 0.5em 0 0',
+      borderRadius: '0.5rem 0.5rem 0 0',
       color: '#fff',
       backgroundColor: theme.palette.primary.dark,
     },
     subTitle: {
       display: 'inline-block',
-      padding: '0 1em',
+      padding: '0 1rem',
       borderBottom: '1px dashed ' + theme.palette.primary.dark,
       color: theme.palette.primary.dark,
     },
     checkbox: {
-      margin: '0 0.25em 0 auto',
+      margin: '0 0.25rem 0 auto',
       padding: 0,
     },
     property: {
@@ -66,7 +66,7 @@ const useStyles = makeStyles((theme: Theme) => {
       flexBasis: thumbWidth + 'rem',
       flexGrow: 0,
       flexShrink: 0,
-      margin: '0 -0.5em',
+      margin: '0 -0.5rem',
       width: thumbWidth + 'rem',
       height: thumbHeight + 'rem',
       '&::before': {

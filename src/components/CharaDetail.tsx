@@ -33,11 +33,11 @@ const useStyles = makeStyles((theme: Theme) => {
       flexFlow: 'wrap',
     },
     tabs: {
-      margin: '0.25em 0',
+      margin: '0.25rem 0',
       backgroundColor: '#fff',
     },
     text: {
-      padding: '0.5em 0',
+      padding: '0.5rem 0',
       lineHeight: 1.8,
       textAlign: 'center',
     },

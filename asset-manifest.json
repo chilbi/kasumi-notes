@@ -1,17 +1,17 @@
 {
   "files": {
     "data.js": "/kasumi-notes/static/js/data.3ef36c52.chunk.js",
-    "main.js": "/kasumi-notes/static/js/main.2261abdf.chunk.js",
+    "main.js": "/kasumi-notes/static/js/main.3eef7fc4.chunk.js",
     "runtime-main.js": "/kasumi-notes/static/js/runtime-main.945becbc.js",
-    "static/js/3.1a2ec6f8.chunk.js": "/kasumi-notes/static/js/3.1a2ec6f8.chunk.js",
+    "static/js/3.87576d4b.chunk.js": "/kasumi-notes/static/js/3.87576d4b.chunk.js",
     "static/js/4.42a63cc6.chunk.js": "/kasumi-notes/static/js/4.42a63cc6.chunk.js",
     "index.html": "/kasumi-notes/index.html",
-    "static/js/3.1a2ec6f8.chunk.js.LICENSE.txt": "/kasumi-notes/static/js/3.1a2ec6f8.chunk.js.LICENSE.txt",
+    "static/js/3.87576d4b.chunk.js.LICENSE.txt": "/kasumi-notes/static/js/3.87576d4b.chunk.js.LICENSE.txt",
     "static/media/FOT-UDMarugo_LargePro-B.335ca207.otf": "/kasumi-notes/static/media/FOT-UDMarugo_LargePro-B.335ca207.otf"
   },
   "entrypoints": [
     "static/js/runtime-main.945becbc.js",
-    "static/js/3.1a2ec6f8.chunk.js",
-    "static/js/main.2261abdf.chunk.js"
+    "static/js/3.87576d4b.chunk.js",
+    "static/js/main.3eef7fc4.chunk.js"
   ]
 }

@@ -31,6 +31,7 @@ const useStyles = makeStyles((theme: Theme) => {
     },
     flexBox: {
       display: 'flex',
+      alignItems: 'center',
       margin: theme.spacing(1, 0),
     },
     label: {
@@ -46,6 +47,7 @@ const useStyles = makeStyles((theme: Theme) => {
       margin: theme.spacing(0, 1, 0, 'auto'),
       width: '3.5rem',
       paddingLeft: theme.spacing(1),
+      lineHeight: 1.5,
       color: theme.palette.secondary.main,
     },
     patternBox: {
@@ -87,7 +89,7 @@ const useStyles = makeStyles((theme: Theme) => {
       margin: theme.spacing(1),
     },
     name: {
-      fontSize: '1.2rem',
+      fontSize: '1.1rem',
     },
     castTime: {
       color: theme.palette.grey[600],

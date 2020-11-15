@@ -50,11 +50,11 @@ const useStyles = makeStyles((theme: Theme) => {
     dropList: {
       display: 'flex',
       flexWrap: 'wrap',
-      padding: theme.spacing(1),
+      padding: theme.spacing(1, 0),
     },
     dropItem: {
       display: 'inline-block',
-      margin: theme.spacing(0.5),
+      margin: theme.spacing(0, 0, 1, 1),
     },
     dropIcon: {
       width: iconSize + 'rem',

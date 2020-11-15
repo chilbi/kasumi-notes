@@ -63,8 +63,8 @@ const useStyles = makeStyles((theme: Theme) => {
       right: 0,
     },
     quickIcon: {
-      width: '1.25rem',
-      height: '1.25rem',
+      width: '2rem',
+      height: '2rem',
     },
     equipList: {
       paddingTop: theme.spacing(1),
@@ -142,7 +142,7 @@ const useStyles = makeStyles((theme: Theme) => {
       flexDirection: 'column',
     },
     uniqueName: {
-      fontSize: '1.2rem',
+      fontSize: '1.1rem',
       color: theme.palette.primary.dark,
     },
     uniqueLevel: {

@@ -21,7 +21,7 @@ const useStyles = makeStyles((theme: Theme) => {
   return {
     root: {
       display: 'inline-block',
-      marginLeft: theme.spacing(2),
+      marginLeft: theme.spacing(1),
       padding: theme.spacing(0, 1),
       borderRadius: '0.25rem',
       color: '#fff',

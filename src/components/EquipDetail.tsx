@@ -39,7 +39,7 @@ const useStyles = makeStyles((theme: Theme) => {
     paper: {
       flex: '0 0 auto',
       marginTop: theme.spacing(1),
-      padding: theme.spacing(1, 2),
+      padding: theme.spacing(1),
       backgroundColor: '#fff',
     },
     flexBox: {
@@ -51,7 +51,7 @@ const useStyles = makeStyles((theme: Theme) => {
       display: 'flex',
       flexDirection: 'column',
       justifyContent: 'space-between',
-      marginLeft: theme.spacing(2),
+      marginLeft: theme.spacing(1),
     },
     control: {
       flexGrow: 1,
@@ -65,7 +65,7 @@ const useStyles = makeStyles((theme: Theme) => {
     genre: {
       display: 'inline-block',
       fontSize: '0.9rem',
-      marginRight: theme.spacing(2),
+      marginRight: theme.spacing(1),
       minWidth: '2rem',
       textAlign: 'center',
       color: theme.palette.grey[600],
@@ -81,7 +81,7 @@ const useStyles = makeStyles((theme: Theme) => {
     property: {
       display: 'flex',
       flexWrap: 'wrap',
-      padding: theme.spacing(0, 1),
+      padding: theme.spacing(0),
     },
     checkbox: {
       margin: 0,
@@ -96,7 +96,7 @@ const useStyles = makeStyles((theme: Theme) => {
     },
     labelBox: {
       display: 'flex',
-      padding: theme.spacing(1, 2),
+      padding: theme.spacing(1),
     },
     label: {
       display: 'inline-block',
@@ -118,7 +118,7 @@ const useStyles = makeStyles((theme: Theme) => {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'left',
-      margin: theme.spacing(0, 0, 1, 2),
+      margin: theme.spacing(0, 0, 1, 1),
       width: '5.25rem',
     },
     consume: {

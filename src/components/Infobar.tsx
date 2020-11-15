@@ -36,13 +36,13 @@ const useStyles = makeStyles((theme: Theme) => ({
     },
   },
   small: {
-    width: '2rem',
+    width: '1.75rem',
   },
   medium: {
-    width: '5rem',
+    width: '4rem',
   },
   large: {
-    width: '8.5rem',
+    width: '7.5rem',
   },
   50: {
     width: '50%',

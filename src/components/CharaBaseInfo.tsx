@@ -79,7 +79,7 @@ const useStyles = makeStyles((theme: Theme) => {
       margin: theme.spacing(1),
     },
     unitName: {
-      fontSize: '1.2rem',
+      fontSize: '1.1rem',
       color: theme.palette.primary.dark,
     },
     actualName: {

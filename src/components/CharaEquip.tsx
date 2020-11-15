@@ -49,7 +49,7 @@ const useStyles = makeStyles((theme: Theme) => {
 
   return {
     root: {
-      padding: '0.25rem 0',
+      padding: theme.spacing(1, 0),
       textAlign: 'center',
     },
     inner: {
@@ -67,12 +67,12 @@ const useStyles = makeStyles((theme: Theme) => {
       height: '1.25rem',
     },
     equipList: {
-      paddingTop: '0.25rem',
+      paddingTop: theme.spacing(1),
       textAlign: 'left',
     },
     equipItem: {
-      margin: '0.5rem 0',
-      padding: '0.25rem 0.75rem',
+      margin: theme.spacing(2, 0),
+      padding: theme.spacing(1, 3),
       borderRadius: '0.5rem',
       border: '1px solid ' + theme.palette.grey[200],
       boxShadow: '0 1px 1px ' + theme.palette.grey[100],
@@ -80,8 +80,8 @@ const useStyles = makeStyles((theme: Theme) => {
     labelBox: {
       display: 'flex',
       alignItems: 'flex-end',
-      marginBottom: '0.25rem',
-      paddingBottom: '0.125rem',
+      marginBottom: theme.spacing(1),
+      paddingBottom: theme.spacing(0.5),
       borderBottom: '2px solid' + theme.palette.primary.main,
     },
     label: {
@@ -90,9 +90,9 @@ const useStyles = makeStyles((theme: Theme) => {
         content: '""',
         display: 'inline-block',
         alignSelf: 'flex-end',
-        margin: '0 4px 4px 0',
-        width: 8,
-        height: 10,
+        margin: theme.spacing(0, 1, 1, 0),
+        width: '0.5rem',
+        height: '0.625rem',
         borderRadius: '50%',
         backgroundColor: theme.palette.primary.main,
         clipPath: 'polygon(50% 0, 100% 50%, 50% 100%, 0 50%)',
@@ -107,7 +107,7 @@ const useStyles = makeStyles((theme: Theme) => {
       justifyContent: 'flex-start',
     },
     m025: {
-      margin: '0.25rem',
+      margin: theme.spacing(1),
     },
     iconRoot: {
       width: iconSize + 'rem',

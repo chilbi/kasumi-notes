@@ -5,12 +5,12 @@ import clsx from 'clsx';
 const useStyles = makeStyles((theme: Theme) => ({
   root: {
     display: 'flex',
-    padding: '0.25rem',
+    padding: theme.spacing(1),
   },
   label: {
     display: 'inline-flex',
     alignItems: 'center',
-    padding: '0 0.25rem',
+    padding: theme.spacing(0, 1),
     color: '#fff',
     backgroundColor: theme.palette.primary.main,
     borderRadius: '0.25rem',
@@ -23,7 +23,7 @@ const useStyles = makeStyles((theme: Theme) => ({
     alignItems: 'center',
     justifyContent: 'flex-end',
     flexGrow: 1,
-    paddingLeft: '0.25rem',
+    paddingLeft: theme.spacing(1),
     textAlign: 'right',
     '&::after': {
       content: '""',

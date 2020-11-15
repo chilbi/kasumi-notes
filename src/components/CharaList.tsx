@@ -48,12 +48,12 @@ const useStyles = makeStyles((theme: Theme) => {
     subtitle: {
       flexGrow: 1,
       margin: 0,
-      paddingRight: 24,
+      paddingRight: '1.5rem',
       textAlign: 'center',
       ...theme.typography.h6,
     },
     popover: {
-      padding: '0.5rem 0.75rem',
+      padding: theme.spacing(2, 3),
     },
     form: {
       display: 'flex',

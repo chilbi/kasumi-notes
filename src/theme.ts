@@ -22,7 +22,9 @@ const theme = createMuiTheme({
     11: '#a14ce5',
     18: '#d72d3e',
   },
-  spacing: 4,
+  spacing: (abs: number | string) =>
+    typeof abs === 'string' ? abs
+      : abs === 0 ? '0' : `${0.25 * abs}rem`,
   palette: {
     primary: { main: '#5f96f5' },
     secondary: { main: '#f84e90' },

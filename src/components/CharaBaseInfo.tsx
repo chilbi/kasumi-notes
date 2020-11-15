@@ -48,13 +48,12 @@ const useStyles = makeStyles((theme: Theme) => {
     infoBox: {
       display: 'flex',
       flexWrap: 'wrap',
-      padding: '0.25rem',
+      padding: theme.spacing(1),
       backgroundColor: '#fff',
     },
     position: {
       alignSelf: 'center',
-      marginLeft: 'auto',
-      paddingLeft: '0.25rem',
+      paddingLeft: theme.spacing(1),
       lineHeight: borderWidth[3].minus(borderWidth[0]) + 'rem',
       borderWidth: borderWidth.map(v => v + 'rem').join(' '),
       borderStyle: 'solid',
@@ -77,7 +76,7 @@ const useStyles = makeStyles((theme: Theme) => {
       flexDirection: 'column',
       justifyContent: 'space-around',
       flexGrow: 1,
-      margin: '0.25rem',
+      margin: theme.spacing(1),
     },
     unitName: {
       fontSize: '1.2rem',

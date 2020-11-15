@@ -36,7 +36,7 @@ const useStyles = makeStyles((theme: Theme) => {
       display: 'flex',
       flexWrap: 'wrap',
       justifyContent: 'space-between',
-      padding: '0.25rem',
+      padding: theme.spacing(1),
       lineHeight: h,
       backgroundColor: '#fff',
     },

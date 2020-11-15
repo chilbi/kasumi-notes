@@ -1,15 +1,17 @@
 import React from 'react';
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles, Theme } from '@material-ui/core/styles';
 import ButtonBase from '@material-ui/core/ButtonBase';
 import { Link } from 'react-router-dom';
 import { getPublicImageURL, getValidID } from '../DBHelper/helper';
 import CharaImage from './CharaImage';
 
-const useStyles = makeStyles({
-  root: {
-    display: 'inline-block',
-    margin: '0.25rem',
-  },
+const useStyles = makeStyles((theme: Theme) => {
+  return {
+    root: {
+      display: 'inline-block',
+      margin: theme.spacing(1),
+    },
+  };
 });
 
 interface CharaListItemProps {

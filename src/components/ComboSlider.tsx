@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles, Theme } from '@material-ui/core/styles';
 import ButtonBase from '@material-ui/core/ButtonBase';
 import Popover from '@material-ui/core/Popover';
 import IconButton from '@material-ui/core/IconButton';
@@ -17,7 +17,7 @@ export const marks = (() => {
   };
 })();
 
-const useStyles = makeStyles(() => {
+const useStyles = makeStyles((theme: Theme) => {
   return {
     popover: {
       display: 'flex',
@@ -27,7 +27,7 @@ const useStyles = makeStyles(() => {
       overflow: 'unset',
     },
     iconButton: {
-      margin: '0.25rem 0',
+      margin: theme.spacing(1, 0),
       padding: 0,
     },
   };

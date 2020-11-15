@@ -38,8 +38,8 @@ const useStyles = makeStyles((theme: Theme) => {
   return {
     paper: {
       flex: '0 0 auto',
-      marginTop: '0.25rem',
-      padding: '0.25rem 0.5rem',
+      marginTop: theme.spacing(1),
+      padding: theme.spacing(1, 2),
       backgroundColor: '#fff',
     },
     flexBox: {
@@ -51,11 +51,11 @@ const useStyles = makeStyles((theme: Theme) => {
       display: 'flex',
       flexDirection: 'column',
       justifyContent: 'space-between',
-      margin: '0 0 0 0.5rem',
+      marginLeft: theme.spacing(2),
     },
     control: {
       flexGrow: 1,
-      margin: '0 0.5rem 0 0',
+      marginRight: theme.spacing(2),
       padding: 0,
     },
     name: {
@@ -65,7 +65,7 @@ const useStyles = makeStyles((theme: Theme) => {
     genre: {
       display: 'inline-block',
       fontSize: '0.9rem',
-      margin: '0 0.5rem 0 0',
+      marginRight: theme.spacing(2),
       minWidth: '2rem',
       textAlign: 'center',
       color: theme.palette.grey[600],
@@ -81,7 +81,7 @@ const useStyles = makeStyles((theme: Theme) => {
     property: {
       display: 'flex',
       flexWrap: 'wrap',
-      padding: '0 0.25rem',
+      padding: theme.spacing(0, 1),
     },
     checkbox: {
       margin: 0,
@@ -96,11 +96,11 @@ const useStyles = makeStyles((theme: Theme) => {
     },
     labelBox: {
       display: 'flex',
-      padding: '0.25rem 0.5rem',
+      padding: theme.spacing(1, 2),
     },
     label: {
       display: 'inline-block',
-      padding: '0 0.5rem',
+      padding: theme.spacing(0, 2),
       lineHeight: 1.5,
       borderRadius: '0.25rem',
       color: '#fff',
@@ -112,42 +112,35 @@ const useStyles = makeStyles((theme: Theme) => {
     craftList: {
       display: 'flex',
       flexWrap: 'wrap',
-      marginTop: '0.25rem',
+      marginTop: theme.spacing(1),
     },
     craftItem: {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'left',
-      margin: '0 0 0.25rem 0.5rem',
+      margin: theme.spacing(0, 0, 1, 2),
       width: '5.25rem',
     },
     consume: {
-      margin: '0 0 0 0.25rem',
+      marginLeft: theme.spacing(1),
       fontFamily: '"Arial","Microsoft YaHei",sans-serif',
     },
     uniqueCraftList: {
-      marginTop: '0.25rem',
+      marginTop: theme.spacing(1),
     },
     uniqueCraftItem: {
       display: 'flex',
-      margin: '0 0 0.25rem 0',
+      marginBottom: theme.spacing(1),
     },
     button: {
       alignSelf: 'center',
-      margin: '0 0.25rem 0 auto',
+      margin: theme.spacing(0, 1, 0, 'auto'),
       width: '6rem',
     },
     types: {
       display: 'flex',
       alignItems: 'center',
       margin: '0 0 0 auto',
-    },
-    dropLabel: {
-      display: 'inline-block',
-      margin: '0 0 0 0.5rem',
-      padding: '0 0.25rem',
-      borderRadius: '0.25rem',
-      color: '#fff',
     },
     selected: {
       backgroundColor: alpha(theme.palette.secondary.main, 0.35),
@@ -164,7 +157,7 @@ const useStyles = makeStyles((theme: Theme) => {
     },
     sortLabel: {
       display: 'inline-block',
-      margin: '0 0 0 0.5rem',
+      marginLeft: theme.spacing(2),
     },
     sort: {
       padding: 0,

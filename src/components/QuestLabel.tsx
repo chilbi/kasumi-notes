@@ -1,9 +1,9 @@
 import React from 'react';
-import { makeStyles, StyleRules } from '@material-ui/core/styles'
+import { makeStyles, StyleRules, Theme } from '@material-ui/core/styles'
 import { QuestType } from '../DBHelper/helper';
 import clsx from 'clsx';
 
-const useStyles = makeStyles(() => {
+const useStyles = makeStyles((theme: Theme) => {
   const colors = [
     ['N', '#5ca6e3'],
     ['H', '#e35875'],
@@ -21,8 +21,8 @@ const useStyles = makeStyles(() => {
   return {
     root: {
       display: 'inline-block',
-      margin: '0 0 0 0.5rem',
-      padding: '0 0.25rem',
+      marginLeft: theme.spacing(2),
+      padding: theme.spacing(0, 1),
       borderRadius: '0.25rem',
       color: '#fff',
     },

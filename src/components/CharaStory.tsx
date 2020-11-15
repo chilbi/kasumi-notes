@@ -20,12 +20,12 @@ const useStyles = makeStyles((theme: Theme) => {
 
   return {
     item: {
-      margin: '0.5rem 0.25rem',
+      margin: theme.spacing(2, 1),
       lineHeight: 1.5,
     },
     titleBox: {
       display: 'flex',
-      padding: '0.5rem 0',
+      padding: theme.spacing(2, 0),
     },
     contentBox: {
       display: 'flex',
@@ -38,7 +38,7 @@ const useStyles = makeStyles((theme: Theme) => {
     },
     title: {
       display: 'inline-block',
-      padding: '0 0.5rem',
+      padding: theme.spacing(0, 2),
       borderBottom: '1px solid ' + theme.palette.primary.dark,
       borderRadius: '0.5rem 0.5rem 0 0',
       color: '#fff',
@@ -46,12 +46,12 @@ const useStyles = makeStyles((theme: Theme) => {
     },
     subTitle: {
       display: 'inline-block',
-      padding: '0 1rem',
+      padding: theme.spacing(0, 4),
       borderBottom: '1px dashed ' + theme.palette.primary.dark,
       color: theme.palette.primary.dark,
     },
     checkbox: {
-      margin: '0 0.25rem 0 auto',
+      margin: theme.spacing(0, 1, 0, 'auto'),
       padding: 0,
     },
     property: {
@@ -66,7 +66,7 @@ const useStyles = makeStyles((theme: Theme) => {
       flexBasis: thumbWidth + 'rem',
       flexGrow: 0,
       flexShrink: 0,
-      margin: '0 -0.5rem',
+      margin: theme.spacing(0, -2),
       width: thumbWidth + 'rem',
       height: thumbHeight + 'rem',
       '&::before': {

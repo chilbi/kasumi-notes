@@ -24,18 +24,18 @@ const useStyles = makeStyles((theme: Theme) => {
 
   return {
     root: {
-      padding: '0.25rem',
+      padding: theme.spacing(1),
     },
     item: {
-      padding: '0.5rem 0',
+      padding: theme.spacing(2, 0),
     },
     flexBox: {
       display: 'flex',
-      margin: '0.25rem 0',
+      margin: theme.spacing(1, 0),
     },
     label: {
       display: 'inline-block',
-      padding: '0 0.5rem',
+      padding: theme.spacing(0, 2),
       lineHeight: 1.5,
       borderRadius: '0.25rem',
       color: '#fff',
@@ -43,19 +43,19 @@ const useStyles = makeStyles((theme: Theme) => {
     },
     level: {
       display: 'inline-block',
-      margin: '0 0.25rem 0 auto',
+      margin: theme.spacing(0, 1, 0, 'auto'),
       width: '3.5rem',
-      paddingLeft: '0.25rem',
+      paddingLeft: theme.spacing(1),
       color: theme.palette.secondary.main,
     },
     patternBox: {
       display: 'flex',
       flexWrap: 'wrap',
-      margin: '0.25rem 0',
+      margin: theme.spacing(1, 0),
       justifyContent: 'flex-start',
     },
     patternItem: {
-      marginRight: '0.5rem',
+      marginRight: theme.spacing(2),
       lineHeight: '1rem',
       textAlign: 'center',
       wordBreak: 'keep-all',
@@ -84,7 +84,7 @@ const useStyles = makeStyles((theme: Theme) => {
       flexDirection: 'column',
       justifyContent: 'space-around',
       flexGrow: 1,
-      margin: '0.25rem',
+      margin: theme.spacing(1),
     },
     name: {
       fontSize: '1.2rem',
@@ -96,7 +96,7 @@ const useStyles = makeStyles((theme: Theme) => {
       wordBreak: 'break-all',
     },
     actionLabel: {
-      margin: '0.5rem 0 0.25rem 0',
+      margin: theme.spacing(2, 0, 1, 0),
       color: theme.palette.grey[600],
     },
     actionList: {
@@ -106,7 +106,7 @@ const useStyles = makeStyles((theme: Theme) => {
     },
     actionItem: {
       position: 'relative',
-      margin: '0.25rem 0',
+      margin: theme.spacing(1, 0),
       paddingLeft: descObjSize.plus(0.25) + 'rem',
       lineHeight: descObjSize + 'rem',
       wordBreak: 'break-all',
@@ -137,7 +137,7 @@ const useStyles = makeStyles((theme: Theme) => {
       height: descObjSize + 'rem',
     },
     formula: {
-      padding: '0 0.25rem',
+      padding: theme.spacing(0, 1),
       borderBottom: '2px dotted ' + theme.palette.primary.main,
       wordBreak: 'inherit',
     },

@@ -19,7 +19,7 @@ const useStyles = makeStyles((theme: Theme) => {
     subtitle: {
       flexGrow: 1,
       margin: 0,
-      paddingRight: 24,
+      paddingRight: '1.5rem',
       textAlign: 'center',
       ...theme.typography.h6,
     },
@@ -31,7 +31,7 @@ const useStyles = makeStyles((theme: Theme) => {
       bottom: 'auto',
       left: 0,
       margin: 0,
-      padding: '0.25rem',
+      padding: theme.spacing(1),
       backgroundColor: '#fff',
       borderBottom: '1px solid ' + theme.palette.grey[100],
     },
@@ -39,7 +39,7 @@ const useStyles = makeStyles((theme: Theme) => {
       justifyContent: 'center',
     },
     popover: {
-      padding: '0.5rem 0.75rem',
+      padding: theme.spacing(2, 3),
     },
     form: {
       display: 'flex',

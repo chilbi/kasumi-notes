@@ -14,14 +14,14 @@ import manaPng from '../images/mana.png';
 const useStyles = makeStyles((theme: Theme) => {
   const
     rem = 16,
-    scalage = 0.375,
+    scalage = 0.34375,
     iconSize = Big(128).times(scalage).div(rem),
     manaSize = Big(28).times(scalage).div(rem),
     iconRadius = Big(12).times(scalage).div(rem);
 
   return {
     item: {
-      margin: '0.25rem 0 0 0',
+      marginTop: theme.spacing(1),
       backgroundColor: '#fff',
       '&:first-child': {
         margin: 0,
@@ -29,24 +29,17 @@ const useStyles = makeStyles((theme: Theme) => {
     },
     titleBox: {
       display: 'flex',
-      padding: '0.25rem 0',
-    },
-    label: {
-      display: 'inline-block',
-      margin: '0 0 0 0.5rem',
-      padding: '0 0.25rem',
-      borderRadius: '0.25rem',
-      color: '#fff',
+      padding: theme.spacing(1, 0),
     },
     name: {
-      margin: '0 0 0 0.25rem',
+      marginLeft: theme.spacing(1),
     },
     mana: {
       display: 'inline-flex',
       alignItems: 'center',
       fontFamily: '"Arial","Microsoft YaHei",sans-serif',
       flexBasis: manaSize.plus(3.25) + 'rem',
-      margin: '0 0.25rem 0 auto',
+      margin: theme.spacing(0, 1, 0, 'auto'),
       paddingLeft: manaSize.plus(0.25) + 'rem',
       lineHeight: 1.25,
       backgroundImage: `url(${manaPng})`,
@@ -57,11 +50,11 @@ const useStyles = makeStyles((theme: Theme) => {
     dropList: {
       display: 'flex',
       flexWrap: 'wrap',
-      padding: '0.25rem',
+      padding: theme.spacing(1),
     },
     dropItem: {
       display: 'inline-block',
-      margin: '0.125rem',
+      margin: theme.spacing(0.5),
     },
     dropIcon: {
       width: iconSize + 'rem',

@@ -8,6 +8,7 @@ import Clear from '@material-ui/icons/Clear';
 import Done from '@material-ui/icons/Done';
 import { useNavigate } from 'react-router-dom';
 import Header from './Header';
+import CharaStillImage from './CharaStillImage';
 import CharaBaseInfo from './CharaBaseInfo';
 import CharaUserProfile from './CharaUserProfile';
 import CharaSkill from './CharaSkill';
@@ -20,11 +21,22 @@ import useQuery from '../hooks/useQuery';
 import { EquipEnhanceStatus } from '../DBHelper/promotion';
 import { SkillEnhanceStatus } from '../DBHelper/skill';
 import { deepClone, equal, getParamsUnitID } from '../DBHelper/helper';
+import { getCharaProperty, PropertyData } from '../DBHelper';
 import { PCRStoreValue } from '../db';
+import localValue from '../localValue';
 import clsx from 'clsx';
 
 const useStyles = makeStyles((theme: Theme) => {
   return {
+    sticky: {
+      zIndex: theme.zIndex.appBar,
+      position: 'sticky',
+      top: '3rem',
+      right: 0,
+      bottom: 'auto',
+      left: 0,
+      backgroundColor: '#fff',
+    },
     tabpanel: {
       backgroundColor: '#fff',
     },
@@ -33,8 +45,8 @@ const useStyles = makeStyles((theme: Theme) => {
       flexFlow: 'wrap',
     },
     tabs: {
-      margin: theme.spacing(1, 0),
-      backgroundColor: '#fff',
+      borderTop: '1px solid ' + theme.palette.grey[100],
+      borderBottom: '1px solid ' + theme.palette.grey[100],
     },
     text: {
       padding: theme.spacing(2, 0),
@@ -65,8 +77,10 @@ function CharaDetail() {
   const detail = charaDetail && charaDetail.charaData.unit_id === unitID ? charaDetail : undefined
 
   const userProfileRef = useRef<PCRStoreValue<'user_profile'>>();
+  const propertyDataRef = useRef<PropertyData>();
   if (!userProfileRef.current && charaDetail) {
     userProfileRef.current = deepClone(charaDetail.userProfile);
+    propertyDataRef.current = [...charaDetail.propertyData];
   }
 
   useEffect(() => {
@@ -75,11 +89,21 @@ function CharaDetail() {
       dbHelper.getCharaDetailData(unitID, base).then(detailData => {
         if (detailData) {
           userProfileRef.current = deepClone(detailData.userProfile);
+          propertyDataRef.current = [...detailData.propertyData];
           setDetail(detailData);
         }
       });
     }
   }, [dbHelper, charaDetail, setDetail, unitID, charaList]);
+
+  const [stillExpand, setStillExpand] = useState(() => localValue.charaBaseInfo.stillExpand.get());
+  const handleToggleStillExpand = useCallback(() => {
+    setStillExpand(prev => {
+      const value = !prev;
+      localValue.charaBaseInfo.stillExpand.set(value);
+      return value;
+    });
+  }, []);
 
   const [tabsValue, setTabsValue] = useState(0);
   const handleChangeTabsValue = useCallback((e: React.SyntheticEvent, newValue: number) => {
@@ -89,9 +113,11 @@ function CharaDetail() {
   const handleSaveUserProfile = useCallback(() => {
     if (dbHelper && detail) dbHelper.setUserProfile(detail.userProfile).then(() => {
       userProfileRef.current = deepClone(detail.userProfile);
+      propertyDataRef.current = [...detail.propertyData];
       setCharaList((prevCharaList = []) => prevCharaList.map(item => {
         if (item.userProfile.unit_id === unitID) {
-          item.userProfile = userProfileRef.current!;
+          item.userProfile = deepClone(userProfileRef.current!);
+          item.propertyData = [...propertyDataRef.current!];
         }
         return item;
       }));
@@ -188,99 +214,22 @@ function CharaDetail() {
 
   const property = useMemo(() => detail && detail.getProperty(), [detail]);
 
-  const detailMemo = useMemo(() => ({
-    baseInfo: (
-      <CharaBaseInfo
-        rarity={detail && detail.userProfile.rarity}
-        position={detail && detail.getPosition()}
-        charaData={detail && detail.charaData}
-      />
-    ),
-    comment: (
-      <div className={styles.text}>
-        {(detail ? detail.charaData.comment : ' \n \n ').split('\n').map((txt, i) => (
-          <Fragment key={i}>{txt}<br /></Fragment>
-        ))}
-      </div>
-    ),
-    catchCopy: (
-      <div className={styles.text}>
-        {detail ? detail.unitProfile.catch_copy : '???'}
-      </div>
-    ),
-    selfText: (
-      <div className={styles.text}>
-        {(detail ? detail.unitProfile.self_text : '???').split('\n').map((txt, i) => (
-          <Fragment key={i}>{txt}<br /></Fragment>
-        ))}
-      </div>
-    ),
-    profile: (
-      <div className={styles.infoBox}>
-        <CharaProfile profile={detail && detail.unitProfile} />
-      </div>
-    ),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }), [detail]);
-
-  const userProfileMemo = useMemo(() => ({
-    userProfile: (
-      <CharaUserProfile
-        maxRarity={detail && detail.charaData.max_rarity}
-        userProfile={detail && detail.userProfile}
-        onChangeRarity={handleChangeRarity}
-        onChangeLevel={handleChangeLevel}
-        onChangeLove={handleChangeLove}
-        onChangeUnique={handleChangeUnique}
-        onChangePromotion={handleChangePromotion}
-      />
-    ),
-    skill: (
-      <CharaSkill
-        atkType={detail && detail.charaData.atk_type}
-        atkCastTime={detail && detail.charaData.normal_atk_cast_time}
-        property={property}
-        unitSkillData={detail && detail.unitSkillData}
-        userProfile={detail && detail.userProfile}
-        onChangeSkill={handleChangeSkill}
-      />
-    ),
-    equip: (
-      <CharaEquip
-        maxRarity={detail && detail.charaData.max_rarity}
-        promotions={detail && detail.promotions}
-        uniqueEquip={detail && detail.propertyData[4]}
-        userProfile={detail && detail.userProfile}
-        onChangeEquip={handleChangeEquip}
-        onChangeUnique={handleChangeUnique}
-        onChangePromotion={handleChangePromotion}
-      />
-    ),
-    story: (
-      <CharaStory
-        storyStatus={detail && detail.propertyData[3]}
-        userProfile={detail && detail.userProfile}
-        onChangeLove={handleChangeLove}
-      />
-    ),
-    status: (
-      <div className={styles.infoBox}>
-        <CharaStatus property={property} />
-      </div>
-    ),
+  const refProperty = useMemo(() => {
+    return userProfileRef.current && propertyDataRef.current && getCharaProperty(userProfileRef.current, propertyDataRef.current);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }), [detail, detail && detail.userProfile]);
-  
+  }, [userProfileRef.current, propertyDataRef.current]);
+
   const isEqual = useMemo(() => {
-    return detail ? equal(userProfileRef.current, detail.userProfile) : true;
+    return userProfileRef.current && detail ? equal(userProfileRef.current, detail.userProfile) : true;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userProfileRef.current, detail]);
 
   const handleBack = useCallback(() => {
     if (!isEqual) {
       setDetail(prevDetail => {
-        if (prevDetail && userProfileRef.current) {
+        if (prevDetail && userProfileRef.current && propertyDataRef.current) {
           prevDetail.userProfile = deepClone(userProfileRef.current);
+          prevDetail.propertyData = [...propertyDataRef.current];
           return { ...prevDetail };
         }
       });
@@ -288,6 +237,128 @@ function CharaDetail() {
       navigate(-1);
     }
   }, [isEqual, setDetail, navigate]);
+
+  const detailMemo = useMemo(() => {
+    let unit_id, unit_name, actual_name, rarity, position, unitProfile,
+      comment = ' \n \n ', catch_copy = '???', self_text = '???';
+    if (detail) {
+      unit_id = detail.charaData.unit_id;
+      unit_name = detail.charaData.unit_name;
+      actual_name = detail.charaData.actual_name;
+      rarity = detail.userProfile.rarity;
+      position = detail.getPosition();
+      comment = detail.charaData.comment;
+      unitProfile = detail.unitProfile;
+      catch_copy = unitProfile.catch_copy;
+      self_text = unitProfile.self_text;
+    }
+    return {
+      stillImage: stillExpand && (
+        <CharaStillImage unitID={unit_id} rarity={rarity} />
+      ),
+      baseInfo: (
+        <CharaBaseInfo
+          unitID={unit_id}
+          unitName={unit_name}
+          actualName={actual_name}
+          rarity={rarity}
+          position={position}
+          stillExpand={stillExpand}
+          onToggleStillExpand={handleToggleStillExpand}
+        />
+      ),
+      comment: (
+        <div className={styles.text}>
+          {comment.split('\n').map((txt, i) => (
+            <Fragment key={i}>{txt}<br /></Fragment>
+          ))}
+        </div>
+      ),
+      catchCopy: (
+        <div className={styles.text}>{catch_copy}</div>
+      ),
+      selfText: (
+        <div className={styles.text}>
+          {self_text.split('\n').map((txt, i) => (
+            <Fragment key={i}>{txt}<br /></Fragment>
+          ))}
+        </div>
+      ),
+      profile: (
+        <div className={styles.infoBox}>
+          <CharaProfile profile={unitProfile} />
+        </div>
+      ),
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [detail, stillExpand, handleToggleStillExpand]);
+
+  const userProfileMemo = useMemo(() => {
+    let max_rarity, atk_type, normal_atk_cast_time,
+      userProfile, propertyData, uniqueEquip, storyStatus, unitSkillData, promotions;
+    if (detail) {
+      max_rarity = detail.charaData.max_rarity;
+      atk_type = detail.charaData.atk_type;
+      normal_atk_cast_time = detail.charaData.normal_atk_cast_time;
+      userProfile = detail.userProfile;
+      propertyData = detail.propertyData;
+      uniqueEquip = propertyData[4];
+      storyStatus = propertyData[3];
+      unitSkillData = detail.unitSkillData;
+      promotions = detail.promotions;
+    }
+    return {
+      userProfile: (
+        <CharaUserProfile
+          maxRarity={max_rarity}
+          userProfile={userProfile}
+          onChangeRarity={handleChangeRarity}
+          onChangeLevel={handleChangeLevel}
+          onChangeLove={handleChangeLove}
+          onChangeUnique={handleChangeUnique}
+          onChangePromotion={handleChangePromotion}
+        />
+      ),
+      skill: (
+        <CharaSkill
+          atkType={atk_type}
+          atkCastTime={normal_atk_cast_time}
+          property={property}
+          unitSkillData={unitSkillData}
+          userProfile={userProfile}
+          onChangeSkill={handleChangeSkill}
+        />
+      ),
+      equip: (
+        <CharaEquip
+          maxRarity={max_rarity}
+          promotions={promotions}
+          uniqueEquip={uniqueEquip}
+          userProfile={userProfile}
+          onChangeEquip={handleChangeEquip}
+          onChangeUnique={handleChangeUnique}
+          onChangePromotion={handleChangePromotion}
+        />
+      ),
+      story: (
+        <CharaStory
+          storyStatus={storyStatus}
+          userProfile={userProfile}
+          onChangeLove={handleChangeLove}
+        />
+      ),
+      status: (
+        <div className={styles.infoBox}>
+          <CharaStatus
+            property={property}
+            refProperty={refProperty}
+            showDiff={!isEqual}
+          />
+        </div>
+      ),
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [detail, detail && detail.userProfile, isEqual]);
 
   const header = useMemo(() => (
     <Header>
@@ -310,7 +381,7 @@ function CharaDetail() {
     <Tabs
       className={styles.tabs}
       variant="scrollable"
-      scrollButtons={true}
+      scrollButtons
       textColor="secondary"
       indicatorColor="secondary"
       value={tabsValue}
@@ -328,9 +399,12 @@ function CharaDetail() {
   return (
     <>
       {header}
-      {detailMemo.baseInfo}
-      {userProfileMemo.userProfile}
-      {tabs}
+      {detailMemo.stillImage}
+      <div className={styles.sticky}>
+        {detailMemo.baseInfo}
+        {userProfileMemo.userProfile}
+        {tabs}
+      </div>
       <div className={clsx(styles.tabpanel, tabsValue !== 0 && styles.hidden)} role="tabpanel">
         {userProfileMemo.skill}
       </div>

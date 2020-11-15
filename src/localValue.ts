@@ -39,6 +39,9 @@ const localValue = (() => {
     charaEquip: {
       quick: createlocalValue('CHARA_EQUIP_QUICK_KEY', true),
     },
+    charaBaseInfo: {
+      stillExpand: createlocalValue('CHARA_BASE_INFO_STILL_KEY', true),
+    },
   };
 })();
 

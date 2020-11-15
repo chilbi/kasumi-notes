@@ -158,7 +158,7 @@ function CharaUserProfile(props: CharaUserProfileProps) {
         defaultValue={userProfile.level}
         onDebouncedChange={onChangeLevel}
       >
-        <Infobar className={styles.infobar} width={100} size="small" label="Lv" value={userProfile.level} />
+        <Infobar classes={{ root: styles.infobar }} width={100} size="small" label="Lv" value={userProfile.level} />
       </ComboSlider>
 
       <ComboSlider

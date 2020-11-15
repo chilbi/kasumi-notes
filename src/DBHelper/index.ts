@@ -22,7 +22,7 @@ export interface CharaBaseData {
   userProfile: PCRStoreValue<'user_profile'>;
   propertyData: PropertyData;
   getPosition(): number;
-  getProperty(): Property<Big>;
+  getProperty(userProfile?: PCRStoreValue<'user_profile'>, propertyData?: PropertyData): Property<Big>;
 }
 
 export interface CharaDetailData extends CharaBaseData {
@@ -38,13 +38,9 @@ export interface EquipDetailData {
   onChangeEnhance?: (enhanceLevel: number) => void;
 }
 
-function getPosition(this: CharaBaseData): number {
-  return this.charaData.search_area_width < 360 ? 1 : this.charaData.search_area_width > 590 ? 3 : 2;
-}
-
-function getProperty(this: CharaBaseData): Property<Big> {
-  const { level, promotion_level, equip_enhance_status, love_level_status, unique_enhance_level } = this.userProfile;
-  const [rarityData, promotionStatusData, promotionData, storyStatus, uniqueEquipData] = this.propertyData;
+export function getCharaProperty(userProfile: PCRStoreValue<'user_profile'>, propertyData: PropertyData): Property<Big> {
+  const { level, promotion_level, equip_enhance_status, love_level_status, unique_enhance_level } = userProfile;
+  const [rarityData, promotionStatusData, promotionData, storyStatus, uniqueEquipData] = propertyData;
   return plus([
     rarityData.getProperty(level, promotion_level),
     promotionStatusData.getProperty(),
@@ -52,6 +48,14 @@ function getProperty(this: CharaBaseData): Property<Big> {
     storyStatus.getProperty(love_level_status),
     uniqueEquipData && uniqueEquipData.getProperty(unique_enhance_level)
   ]);
+}
+
+function getPosition(this: CharaBaseData): number {
+  return this.charaData.search_area_width < 360 ? 1 : this.charaData.search_area_width > 590 ? 3 : 2;
+}
+
+function getProperty(this: CharaBaseData): Property<Big> {
+  return getCharaProperty(this.userProfile, this.propertyData);
 }
 
 class DBHelper extends ImageData {
@@ -78,7 +82,7 @@ class DBHelper extends ImageData {
         promotions: promotions!,
       }));
     }
-    const propertyData = base ? base.propertyData : await this.getCharaPropertyData(userProfile);
+    const propertyData = base ? [...base.propertyData] as PropertyData : await this.getCharaPropertyData(userProfile);
     return {
       charaData,
       userProfile,

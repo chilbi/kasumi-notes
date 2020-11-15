@@ -1,17 +1,14 @@
-import React, { makeStyles, Theme } from '@material-ui/core/styles';
+import React from 'react';
+import { makeStyles, Theme } from '@material-ui/core/styles';
+import IconButton from '@material-ui/core/IconButton';
+import ExpandLess from '@material-ui/icons/ExpandLess';
 import SkeletonImage from './SkeletonImage';
 import { getPositionText, getPublicImageURL, getValidID } from '../DBHelper/helper';
-import { PCRStoreValue } from '../db';
 import Big from 'big.js';
 import clsx from 'clsx';
 import positionBorder1Png from '../images/position_border_1.png';
 import positionBorder2Png from '../images/position_border_2.png';
 import positionBorder3Png from '../images/position_border_3.png';
-
-const defaultCharaData: PCRStoreValue<'chara_data'> = {
-  unit_name: '???',
-  actual_name: '???',
-} as any;
 
 const useStyles = makeStyles((theme: Theme) => {
   const
@@ -22,37 +19,47 @@ const useStyles = makeStyles((theme: Theme) => {
     borderSlice = [2, 12, 2, 26, 'fill'];
 
   return {
-    stillRoot: {
-      maxWidth: '100%',
-      width: 'calc(100vw - (100vw - 100%))',
-      paddingBottom: 'calc(792 / 1408 * (100vw - (100vw - 100%)))',
-      position: 'relative',
-      '&::before': {
-        content: '"Loading..."',
-        zIndex: 0,
-        position: 'absolute',
-        top: '50%',
-        left: '50%',
-        display: 'inline-block',
-        color: theme.palette.grey[800],
-        fontSize: '2.5rem',
-        transform: 'translate(-50%, -50%)',
-      },
-    },
-    iconRoot: {
-      width: imgSize + 'rem',
-      height: imgSize + 'rem',
-      borderRadius: '50%',
-      overflow: 'hidden',
-    },
-    infoBox: {
+    root: {
       display: 'flex',
       flexWrap: 'wrap',
       padding: theme.spacing(1),
       backgroundColor: '#fff',
     },
+    imgRoot: {
+      width: imgSize + 'rem',
+      height: imgSize + 'rem',
+      borderRadius: '50%',
+      overflow: 'hidden',
+    },
+    nameBox: {
+      flexGrow: 1,
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'space-between',
+      marginLeft: theme.spacing(1),
+    },
+    unitName: {
+      fontSize: '1.1rem',
+      color: theme.palette.primary.dark,
+    },
+    actualName: {
+      color: theme.palette.secondary.main,
+    },
+    expandless: {
+      margin: '0 0 0 auto',
+      padding: theme.spacing(0.5),
+      transform: 'rotate(180deg)',
+      transition: 'transform 0.2s',
+    },
+    expandlessRotate: {
+      transform: 'rotate(0)',
+    },
+    positionBox: {
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'space-between',
+    },
     position: {
-      alignSelf: 'center',
       paddingLeft: theme.spacing(1),
       lineHeight: borderWidth[3].minus(borderWidth[0]) + 'rem',
       borderWidth: borderWidth.map(v => v + 'rem').join(' '),
@@ -71,50 +78,41 @@ const useStyles = makeStyles((theme: Theme) => {
     position3: {
       borderImageSource: `url(${positionBorder3Png})`,
     },
-    nameBox: {
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'space-around',
-      flexGrow: 1,
-      margin: theme.spacing(1),
-    },
-    unitName: {
-      fontSize: '1.1rem',
-      color: theme.palette.primary.dark,
-    },
-    actualName: {
-      color: theme.palette.secondary.main,
-    },
   };
 });
 
 interface CharaBaseInfoProps {
+  unitID?: number;
+  unitName?: string;
+  actualName?: string;
   rarity?: number;
   position?: number;
-  charaData?: PCRStoreValue<'chara_data'>;
+  stillExpand?: boolean;
+  onToggleStillExpand?: () => void;
 }
 
 function CharaBaseInfo(props: CharaBaseInfoProps) {
-  const { rarity = 5, position = 1, charaData = defaultCharaData } = props;
+  const { rarity = 5, position = 1, unitID, unitName = '???', actualName = '???', stillExpand, onToggleStillExpand } = props;
   const styles = useStyles();
 
-  const stillImgSrc = charaData.unit_id ? getPublicImageURL('still_unit', getValidID(charaData.unit_id, rarity, 3)) : undefined;
-  const iconImgSrc = charaData.unit_id ? getPublicImageURL('icon_unit', getValidID(charaData.unit_id, rarity)) : undefined;
+  const iconImgSrc = unitID ? getPublicImageURL('icon_unit', getValidID(unitID, rarity)) : undefined;
 
   return (
-    <>
-      <SkeletonImage classes={{ root: styles.stillRoot }} src={stillImgSrc} />
-      <div className={styles.infoBox}>
-        <SkeletonImage classes={{ root: styles.iconRoot }} src={iconImgSrc} save />
-        <div className={clsx(styles.nameBox)}>
-          <span className={styles.unitName}>{charaData.unit_name}</span>
-          <span className={styles.actualName}>{charaData.actual_name}</span>
-        </div>
+    <div className={styles.root}>
+      <SkeletonImage classes={{ root: styles.imgRoot }} src={iconImgSrc} save />
+      <div className={clsx(styles.nameBox)}>
+        <span className={styles.unitName}>{unitName}</span>
+        <span className={styles.actualName}>{actualName}</span>
+      </div>
+      <div className={styles.positionBox}>
+        <IconButton className={clsx(styles.expandless, stillExpand && styles.expandlessRotate)} onClick={onToggleStillExpand}>
+          <ExpandLess />
+        </IconButton>
         <div className={clsx(styles.position, styles['position' + position as keyof typeof styles])}>
           {getPositionText(position)}
         </div>
       </div>
-    </>
+    </div>
   );
 }
 

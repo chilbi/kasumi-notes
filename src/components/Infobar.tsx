@@ -4,8 +4,24 @@ import clsx from 'clsx';
 
 const useStyles = makeStyles((theme: Theme) => ({
   root: {
-    display: 'flex',
     padding: theme.spacing(1),
+  },
+  diffBar: {
+    textAlign: 'right',
+  },
+  plus: {
+    color: theme.palette.success.main,
+  },
+  minus: {
+    color: theme.palette.error.main,
+  },
+  zero: {
+    '&::after': {
+      content: '"\\00A0"',
+    },
+  },
+  valueBar: {
+    display: 'flex',
   },
   label: {
     display: 'inline-flex',
@@ -55,22 +71,31 @@ const useStyles = makeStyles((theme: Theme) => ({
 interface InfobarProps extends ClassesProps<typeof useStyles> {
   label: string;
   value?: string | number;
+  diffValue?: string | number;
+  showDiff?: boolean;
   width?: 50 | 100;
   size?: 'small' | 'medium' | 'large';
 }
 
 function Infobar(props: InfobarProps) {
-  const { className, classes = {}, label, value, width, size } = props;
+  const { className, classes = {}, label, value, diffValue, showDiff, width, size } = props;
   const styles = useStyles();
 
   return (
-    <div className={clsx(styles.root, classes.root, width && styles[width], className )}>
-      <span className={clsx(styles.label, classes.label, size && styles[size])}>
-        {label}
-      </span>
-      <span className={clsx(styles.value, classes.value)}>
-        {value != null ? value : '???'}
-      </span>
+    <div className={clsx(styles.root, classes.root, width && styles[width], className)}>
+      {showDiff && (
+        <div className={clsx(styles.diffBar, diffValue! > 0 ? styles.plus : diffValue! < 0 ? styles.minus : styles.zero)}>
+          {diffValue! > 0 ? '+' + diffValue : diffValue! < 0 ? diffValue : ''}
+        </div>
+      )}
+      <div className={styles.valueBar}>
+        <span className={clsx(styles.label, classes.label, size && styles[size])}>
+          {label}
+        </span>
+        <span className={clsx(styles.value, classes.value)}>
+          {value}
+        </span>
+      </div>
     </div>
   );
 }

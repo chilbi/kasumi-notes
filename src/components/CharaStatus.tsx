@@ -17,8 +17,8 @@ const allPropertyKeys: PropertyKeys[] = [
   'wave_energy_recovery', // 11
   'accuracy', // 17
   'dodge', // 8
-  'physical_penetrate', // 12(未知)
-  'magic_penetrate', // 13(未知)
+  // 'physical_penetrate', // 12(未知)
+  // 'magic_penetrate', // 13(未知)
   'energy_recovery_rate', // 14
   'energy_reduce_rate', // 16(未知)
   'hp_recovery_rate', // 15
@@ -69,29 +69,38 @@ interface CharaStatusProps {
   refProperty?: Partial<Property<Big>>;
   partial?: boolean;
   abbr?: boolean;
+  showDiff?: boolean;
   // showFightingCapacity?: boolean;
 }
 
 function CharaStatus(props: CharaStatusProps) {
-  const property: Partial<Property<Big>> = props.property || {};
-  const keys = props.partial ? Object.keys(props.property || {}) as PropertyKeys[] : allPropertyKeys;
-  const isNullable = !props.property;
-  if (isNullable) {
-    for (let key of keys) {
-      property[key] = '???' as any;
-    }
-  }
+  const { property = {}, refProperty = {}, partial, abbr, showDiff } = props;
+  const keys = partial ? Object.keys(property) as PropertyKeys[] : allPropertyKeys;
   return (
     <>
-      {keys.map(key => (
-        <Infobar
-          key={key}
-          size={props.abbr ? 'medium': 'large'}
-          width={50}
-          label={props.abbr ? keyAbbrLabel[key] : keyLabel[key]}
-          value={isNullable ? property[key] as any as string : property[key]!.round(0, 1).toString()}
-        />
-      ))}
+      {keys.map(key => {
+        let value = property[key];
+        if (value) value = value.round(0, 1);
+        let diffValue;
+        if (showDiff) {
+          let refValue = refProperty[key];
+          if (refValue) {
+            refValue = refValue.round(0, 1);
+            diffValue = value!.minus(refValue).toNumber();
+          }
+        }
+        return (
+          <Infobar
+            key={key}
+            size={abbr ? 'medium' : 'large'}
+            width={50}
+            label={abbr ? keyAbbrLabel[key] : keyLabel[key]}
+            value={value ? value.toString() : '???'}
+            diffValue={diffValue}
+            showDiff={showDiff}
+          />
+        );
+      })}
     </>
   );
 }

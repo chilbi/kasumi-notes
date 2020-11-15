@@ -57,12 +57,11 @@ const useStyles = makeStyles((theme: Theme) => {
       justifyContent: 'flex-start',
     },
     patternItem: {
-      marginRight: theme.spacing(2),
+      margin: theme.spacing(0, 1, 1, 0),
       lineHeight: '1rem',
       textAlign: 'center',
       wordBreak: 'keep-all',
       overflow: 'hidden',
-      // fontFamily: '"Helvetica", "Arial", sans-serif',
     },
     loopLabel: {
       width: iconSize + 'rem',
@@ -82,11 +81,11 @@ const useStyles = makeStyles((theme: Theme) => {
       borderRadius: borderRadius + 'rem',
     },
     nameBox: {
+      flexGrow: 1,
       display: 'flex',
       flexDirection: 'column',
-      justifyContent: 'space-around',
-      flexGrow: 1,
-      margin: theme.spacing(1),
+      justifyContent: 'space-between',
+      marginLeft: theme.spacing(1),
     },
     name: {
       fontSize: '1.1rem',
@@ -206,12 +205,12 @@ function CharaSkill(props: CharaSkillProps) {
         if (atkItem < 2000) {
           iconType = unitSkillData.main_skill[i - 1].icon_type;
           patternLabel = 'Main' + i;
-          if (i === 1 && unique_enhance_level > 0) {
-            patternLabel += '+';
-          }
         } else {
           iconType = unitSkillData.sp_skill[i - 1].icon_type;
           patternLabel = 'SP' + i;
+        }
+        if (i === 1 && unique_enhance_level > 0) {
+          patternLabel += '+';
         }
         imgSrc = getPublicImageURL('icon_skill', iconType);
       }

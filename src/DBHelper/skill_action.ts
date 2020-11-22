@@ -394,8 +394,15 @@ const actionMap: Record</*action_type*/number, /*getDescription*/(this: SkillAct
           desc = desc.replace('ダウン', 'を' + str);
         }
         break;
-      case 2: // ユイ UB+、アン Main2
-        desc = desc.replace(/*行動速度*/'アップ', /*行動速度*/`を${this.action_value_1}倍にする`);
+      case 2:
+        if (desc.indexOf(/*行動速度*/'アップ') > -1) { // ユイ UB+、アン Main2
+          desc = desc.replace(/*行動速度*/'アップ', /*行動速度*/`を${this.action_value_1}倍にする`);
+        } else if (desc.indexOf(/*行動速度を*/'一定時間上昇させる') > -1) { // トモ（マジカル）
+          desc = desc.replace(/*行動速度を*/'一定時間上昇させる', /*行動速度を*/`${this.action_value_1}倍にする`);
+          if (desc.indexOf('自身') > -1) {
+            desc = desc.replace('自身', '自分');
+          }
+        }
         break;
       case 3: // アオイ Main2
         desc = desc.replace(akinesia, '麻痺状態');

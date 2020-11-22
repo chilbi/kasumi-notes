@@ -116,7 +116,7 @@ const useStyles = makeStyles((theme: Theme) => {
       display: 'inline-block',
       width: descObjSize + 'rem',
       height: descObjSize + 'rem',
-      fontFamily: '"Arial","Microsoft YaHei",sans-serif',
+      fontFamily: 'sans-serif',
       fontWeight: 700,
       textAlign: 'center',
       borderRadius: '50%',

@@ -6,7 +6,7 @@ import { openDB } from 'idb';
  * @returns {Promise<import('.').PCRDB>}
  */
 export default function openPCRDB(options = {}) {
-  return openDB('pcr', 10022700, {
+  return openDB('pcr', 10023300, {
     upgrade(db, oldVersion, newVersion, transaction) {
       if (newVersion !== oldVersion) Array.from(db.objectStoreNames).forEach(name => db.deleteObjectStore(name));
 

@@ -1,4 +1,9 @@
 import { QuestType } from './DBHelper/helper';
+export interface PCRTheme {
+  fontFamily: string;
+  fontSize: number;
+  fontWeight: number;
+}
 
 const localValue = (() => {
   const createlocalValue = <T>(key: string, defaultValue: T) => {
@@ -20,6 +25,13 @@ const localValue = (() => {
     };
   };
   return {
+    app: {
+      theme: createlocalValue<PCRTheme>('APP_THEME_KEY', {
+        fontFamily: 'Marugo',
+        fontSize: 14,
+        fontWeight: 400,
+      }),
+    },
     charaList: {
       variant: createlocalValue<'icon_unit' | 'unit_plate'>('CHARA_LIST_VARIANT_KEY', 'unit_plate'),
       sort: createlocalValue<'asc' | 'desc'>('CHARA_LIST_SORT_KEY', 'asc'),

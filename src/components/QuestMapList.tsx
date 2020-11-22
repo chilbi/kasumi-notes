@@ -17,11 +17,12 @@ import clsx from 'clsx';
 const useStyles = makeStyles((theme: Theme) => {
   return {
     subtitle: {
+      ...theme.typography.h6,
       flexGrow: 1,
       margin: 0,
       paddingRight: '1.5rem',
+      fontWeight: 700,
       textAlign: 'center',
-      ...theme.typography.h6,
     },
     nav: {
       zIndex: theme.zIndex.appBar,
@@ -160,7 +161,7 @@ function QuestMapList() {
           boundaryCount={1}
           hidePrevButton
           hideNextButton
-          count={39}
+          count={40}
           page={area}
           onChange={handleChangeArea}
         />

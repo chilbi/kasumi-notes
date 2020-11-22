@@ -6,6 +6,7 @@ import CharaList from './CharaList';
 import CharaDetail from './CharaDetail';
 import EquipDetail from './EquipDetail';
 import Quest from './Quest';
+import Menu from './Menu';
 import clsx from 'clsx';
 
 const useStyles = makeStyles((theme: Theme) => {
@@ -90,7 +91,7 @@ function Main() {
           {questMatch && <Quest />}
         </div>
         <div id="menu" className={clsx(styles.item, !menuMatch && styles.hidden)}>
-          未完成
+          <Menu />
         </div>
         {!charaDetailMatch && <Footer value={path} onChange={handleChange} />}
         {noMatch && <Navigate to="/chara" replace />}

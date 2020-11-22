@@ -105,13 +105,13 @@ function getBranchDesc(actionID: number, actionList: SkillAction[]): string {
   return desc;
 }
 
-function getSameDesc(action: SkillAction, actionList: SkillAction[]): string {
+function getSameDesc(action: SkillAction, actionList: SkillAction[], detail = false): string {
   let desc = '';
   const sameAction = actionList.find(item =>
     item.description !== '' &&
     item.action_id !== action.action_id &&
     item.action_type === action.action_type &&
-    item.action_detail_1 === action.action_detail_1
+    (detail || item.action_detail_1 === action.action_detail_1)
   );
   if (sameAction) {
     desc = sameAction.description;
@@ -231,6 +231,9 @@ const actionMap: Record</*action_type*/number, /*getDescription*/(this: SkillAct
         desc = getBranchDesc(this.action_id, actionList);
         if (desc === '') {
           desc = getSameDesc(this, actionList);
+          if (desc === '') {
+            desc = getSameDesc(this, actionList, true);
+          }
         }
       }
       let str = '最大３キャラに各'; // シオリ Main1

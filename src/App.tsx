@@ -1,18 +1,15 @@
 import React from 'react';
-import { ThemeProvider } from '@material-ui/core/styles'
-import CssBaseline from '@material-ui/core/CssBaseline';
 import { HashRouter } from 'react-router-dom';
+import PCRThemeProvider from './components/PCRThemeProvider';
 import PCRDBProvider from './components/PCRDBProvider';
 import CharaListProvider from './components/CharaListProvider';
 import CharaDetailProvider from './components/CharaDetailProvider';
 import EquipDetailProvider from './components/EquipDetailProvider';
 import Main from './components/Main';
-import theme from './theme';
 
 function App() {
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
+    <PCRThemeProvider>
       <HashRouter>
         <PCRDBProvider>
           <CharaListProvider>
@@ -24,7 +21,7 @@ function App() {
           </CharaListProvider>
         </PCRDBProvider>
       </HashRouter>
-    </ThemeProvider>
+    </PCRThemeProvider>
   );
 }
 

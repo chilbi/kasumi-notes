@@ -17,6 +17,7 @@ const useStyles = makeStyles((theme: Theme) => {
       alignItems: 'center',
       borderBottom: '1px solid ' + theme.palette.grey[100],
       backgroundColor: '#fff',
+      overflow: 'hidden',
     },
   };
 });

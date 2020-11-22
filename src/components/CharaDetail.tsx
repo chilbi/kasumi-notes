@@ -43,6 +43,7 @@ const useStyles = makeStyles((theme: Theme) => {
     infoBox: {
       display: 'flex',
       flexFlow: 'wrap',
+      padding: theme.spacing(1),
     },
     tabs: {
       borderTop: '1px solid ' + theme.palette.grey[100],
@@ -54,10 +55,11 @@ const useStyles = makeStyles((theme: Theme) => {
       textAlign: 'center',
     },
     subtitle: {
+      ...theme.typography.h6,
       flexGrow: 1,
       margin: 0,
+      fontWeight: 700,
       textAlign: 'center',
-      ...theme.typography.h6,
     },
     hidden: {
       display: 'none',

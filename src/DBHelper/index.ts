@@ -51,7 +51,8 @@ export function getCharaProperty(userProfile: PCRStoreValue<'user_profile'>, pro
 }
 
 function getPosition(this: CharaBaseData): number {
-  return this.charaData.search_area_width < 360 ? 1 : this.charaData.search_area_width > 590 ? 3 : 2;
+  const { search_area_width } = this.charaData;
+  return search_area_width < 300 ? 1 : search_area_width > 600 ? 3 : 2;
 }
 
 function getProperty(this: CharaBaseData): Property<Big> {

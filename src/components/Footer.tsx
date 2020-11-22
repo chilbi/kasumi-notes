@@ -18,6 +18,7 @@ const useStyles = makeStyles((theme: Theme) => {
       height: '3.5rem',
       flex: '0 0 auto',
       borderTop: '1px solid ' + theme.palette.grey[100],
+      overflow: 'hidden',
     },
   };
 });
@@ -35,7 +36,7 @@ function Footer(props: FooterProps) {
     <BottomNavigation className={styles.root} showLabels value={value} onChange={onChange}>
       <BottomNavigationAction value="/chara" label="キャラ" icon={<PeopleAlt />} />
       <BottomNavigationAction value="/quest" label="クエスト" icon={<Gavel />} />
-      <BottomNavigationAction value="/menu" label="メニュー" icon={<Menu />} disabled />
+      <BottomNavigationAction value="/menu" label="メニュー" icon={<Menu />} />
     </BottomNavigation>
   );
 }

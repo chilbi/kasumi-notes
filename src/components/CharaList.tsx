@@ -46,11 +46,12 @@ const useStyles = makeStyles((theme: Theme) => {
       justifyContent: 'space-evenly',
     },
     subtitle: {
+      ...theme.typography.h6,
       flexGrow: 1,
       margin: 0,
       paddingRight: '1.5rem',
+      fontWeight: 700,
       textAlign: 'center',
-      ...theme.typography.h6,
     },
     popover: {
       padding: theme.spacing(2, 3),

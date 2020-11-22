@@ -88,11 +88,12 @@ const useStyles = makeStyles((theme: Theme) => {
       padding: 0,
     },
     subtitle: {
+      ...theme.typography.h6,
       flexGrow: 1,
       margin: 0,
       paddingRight: '3rem',
+      fontWeight: 700,
       textAlign: 'center',
-      ...theme.typography.h6,
     },
     labelBox: {
       display: 'flex',
@@ -123,7 +124,7 @@ const useStyles = makeStyles((theme: Theme) => {
     },
     consume: {
       marginLeft: theme.spacing(1),
-      fontFamily: '"Arial","Microsoft YaHei",sans-serif',
+      fontFamily: 'sans-serif',
     },
     uniqueCraftList: {
       marginTop: theme.spacing(1),

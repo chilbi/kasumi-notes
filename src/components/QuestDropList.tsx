@@ -37,7 +37,7 @@ const useStyles = makeStyles((theme: Theme) => {
     mana: {
       display: 'inline-flex',
       alignItems: 'center',
-      fontFamily: '"Arial","Microsoft YaHei",sans-serif',
+      fontFamily: 'sans-serif',
       flexBasis: manaSize.plus(3.25) + 'rem',
       margin: theme.spacing(0, 1, 0, 'auto'),
       paddingLeft: manaSize.plus(0.25) + 'rem',
@@ -64,7 +64,7 @@ const useStyles = makeStyles((theme: Theme) => {
     odds: {
       display: 'inline-block',
       width:' 100%',
-      fontFamily: '"Arial","Microsoft YaHei",sans-serif',
+      fontFamily: 'sans-serif',
       textAlign: 'center',
     },
     selected: {

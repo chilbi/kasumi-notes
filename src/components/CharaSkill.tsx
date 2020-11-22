@@ -178,7 +178,6 @@ function CharaSkill(props: CharaSkillProps) {
 
   if (!unitSkillData || !atkType || !atkCastTime || !property)
     return <LinearProgress color="secondary" />;
-  console.log(unitSkillData)
 
   const atkData = atkType === 1
     ? {

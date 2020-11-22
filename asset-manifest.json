@@ -1,7 +1,7 @@
 {
   "files": {
     "data.js": "/kasumi-notes/static/js/data.cbae7073.chunk.js",
-    "main.js": "/kasumi-notes/static/js/main.731fb6ba.chunk.js",
+    "main.js": "/kasumi-notes/static/js/main.b42211ac.chunk.js",
     "runtime-main.js": "/kasumi-notes/static/js/runtime-main.487091d7.js",
     "static/js/3.783e9688.chunk.js": "/kasumi-notes/static/js/3.783e9688.chunk.js",
     "static/js/4.f9819b2b.chunk.js": "/kasumi-notes/static/js/4.f9819b2b.chunk.js",
@@ -13,6 +13,6 @@
   "entrypoints": [
     "static/js/runtime-main.487091d7.js",
     "static/js/3.783e9688.chunk.js",
-    "static/js/main.731fb6ba.chunk.js"
+    "static/js/main.b42211ac.chunk.js"
   ]
 }

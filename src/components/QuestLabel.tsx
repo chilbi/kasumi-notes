@@ -1,4 +1,3 @@
-import React from 'react';
 import { makeStyles, StyleRules, Theme } from '@material-ui/core/styles'
 import { QuestType } from '../DBHelper/helper';
 import clsx from 'clsx';

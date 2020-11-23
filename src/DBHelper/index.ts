@@ -11,7 +11,7 @@ import { getEquipCraft, EquipCraft } from './equip_craft';
 import { getQuestList, QuestData } from './quest';
 import { plus, Property } from './property';
 import ImageData from './ImageData';
-import maxUserProfile from './maxUserProfile';
+import maxUserProfile, { nullID } from './maxUserProfile';
 import { deepClone, Range } from './helper';
 import Big from 'big.js';
 
@@ -65,7 +65,7 @@ class DBHelper extends ImageData {
     super(db);
   }
 
-  async getCharaDetailData(unit_id: number, base?: CharaBaseData, user_name = maxUserProfile.user_name): Promise<CharaDetailData | undefined> {
+  async getCharaDetailData(unit_id: number, user_name: string, base?: CharaBaseData): Promise<CharaDetailData | undefined> {
     const [charaData, userProfile, unitProfile, promotions, unitSkillData] = await Promise.all([
       base ? base.charaData : this.db.transaction('chara_data', 'readonly').store.get(unit_id),
       base ? deepClone(base.userProfile) : this.db.transaction('user_profile', 'readonly').store.get([user_name, unit_id]),
@@ -76,14 +76,14 @@ class DBHelper extends ImageData {
     if (!userProfile || !charaData) {
       const count = await this.db.transaction('chara_data', 'readonly').store.count();
       if (count > 0) return undefined;
-      return this.getAllCharaBaseData().then(list => ({
+      return this.getAllCharaBaseData(user_name).then(list => ({
         ...list.find(item => item.charaData.unit_id === unit_id)!,
         unitProfile: unitProfile!,
         unitSkillData: unitSkillData!,
         promotions: promotions!,
       }));
     }
-    const propertyData = base ? [...base.propertyData] as PropertyData : await this.getCharaPropertyData(userProfile);
+    const propertyData = base ? [...base.propertyData] as PropertyData : await this.getCharaPropertyData(charaData.unique_equip_id, userProfile);
     return {
       charaData,
       userProfile,
@@ -96,7 +96,7 @@ class DBHelper extends ImageData {
     };
   }
 
-  async getAllCharaBaseData(user_name = maxUserProfile.user_name): Promise<CharaBaseData[]> {
+  async getAllCharaBaseData(user_name: string): Promise<CharaBaseData[]> {
     let [allCharaData, userProfiles] = await Promise.all([
       this.db.transaction('chara_data', 'readonly').store.getAll(),
       this.db.transaction('user_profile', 'readonly').store.index('user_profile_0_user_name').getAll(user_name)
@@ -111,7 +111,7 @@ class DBHelper extends ImageData {
     for (let i = 0; i < userProfiles.length; i++) {
       const userProfile = userProfiles[i];
       const charaData = allCharaData.find(item => item.unit_id === userProfile.unit_id)!;
-      promiseArr.push(this.getCharaPropertyData(userProfile, memo).then(propertyData => {
+      promiseArr.push(this.getCharaPropertyData(charaData.unique_equip_id, userProfile, memo).then(propertyData => {
         return {
           charaData,
           userProfile,
@@ -124,14 +124,14 @@ class DBHelper extends ImageData {
     return Promise.all(promiseArr);
   }
 
-  getCharaPropertyData(userProfile: PCRStoreValue<'user_profile'>, memo?: StoryStatusMemo): Promise<PropertyData> {
-    const { unit_id, rarity, promotion_level, unique_equip_id } = userProfile;
+  getCharaPropertyData(uniqueEquipID: number, userProfile: PCRStoreValue<'user_profile'>, memo?: StoryStatusMemo): Promise<PropertyData> {
+    const { unit_id, rarity, promotion_level } = userProfile;
     return Promise.all([
       getRarityData(this.db, unit_id, rarity),
       getPromotionStatusData(this.db, unit_id, promotion_level),
       getPromotionData(this.db, unit_id, promotion_level),
       getStoryStatusData(this.db, unit_id, memo),
-      unique_equip_id !== maxUserProfile.unique_equip_id ? getUniqueEquipData(this.db, unit_id, unique_equip_id) : undefined
+      uniqueEquipID !== nullID ? getUniqueEquipData(this.db, unit_id, uniqueEquipID) : undefined
     ]);
   }
 
@@ -163,6 +163,28 @@ class DBHelper extends ImageData {
 
   setUserProfile(userProfile: PCRStoreValue<'user_profile'>): Promise<void> {
     return this.db.transaction('user_profile', 'readwrite').store.put(userProfile) as any;
+  }
+
+  getAllUser(): Promise<string[]> {
+    return this.db.transaction('user_profile', 'readonly').store.getAllKeys().then(keys => {
+      const allUser: string[] = [];
+      for (let key of keys) {
+        const user = key[0];
+        if (allUser.indexOf(user) < 0) {
+          allUser.push(user);
+        }
+      }
+      return allUser;
+    });
+  }
+
+  update(): Promise<boolean> {
+    return getAllInit(this.db, maxUserProfile.user_name).then(([allCharaData, userProfiles]) => {
+      return Promise.all([
+        this.setAllCharaData(allCharaData),
+        this.setUserProfiles(userProfiles)
+      ]).then(() => true);
+    });
   }
 
   protected getPromotions(unit_id: number): Promise<PromotionData[]> {

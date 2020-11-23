@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { CharaDetailContext, State } from './Contexts';
 import { CharaDetailData } from '../DBHelper';
 

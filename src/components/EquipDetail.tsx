@@ -1,4 +1,4 @@
-import React, { Fragment, useContext, useState, useCallback, useMemo, useEffect } from 'react';
+import { Fragment, useContext, useState, useCallback, useMemo, useEffect } from 'react';
 import { makeStyles, alpha, Theme } from '@material-ui/core/styles';
 import ButtonBase from '@material-ui/core/ButtonBase';
 import Button from '@material-ui/core/Button';
@@ -60,11 +60,10 @@ const useStyles = makeStyles((theme: Theme) => {
     },
     name: {
       display: 'inline-block',
-      fontSize: '1.1rem',
+      fontSize: '1.1em',
     },
     genre: {
       display: 'inline-block',
-      fontSize: '0.9rem',
       marginRight: theme.spacing(1),
       minWidth: '2rem',
       textAlign: 'center',

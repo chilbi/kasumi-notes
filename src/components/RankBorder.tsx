@@ -1,4 +1,3 @@
-import React from 'react';
 import { makeStyles, Theme, StyleRules } from '@material-ui/core/styles';
 import { getRankPoint } from '../DBHelper/helper';
 import Big from 'big.js';

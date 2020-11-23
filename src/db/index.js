@@ -1,14 +1,24 @@
 // @ts-check
 import { openDB } from 'idb';
+import localValue from '../localValue';
 
 /**
  * @param {{ onInserted?: (db: import('.').PCRDB) => void; onProgress?: (count: number, total: number) => void; }} [options] 
  * @returns {Promise<import('.').PCRDB>}
  */
 export default function openPCRDB(options = {}) {
-  return openDB('pcr', 10023300, {
+  return openDB('pcr', 10023302, {
     upgrade(db, oldVersion, newVersion, transaction) {
-      if (newVersion !== oldVersion) Array.from(db.objectStoreNames).forEach(name => db.deleteObjectStore(name));
+      if (newVersion !== oldVersion) {
+        if (db.objectStoreNames.length > 0) {
+          localValue.app.requireUpdate.set(true);
+          Array.from(db.objectStoreNames).forEach(name => {
+            if (['image_data', 'chara_data', 'user_profile'].indexOf(name) < 0) {
+              db.deleteObjectStore(name);
+            }
+          });
+        }
+      }
 
       db.createObjectStore('actual_unit_background', {
         keyPath: 'unit_id',
@@ -99,19 +109,25 @@ export default function openPCRDB(options = {}) {
         keyPath: 'wave_group_id',
       });
 
-      const imageDataStore = db.createObjectStore('image_data', {
-        keyPath: 'url',
-      });
-      imageDataStore.createIndex('image_data_0_last_visit', 'last_visit');
+      if (!db.objectStoreNames.contains('image_data')) {
+        const imageDataStore = db.createObjectStore('image_data', {
+          keyPath: 'url',
+        });
+        imageDataStore.createIndex('image_data_0_last_visit', 'last_visit');
+      }
 
-      db.createObjectStore('chara_data', {
-        keyPath: 'unit_id',
-      });
+      if (!db.objectStoreNames.contains('chara_data')) {
+        db.createObjectStore('chara_data', {
+          keyPath: 'unit_id',
+        });
+      }
 
-      const userProfileStore = db.createObjectStore('user_profile', {
-        keyPath: ['user_name', 'unit_id'],
-      });
-      userProfileStore.createIndex('user_profile_0_user_name', 'user_name');
+      if (!db.objectStoreNames.contains('user_profile')) {
+        const userProfileStore = db.createObjectStore('user_profile', {
+          keyPath: ['user_name', 'unit_id'],
+        });
+        userProfileStore.createIndex('user_profile_0_user_name', 'user_name');
+      }
 
       transaction.done.then(async () => {
         const data = await import(/* webpackChunkName: "data" */ './data');

@@ -1,4 +1,4 @@
-import React, { Fragment, useContext, useRef, useState, useCallback, useMemo, useEffect } from 'react';
+import { Fragment, useContext, useRef, useState, useCallback, useMemo, useEffect } from 'react';
 import { makeStyles, Theme } from '@material-ui/core/styles';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
@@ -88,7 +88,7 @@ function CharaDetail() {
   useEffect(() => {
     if (dbHelper && (!charaDetail || charaDetail.charaData.unit_id !== unitID)) {
       const base = charaList && charaList.find(item => item.charaData.unit_id === unitID);
-      dbHelper.getCharaDetailData(unitID, base).then(detailData => {
+      dbHelper.getCharaDetailData(unitID, localValue.app.user.get(), base).then(detailData => {
         if (detailData) {
           userProfileRef.current = deepClone(detailData.userProfile);
           propertyDataRef.current = [...detailData.propertyData];
@@ -296,10 +296,11 @@ function CharaDetail() {
   }, [detail, stillExpand, handleToggleStillExpand]);
 
   const userProfileMemo = useMemo(() => {
-    let max_rarity, atk_type, normal_atk_cast_time,
+    let max_rarity, unique_equip_id, atk_type, normal_atk_cast_time,
       userProfile, propertyData, uniqueEquip, storyStatus, unitSkillData, promotions;
     if (detail) {
       max_rarity = detail.charaData.max_rarity;
+      unique_equip_id = detail.charaData.unique_equip_id;
       atk_type = detail.charaData.atk_type;
       normal_atk_cast_time = detail.charaData.normal_atk_cast_time;
       userProfile = detail.userProfile;
@@ -313,6 +314,7 @@ function CharaDetail() {
       userProfile: (
         <CharaUserProfile
           maxRarity={max_rarity}
+          uniqueEquipID={unique_equip_id}
           userProfile={userProfile}
           onChangeRarity={handleChangeRarity}
           onChangeLevel={handleChangeLevel}

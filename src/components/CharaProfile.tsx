@@ -1,4 +1,3 @@
-import React from 'react';
 import Infobar from './Infobar';
 import { PCRStoreValue } from '../db';
 

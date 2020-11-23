@@ -1,4 +1,4 @@
-import React, { Fragment, useState, useCallback, useMemo } from 'react';
+import { Fragment, useState, useCallback, useMemo } from 'react';
 import { makeStyles, Theme } from '@material-ui/core/styles';
 import Pagination from '@material-ui/core/Pagination';
 import IconButton from '@material-ui/core/IconButton';
@@ -11,6 +11,7 @@ import QuestDropList from './QuestDropList';
 import QuestLabel from './QuestLabel';
 import Header from './Header';
 import { mapQuestType, QuestType, Range } from '../DBHelper/helper';
+import { maxArea } from '../DBHelper/maxUserProfile';
 import localValue from '../localValue';
 import clsx from 'clsx';
 
@@ -59,7 +60,7 @@ const useStyles = makeStyles((theme: Theme) => {
 function QuestMapList() {
   const styles = useStyles();
 
-  const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(null);
+  const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
 
   const handleOpen = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(e.currentTarget);
@@ -161,7 +162,7 @@ function QuestMapList() {
           boundaryCount={1}
           hidePrevButton
           hideNextButton
-          count={40}
+          count={maxArea}
           page={area}
           onChange={handleChangeArea}
         />

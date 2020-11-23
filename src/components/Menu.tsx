@@ -1,4 +1,4 @@
-import React, { useContext, useCallback } from 'react';
+import { useContext, useCallback } from 'react';
 import { makeStyles, Theme } from '@material-ui/core/styles';
 import FormControl from '@material-ui/core/FormControl';
 import FormLabel from '@material-ui/core/FormLabel';
@@ -7,6 +7,12 @@ import RadioGroup from '@material-ui/core/RadioGroup';
 import Radio from '@material-ui/core/Radio';
 import Slider from '@material-ui/core/Slider';
 import Divider from '@material-ui/core/Divider';
+// import Chip from '@material-ui/core/Chip';
+// import IconButton from '@material-ui/core/IconButton';
+// import Add from '@material-ui/icons/Add';
+// import Face from '@material-ui/icons/Face';
+// import Clear from '@material-ui/icons/Clear';
+// import Done from '@material-ui/icons/Done';
 import Header from './Header';
 import { PCRThemeContext } from './Contexts';
 import localValue from '../localValue';
@@ -48,6 +54,15 @@ const useStyles = makeStyles((theme: Theme) => {
     form: {
       margin: theme.spacing(4, 0),
     },
+    // chips: {
+    //   display: 'flex',
+    //   flexWrap: 'wrap',
+    //   justifyContent: 'start',
+    //   alignItems: 'center',
+    // },
+    // chip: {
+    //   margin: theme.spacing(2),
+    // },
     sliderBox: {
       display: 'flex',
       alignItems: 'center',
@@ -80,6 +95,20 @@ const useStyles = makeStyles((theme: Theme) => {
 function Menu() {
   const styles = useStyles();
   const [pcrTheme, setPCRTheme] = useContext(PCRThemeContext);
+  // const dbHelper = useContext(DBHelperContext);
+
+  // const [currUser, setCurrUser] = useState(() => localValue.app.user.get());
+
+  // const [allUser, setAllUser] = useState(() => [currUser]);
+
+  // useEffect(() => {
+  //   if (dbHelper) dbHelper.getAllUser().then(value => {
+  //     setAllUser(value);
+  //   });
+  // }, [dbHelper]);
+
+  // const handleChangeUser = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+  // }, []);
 
   const handleChangeFontFamily = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setPCRTheme(prev => {
@@ -122,6 +151,31 @@ function Menu() {
         <h6 className={styles.subtitle}>メニュー</h6>
       </Header>
       <div className={styles.forms}>
+        {/* <FormControl className={styles.form} component="fieldset" color="secondary" fullWidth>
+          <FormLabel component="legend">ユーザー</FormLabel>
+          <div className={styles.chips}>
+            {allUser.map(user => {
+              const isCurr = user = currUser;
+              return (
+                <Chip
+                  key={user}
+                  className={styles.chip}
+                  variant="outlined"
+                  color="secondary"
+                  label={user}
+                  icon={<Face />}
+                  deleteIcon={isCurr ? <Done /> : <Clear />}
+                  onDelete={() => {}}
+                />
+              );
+            })}
+            <IconButton color="secondary">
+              <Add />
+            </IconButton>
+          </div>
+        </FormControl>
+
+        <Divider /> */}
         <FormControl className={styles.form} component="fieldset" color="secondary" fullWidth>
           <FormLabel component="legend">フォント</FormLabel>
           <RadioGroup
@@ -134,6 +188,7 @@ function Menu() {
             <FormControlLabel labelPlacement="start" value="Hanzi Pen" label="漢字筆" control={<Radio />} />
           </RadioGroup>
         </FormControl>
+
         <Divider />
         <FormControl className={styles.form} component="fieldset" color="secondary" fullWidth>
           <FormLabel component="legend">フォントサイズ</FormLabel>
@@ -154,6 +209,7 @@ function Menu() {
             <span className={clsx(styles.sample, styles.maxSize)}>A</span>
           </div>
         </FormControl>
+
         <Divider />
         <FormControl className={styles.form} component="fieldset" color="secondary" disabled={isMarugo} fullWidth>
           <FormLabel component="legend">フォントウエート</FormLabel>

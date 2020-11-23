@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { Navigate, useNavigate, useLocation, matchPath } from 'react-router-dom';
 import { makeStyles, Theme } from '@material-ui/core/styles';
 import Footer from './Footer';
@@ -91,7 +91,7 @@ function Main() {
           {questMatch && <Quest />}
         </div>
         <div id="menu" className={clsx(styles.item, !menuMatch && styles.hidden)}>
-          <Menu />
+          {menuMatch && <Menu />}
         </div>
         {!charaDetailMatch && <Footer value={path} onChange={handleChange} />}
         {noMatch && <Navigate to="/chara" replace />}

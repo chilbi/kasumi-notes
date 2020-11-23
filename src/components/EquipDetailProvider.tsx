@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { EquipDetailContext, State } from './Contexts';
 import { EquipDetailData } from '../DBHelper';
 

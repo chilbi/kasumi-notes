@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { makeStyles, alpha, Theme } from '@material-ui/core/styles'
 import LinearProgress from '@material-ui/core/LinearProgress';
 import ButtonBase from '@material-ui/core/ButtonBase';

@@ -1,4 +1,4 @@
-import React, { Fragment } from 'react';
+import { Fragment } from 'react';
 import { makeStyles, Theme } from '@material-ui/core/styles';
 import Divider from '@material-ui/core/Divider';
 import LinearProgress from '@material-ui/core/LinearProgress';
@@ -66,13 +66,13 @@ const useStyles = makeStyles((theme: Theme) => {
     loopLabel: {
       width: iconSize + 'rem',
       height: '1rem',
-      fontSize: '0.625rem',
+      fontSize: '0.625em',
       color: theme.palette.secondary.dark,
     },
     patternLabel: {
       width: iconSize + 'rem',
       height: '1rem',
-      fontSize: '0.625rem',
+      fontSize: '0.625em',
       color: theme.palette.primary.dark,
     },
     imgRoot: {
@@ -88,7 +88,7 @@ const useStyles = makeStyles((theme: Theme) => {
       marginLeft: theme.spacing(1),
     },
     name: {
-      fontSize: '1.1rem',
+      fontSize: '1.1em',
     },
     castTime: {
       color: theme.palette.grey[600],

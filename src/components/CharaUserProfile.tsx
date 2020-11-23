@@ -1,4 +1,4 @@
-import React, { useRef, useState, useCallback } from 'react';
+import { useRef, useState, useCallback } from 'react';
 import { makeStyles, Theme, StyleRules } from '@material-ui/core/styles';
 import ButtonBase from '@material-ui/core/ButtonBase';
 import Popover from '@material-ui/core/Popover';
@@ -6,7 +6,7 @@ import ComboSlider, { marks } from './ComboSlider';
 import Rarities from './Rarities';
 import Infobar from './Infobar';
 import { getCharaID, getRankPoint } from '../DBHelper/helper';
-import maxUserProfile from '../DBHelper/maxUserProfile';
+import maxUserProfile, { nullID } from '../DBHelper/maxUserProfile';
 import { PCRStoreValue } from '../db';
 import Big from 'big.js';
 import clsx from 'clsx';
@@ -105,6 +105,7 @@ const useStyles = makeStyles((theme: Theme) => {
 
 interface CharaUserProfileProps {
   maxRarity?: number;
+  uniqueEquipID?: number;
   userProfile?: PCRStoreValue<'user_profile'>;
   onChangeRarity?: (rarity: number) => void;
   onChangeLevel?: (level: number) => void;
@@ -115,7 +116,8 @@ interface CharaUserProfileProps {
 
 function CharaUserProfile(props: CharaUserProfileProps) {
   const {
-    maxRarity = maxUserProfile.rarity,
+    maxRarity = 5,
+    uniqueEquipID = nullID,
     userProfile = maxUserProfile,
     onChangeRarity,
     onChangeLevel,
@@ -172,7 +174,7 @@ function CharaUserProfile(props: CharaUserProfileProps) {
         <span>{love_level}</span>
       </ComboSlider>
 
-      {userProfile.unique_equip_id !== maxUserProfile.unique_equip_id && (
+      {uniqueEquipID !== nullID && (
         <ComboSlider
           classes={{ button: clsx(styles.unique, userProfile.unique_enhance_level < 1 && styles.disableUnique) }}
           marks={marks.unique}

@@ -256,15 +256,21 @@ function getStr(obj) {
   const hasRecord = obj.records.length > 0;
 
   let create = '';
-  // create += `      if (db.objectStoreNames.contains('${obj.tableName}'))\n`;
-  // create += `        db.deleteObjectStore('${obj.tableName}');\n`;
-  create += `      ${hasIndex ? 'const ' + lName + 'Store = ' : ''}db.createObjectStore('${obj.tableName}', {\n`;
-  create += `        keyPath: ${getName(obj.primaryKeys)},\n`;
-  create += '      });\n';
+  const requireCheck = ['image_data', 'chara_data', 'user_profile'].indexOf(obj.tableName) > -1;
+  const space = requireCheck ? '  ' : '';
+  if (requireCheck) {
+    create += `      if (!db.objectStoreNames.contains('${obj.tableName}')) {\n`;
+  }
+  create += `${space}      ${hasIndex ? 'const ' + lName + 'Store = ' : ''}db.createObjectStore('${obj.tableName}', {\n`;
+  create += `${space}        keyPath: ${getName(obj.primaryKeys)},\n`;
+  create += `${space}      });\n`;
   if (hasIndex) {
     obj.indexes.forEach(index => {
-      create += `      ${lName}Store.createIndex('${index.indexName}', ${getName(index.indexFields)});\n`;
+      create += `${space}      ${lName}Store.createIndex('${index.indexName}', ${getName(index.indexFields)});\n`;
     });
+  }
+  if (requireCheck) {
+    create += '      }\n';
   }
   create += '\n';
 
@@ -279,14 +285,8 @@ function getStr(obj) {
   }
 
   let schema = '';
-  // console.log(obj.primaryKeys, obj.fields);
   schema += `  '${obj.tableName}': {\n`;
   schema += `    key: ${getType(obj.primaryKeys, obj.fields)};\n`;
-  // str += '    value: {\n';
-  // sqlContentObject.fields.forEach(field => {
-  //   str += `      '${field.fieldName}': ${field.fieldType};\n`;
-  // });
-  // str += '    };\n';
   schema += `    value: ${uName};\n`;
   if (obj.indexes.length > 0) {
     schema += '    indexes: {\n';
@@ -382,20 +382,8 @@ function writeData(objs, dataDir) {
   let dtsStr = "import { DBSchema } from 'idb';\n";
   dtsStr += "import { PCRDB } from '..';\n";
   dtsStr += importDTSStr + '\n';
-  // dtsStr += 'export interface ImageData {\n'
-  // dtsStr += '  url: string;\n';
-  // dtsStr += '  data_url: string;\n';
-  // dtsStr += '  last_visit: Date;\n';
-  // dtsStr += '}\n\n';
   dtsStr += `export interface PCRDBSchema extends DBSchema {\n`;
   dtsStr += schemaStr;
-  // dtsStr += "  'image_data': {\n";
-  // dtsStr += '    key: string;\n';
-  // dtsStr += '    value: ImageData;\n';
-  // dtsStr += '    indexes: {\n';
-  // dtsStr += "      'image_data_0_last_visit': Date;\n";
-  // dtsStr += '    };\n';
-  // dtsStr += '  };\n';
   dtsStr += '}\n\n';
   dtsStr += "export async function insert(db: PCRDB, onProgress?: (count: number, total: number) => void): Promise<void>;\n";
   fs.writeFileSync(dataDir + 'index.d.ts', dtsStr, { encoding: 'utf-8' });
@@ -411,7 +399,8 @@ function writeData(objs, dataDir) {
  */
 function writeOpenDB(dbDir, dbName, dbVersion, createStr) {
   let jsStr = '// @ts-check\n';
-  jsStr += "import { openDB } from 'idb';\n\n";
+  jsStr += "import { openDB } from 'idb';\n";
+  jsStr += "import localValue from '../localValue';\n\n";
   jsStr += '/**\n';
   jsStr += " * @param {{ onInserted?: (db: import('.').PCRDB) => void; onProgress?: (count: number, total: number) => void; }} [options] \n";
   jsStr += " * @returns {Promise<import('.').PCRDB>}\n";
@@ -419,12 +408,17 @@ function writeOpenDB(dbDir, dbName, dbVersion, createStr) {
   jsStr += 'export default function openPCRDB(options = {}) {\n';
   jsStr += `  return openDB('${dbName}', ${dbVersion}, {\n`;
   jsStr += '    upgrade(db, oldVersion, newVersion, transaction) {\n';
-  jsStr += '      if (newVersion !== oldVersion) Array.from(db.objectStoreNames).forEach(name => db.deleteObjectStore(name));\n\n';
+  jsStr += '      if (newVersion !== oldVersion) {\n';
+  jsStr += '        if (db.objectStoreNames.length > 0) {\n';
+  jsStr += '          localValue.app.requireUpdate.set(true);\n';
+  jsStr += '          Array.from(db.objectStoreNames).forEach(name => {\n';
+  jsStr += "            if (['image_data', 'chara_data', 'user_profile'].indexOf(name) < 0) {\n";
+  jsStr += '              db.deleteObjectStore(name);\n';
+  jsStr += '            }\n';
+  jsStr += '          });\n';
+  jsStr += '        }\n';
+  jsStr += '      }\n\n';
   jsStr += createStr;
-  // jsStr += "      const imageDataStore = db.createObjectStore('image_data', {\n";
-  // jsStr += "        keyPath: 'url',\n";
-  // jsStr += '      });\n';
-  // jsStr += "      imageDataStore.createIndex('image_data_0_last_visit', 'last_visit');\n\n"
   jsStr += '      transaction.done.then(async () => {\n';
   jsStr += `        const data = await import(/* webpackChunkName: "data" */ './data');\n`;
   jsStr += '        await data.insert(db, options.onProgress);\n';
@@ -472,15 +466,29 @@ function writeMaxUserProfile(sqlFilesDir, sqlRawObjs) {
   const uniqueEquipmentEnhanceDataObj = getSqlRawObj(uniqueEquipmentEnhanceDataRaw);
   const maxUniqueEnhanceLevel = uniqueEquipmentEnhanceDataObj.records.length + 1;
 
+  let maxArea;
+  const questDataObj = sqlRawObjs.find(obj => obj.tableName === 'quest_data');
+  for (let record of questDataObj.records) {
+    const areaIDIdx = record.indexOf('area_id');
+    const areaID = record[areaIDIdx + 1];
+    if (parseInt(areaID) > 12000) break;
+    maxArea = areaID.substr(-2);
+  }
+
+  const unitProfileObj = sqlRawObjs.find(obj => obj.tableName === 'unit_profile');
+  const maxChara = unitProfileObj.records.length;
+
   let str = '';
   str += "import { PCRStoreValue } from '../db';\n\n";
+  str += 'export const nullID = 999999;\n\n';
+  str += `export const maxArea = ${parseInt(maxArea)};\n\n`;
+  str += `export const maxChara = ${maxChara};\n\n`;
   str += "const maxUserProfile: PCRStoreValue<'user_profile'> = {\n";
   str += "  user_name: 'MAX',\n";
   str += '  unit_id: undefined as any,\n';
   str += `  level: ${maxLevel},\n`;
   str += '  rarity: 5,\n';
   str += `  promotion_level: ${maxPromotionLevel},\n`;
-  str += '  unique_equip_id: 999999,\n';
   str += `  unique_enhance_level: ${maxUniqueEnhanceLevel},\n`;
   str += `  skill_enhance_status: { ub: ${maxLevel}, 1: ${maxLevel}, 2: ${maxLevel}, ex: ${maxLevel} },\n`;
   str += '  equip_enhance_status: {},\n';
@@ -713,6 +721,7 @@ function main() {
       { fieldName: 'actual_name', fieldType: 'string' },
       { fieldName: 'min_rarity', fieldType: 'number' },
       { fieldName: 'max_rarity', fieldType: 'number' },
+      { fieldName: 'unique_equip_id', fieldType: 'number' },
       { fieldName: 'search_area_width', fieldType: 'number' },
       { fieldName: 'atk_type', fieldType: 'number' },
       { fieldName: 'normal_atk_cast_time', fieldType: 'number' },
@@ -731,7 +740,6 @@ function main() {
       { fieldName: 'level', fieldType: 'number' },
       { fieldName: 'rarity', fieldType: 'number' },
       { fieldName: 'promotion_level', fieldType: 'number' },
-      { fieldName: 'unique_equip_id', fieldType: 'number' },
       { fieldName: 'unique_enhance_level', fieldType: 'number' },
       { fieldName: 'skill_enhance_status', fieldType: "Record</*skill*/'ub' | 1 | 2 | 'ex', /*enhance_level*/number>" },
       { fieldName: 'equip_enhance_status', fieldType: 'Record</*0-5*/number, /*enhance_level*/number>' },

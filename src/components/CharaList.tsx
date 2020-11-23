@@ -1,4 +1,4 @@
-import React, { Fragment, useState, useCallback, useContext, useMemo } from 'react';
+import { Fragment, useState, useCallback, useContext, useMemo } from 'react';
 import { makeStyles, Theme } from '@material-ui/core/styles';
 import IconButton from '@material-ui/core/IconButton';
 import Popover from '@material-ui/core/Popover';
@@ -15,6 +15,7 @@ import CharaListItem from './CharaListItem';
 import { DBHelperContext, CharaListContext } from './Contexts';
 import { getPositionText } from '../DBHelper/helper';
 import { CharaBaseData } from '../DBHelper';
+import maxUserProfile, { maxChara } from '../DBHelper/maxUserProfile';
 import localValue from '../localValue';
 import clsx from 'clsx';
 
@@ -95,7 +96,7 @@ function CharaList() {
     });
   }, []);
 
-  const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(null);
+  const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
 
   const handleOpen = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(e.currentTarget);
@@ -152,7 +153,7 @@ function CharaList() {
   }, []);
 
   const nullableCharaList: (CharaBaseData | undefined)[] = useMemo(() => {
-    return (charaList && filterCharaList(charaList, order, sort, atkTypeArr, positionArr)) || Array.from(Array(130));
+    return (charaList && filterCharaList(charaList, order, sort, atkTypeArr, positionArr)) || Array.from(Array(maxChara));
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [charaList, sort, order, atkTypeArr.length, positionArr.length]);
 
@@ -242,7 +243,7 @@ function CharaList() {
             unitID={base && base.charaData.unit_id}
             rarity={base ? base.userProfile.rarity : 6}
             maxRarity={base ? base.charaData.max_rarity : 6}
-            promotionLevel={base ? base.userProfile.promotion_level : 18}
+            promotionLevel={base ? base.userProfile.promotion_level : maxUserProfile.promotion_level}
             position={base ? base.getPosition() : 1}
             hasUnique={base ? base.userProfile.unique_enhance_level > 0 : true}
           />

@@ -1,4 +1,3 @@
-import React from 'react';
 import { makeStyles, Theme } from '@material-ui/core/styles';
 import IconButton from '@material-ui/core/IconButton';
 import ExpandLess from '@material-ui/icons/ExpandLess';
@@ -39,7 +38,7 @@ const useStyles = makeStyles((theme: Theme) => {
       marginLeft: theme.spacing(1),
     },
     unitName: {
-      fontSize: '1.1rem',
+      fontSize: '1.1em',
       color: theme.palette.primary.dark,
     },
     actualName: {

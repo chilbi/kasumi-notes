@@ -1,4 +1,3 @@
-import React from 'react';
 import { makeStyles, Theme } from '@material-ui/core/styles';
 import SkeletonImage from './SkeletonImage';
 import { getPublicImageURL, getValidID } from '../DBHelper/helper';
@@ -18,7 +17,7 @@ const useStyles = makeStyles((theme: Theme) => {
         left: '50%',
         display: 'inline-block',
         color: theme.palette.grey[800],
-        fontSize: '2.5rem',
+        fontSize: '2.5em',
         transform: 'translate(-50%, -50%)',
       },
     },

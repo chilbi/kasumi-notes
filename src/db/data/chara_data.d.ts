@@ -5,6 +5,7 @@ export interface CharaData {
   actual_name: string;
   min_rarity: number;
   max_rarity: number;
+  unique_equip_id: number;
   search_area_width: number;
   atk_type: number;
   normal_atk_cast_time: number;

@@ -1,4 +1,4 @@
-import React, { useContext, useState, useCallback } from 'react';
+import { useContext, useState, useCallback } from 'react';
 import { makeStyles, Theme, StyleRules } from '@material-ui/core/styles';
 import Checkbox from '@material-ui/core/Checkbox';
 import Radio from '@material-ui/core/Radio';
@@ -142,7 +142,7 @@ const useStyles = makeStyles((theme: Theme) => {
       flexDirection: 'column',
     },
     uniqueName: {
-      fontSize: '1.1rem',
+      fontSize: '1.1em',
       color: theme.palette.primary.dark,
     },
     uniqueLevel: {

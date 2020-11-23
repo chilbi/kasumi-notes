@@ -1,4 +1,3 @@
-import React from 'react';
 import Infobar from './Infobar';
 import { Property, PropertyKeys } from '../DBHelper/property';
 import Big from 'big.js';

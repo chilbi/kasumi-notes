@@ -399,8 +399,7 @@ function writeData(objs, dataDir) {
  */
 function writeOpenDB(dbDir, dbName, dbVersion, createStr) {
   let jsStr = '// @ts-check\n';
-  jsStr += "import { openDB } from 'idb';\n";
-  jsStr += "import localValue from '../localValue';\n\n";
+  jsStr += "import { openDB } from 'idb';\n\n";
   jsStr += '/**\n';
   jsStr += " * @param {{ onInserted?: (db: import('.').PCRDB) => void; onProgress?: (count: number, total: number) => void; }} [options] \n";
   jsStr += " * @returns {Promise<import('.').PCRDB>}\n";
@@ -410,7 +409,6 @@ function writeOpenDB(dbDir, dbName, dbVersion, createStr) {
   jsStr += '    upgrade(db, oldVersion, newVersion, transaction) {\n';
   jsStr += '      if (newVersion !== oldVersion) {\n';
   jsStr += '        if (db.objectStoreNames.length > 0) {\n';
-  jsStr += '          localValue.app.requireUpdate.set(true);\n';
   jsStr += '          Array.from(db.objectStoreNames).forEach(name => {\n';
   jsStr += "            if (['image_data', 'chara_data', 'user_profile'].indexOf(name) < 0) {\n";
   jsStr += '              db.deleteObjectStore(name);\n';

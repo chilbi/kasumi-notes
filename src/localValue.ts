@@ -32,8 +32,8 @@ const localValue = (() => {
         fontSize: 14,
         fontWeight: 400,
       }),
-      requireUpdate: createlocalValue('APP_REQUIRE_UPDATE_KEY', false),
       user: createlocalValue('APP_USER_KEY', maxUserProfile.user_name),
+      avatars: createlocalValue('APP_AVATAR_KEY', { [maxUserProfile.user_name]: '101431' }),
     },
     charaList: {
       variant: createlocalValue<'icon_unit' | 'unit_plate'>('CHARA_LIST_VARIANT_KEY', 'unit_plate'),

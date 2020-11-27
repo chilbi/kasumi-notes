@@ -20,7 +20,7 @@ const useStyles = makeStyles((theme: Theme) => {
     scalage = 0.375,
     iconSize = Big(128).times(scalage).div(rem),
     borderRadius = Big(12).times(scalage).div(rem),
-    descObjSize = Big(1.5);
+    descObjSize = Big(1.25);
 
   return {
     root: {
@@ -139,7 +139,7 @@ const useStyles = makeStyles((theme: Theme) => {
     },
     formula: {
       padding: theme.spacing(0, 1),
-      borderBottom: '2px dotted ' + theme.palette.primary.main,
+      color: theme.palette.primary.main,
       wordBreak: 'inherit',
     },
     absolute0: {

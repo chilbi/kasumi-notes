@@ -1,6 +1,5 @@
 // @ts-check
 import { openDB } from 'idb';
-import localValue from '../localValue';
 
 /**
  * @param {{ onInserted?: (db: import('.').PCRDB) => void; onProgress?: (count: number, total: number) => void; }} [options] 
@@ -11,7 +10,6 @@ export default function openPCRDB(options = {}) {
     upgrade(db, oldVersion, newVersion, transaction) {
       if (newVersion !== oldVersion) {
         if (db.objectStoreNames.length > 0) {
-          localValue.app.requireUpdate.set(true);
           Array.from(db.objectStoreNames).forEach(name => {
             if (['image_data', 'chara_data', 'user_profile'].indexOf(name) < 0) {
               db.deleteObjectStore(name);

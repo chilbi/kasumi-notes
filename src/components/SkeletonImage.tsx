@@ -4,7 +4,7 @@ import clsx from 'clsx';
 
 const useStyles = makeStyles((theme: Theme) => ({
   root: {
-    backgroundColor: theme.palette.grey[300], // '#ecebf0',
+    backgroundColor: theme.palette.grey[300],
   },
   imgBox: {
     position: 'relative',

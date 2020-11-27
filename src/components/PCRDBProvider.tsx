@@ -34,11 +34,7 @@ function PCRDBConnect(props: PCRDBConnectProps) {
       onInserted: (db) => {
         setStatus(1);
         setProgress(Big(1));
-        if (localValue.app.requireUpdate.get()) {
-          onRequireUpdate(db);
-        } else {
-          onSuccess(db);
-        }
+        onRequireUpdate(db);
       },
       onProgress: (count, total) => {
         setProgress(prevState => Big(count).div(total).plus(prevState));
@@ -93,11 +89,7 @@ function PCRDBProvider(props: PCRDBProviderProps) {
   const handleRequireUpdate = useCallback((db: PCRDB) => {
     dbRef.current = db;
     const dbHelper = new DBHelper(db);
-    dbHelper.update().then(success => {
-      if (success) {
-        setDBHelper(dbHelper);
-      }
-    });
+    dbHelper.update().then(() => setDBHelper(dbHelper));
   }, []);
 
   useEffect(() => {

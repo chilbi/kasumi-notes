@@ -68,7 +68,7 @@ const useStyles = makeStyles((theme: Theme) => {
       textAlign: 'center',
     },
     selected: {
-      backgroundColor: alpha(theme.palette.secondary.main, 0.35),
+      backgroundColor: alpha(theme.palette.warning.main, 0.35),
     },
   };
 });

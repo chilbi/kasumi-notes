@@ -135,7 +135,8 @@ const useStyles = makeStyles((theme: Theme) => {
     button: {
       alignSelf: 'center',
       margin: theme.spacing(0, 1, 0, 'auto'),
-      width: '6rem',
+      width: '5em',
+      textTransform: 'none',
     },
     types: {
       display: 'flex',
@@ -143,7 +144,7 @@ const useStyles = makeStyles((theme: Theme) => {
       margin: '0 0 0 auto',
     },
     selected: {
-      backgroundColor: alpha(theme.palette.secondary.main, 0.35),
+      backgroundColor: alpha(theme.palette.warning.main, 0.35),
     },
     expandless: {
       alignSelf: 'center',
@@ -364,7 +365,7 @@ function EquipDetail() {
             }
             {uniqueEquipData && (
               <DebouncedSlider
-                classes={{ root: styles.control }}
+                className={styles.control}
                 orientation="horizontal"
                 valueLabelDisplay="auto"
                 marks={marks.unique}
@@ -428,7 +429,7 @@ function EquipDetail() {
                         setLevel(lv);
                       }}
                     >
-                      {'LEVEL' + item[0]}
+                      {'Lv' + item[0]}
                     </Button>
                   </div>
                 );

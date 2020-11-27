@@ -1,4 +1,4 @@
-import { useContext, useCallback } from 'react';
+import { useContext, useState, useCallback, useEffect } from 'react';
 import { makeStyles, Theme } from '@material-ui/core/styles';
 import FormControl from '@material-ui/core/FormControl';
 import FormLabel from '@material-ui/core/FormLabel';
@@ -7,14 +7,19 @@ import RadioGroup from '@material-ui/core/RadioGroup';
 import Radio from '@material-ui/core/Radio';
 import Slider from '@material-ui/core/Slider';
 import Divider from '@material-ui/core/Divider';
-// import Chip from '@material-ui/core/Chip';
-// import IconButton from '@material-ui/core/IconButton';
-// import Add from '@material-ui/icons/Add';
-// import Face from '@material-ui/icons/Face';
-// import Clear from '@material-ui/icons/Clear';
-// import Done from '@material-ui/icons/Done';
+import Dialog from '@material-ui/core/Dialog';
+import Chip from '@material-ui/core/Chip';
+import IconButton from '@material-ui/core/IconButton';
+import Avatar from '@material-ui/core/Avatar';
+import Add from '@material-ui/icons/Add';
+import Done from '@material-ui/icons/Done';
+import Edit from '@material-ui/icons/Edit';
+import Clear from '@material-ui/icons/Clear';
 import Header from './Header';
-import { PCRThemeContext } from './Contexts';
+import UserForm from './UserForm';
+import { PCRThemeContext, DBHelperContext } from './Contexts';
+import { getPublicImageURL } from '../DBHelper/helper';
+import maxUserProfile from '../DBHelper/maxUserProfile';
 import localValue from '../localValue';
 import clsx from 'clsx';
 
@@ -54,15 +59,15 @@ const useStyles = makeStyles((theme: Theme) => {
     form: {
       margin: theme.spacing(4, 0),
     },
-    // chips: {
-    //   display: 'flex',
-    //   flexWrap: 'wrap',
-    //   justifyContent: 'start',
-    //   alignItems: 'center',
-    // },
-    // chip: {
-    //   margin: theme.spacing(2),
-    // },
+    chips: {
+      display: 'flex',
+      flexWrap: 'wrap',
+      justifyContent: 'start',
+      alignItems: 'center',
+    },
+    chip: {
+      margin: theme.spacing(2),
+    },
     sliderBox: {
       display: 'flex',
       alignItems: 'center',
@@ -95,20 +100,26 @@ const useStyles = makeStyles((theme: Theme) => {
 function Menu() {
   const styles = useStyles();
   const [pcrTheme, setPCRTheme] = useContext(PCRThemeContext);
-  // const dbHelper = useContext(DBHelperContext);
+  const dbHelper = useContext(DBHelperContext);
 
-  // const [currUser, setCurrUser] = useState(() => localValue.app.user.get());
+  const [open, setOpen] = useState(false);
+  const handleOpen = useCallback(() => setOpen(true), []);
+  const handleClose = useCallback(() => setOpen(false), []);
 
-  // const [allUser, setAllUser] = useState(() => [currUser]);
+  const [currUser, setCurrUser] = useState(() => localValue.app.user.get());
 
-  // useEffect(() => {
-  //   if (dbHelper) dbHelper.getAllUser().then(value => {
-  //     setAllUser(value);
-  //   });
-  // }, [dbHelper]);
+  const [avatars, setAvatars] = useState(() => localValue.app.avatars.get());
 
-  // const handleChangeUser = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-  // }, []);
+  const [allUser, setAllUser] = useState(() => [currUser]);
+
+  useEffect(() => {
+    if (dbHelper) dbHelper.getAllUser().then(value => {
+      setAllUser(value);
+    });
+  }, [dbHelper]);
+
+  const handleChangeUser = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+  }, []);
 
   const handleChangeFontFamily = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setPCRTheme(prev => {
@@ -151,7 +162,7 @@ function Menu() {
         <h6 className={styles.subtitle}>メニュー</h6>
       </Header>
       <div className={styles.forms}>
-        {/* <FormControl className={styles.form} component="fieldset" color="secondary" fullWidth>
+        <FormControl className={styles.form} component="fieldset" color="secondary" fullWidth>
           <FormLabel component="legend">ユーザー</FormLabel>
           <div className={styles.chips}>
             {allUser.map(user => {
@@ -161,21 +172,23 @@ function Menu() {
                   key={user}
                   className={styles.chip}
                   variant="outlined"
-                  color="secondary"
+                  color={isCurr ? 'secondary' : 'default'}
+                  avatar={<Avatar src={getPublicImageURL('icon_unit', avatars[user])} />}
                   label={user}
-                  icon={<Face />}
-                  deleteIcon={isCurr ? <Done /> : <Clear />}
+                  deleteIcon={user === maxUserProfile.user_name ? <Done /> : isCurr ? <Edit /> : <Clear />}
                   onDelete={() => {}}
                 />
               );
             })}
-            <IconButton color="secondary">
-              <Add />
-            </IconButton>
+            {currUser === maxUserProfile.user_name && (
+              <IconButton color="secondary" onClick={handleOpen}>
+                <Add />
+              </IconButton>
+            )}
           </div>
         </FormControl>
 
-        <Divider /> */}
+        <Divider />
         <FormControl className={styles.form} component="fieldset" color="secondary" fullWidth>
           <FormLabel component="legend">フォント</FormLabel>
           <RadioGroup
@@ -186,6 +199,7 @@ function Menu() {
           >
             <FormControlLabel labelPlacement="start" value="Marugo" label="丸ゴ" control={<Radio />} />
             <FormControlLabel labelPlacement="start" value="Hanzi Pen" label="漢字筆" control={<Radio />} />
+            <FormControlLabel labelPlacement="start" value="" label="無" control={<Radio />} />
           </RadioGroup>
         </FormControl>
 
@@ -232,6 +246,14 @@ function Menu() {
           </div>
         </FormControl>
       </div>
+      <Dialog open={open} fullWidth onClose={handleClose}>
+        <UserForm
+          title="新規ユーザー"
+          allUser={allUser}
+          onCancel={handleClose}
+          onSubmit={() => {}}
+        />
+      </Dialog>
     </>
   );
 }

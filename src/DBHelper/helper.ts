@@ -55,11 +55,11 @@ export function getRankPoint(p: number) {
   }
 }
 
-export function getSubID(unitID: number): string {
+export function getSubID(unitID: number | string): string {
   return unitID.toString().substr(0, 4);
 }
 
-export function getCharaID(unitID: number) {
+export function getCharaID(unitID: number | string) {
   return parseInt(getSubID(unitID));
 }
 
@@ -70,7 +70,7 @@ export function getParamsUnitID(unitID: string): number {
   return parseInt(unitID);
 }
 
-export function getValidID(unitID: number, rarity = 3, min = 1, last = 1): string {
+export function getValidID(unitID: number | string, rarity = 3, min = 1, last = 1): string {
   rarity = rarity < 3 ? min : rarity > 3 && rarity < 6 ? 3 : rarity;
   return getSubID(unitID) + rarity + last;
 }

@@ -14,6 +14,7 @@ import CheckCircle from '@material-ui/icons/CheckCircle';
 import HighlightOff from '@material-ui/icons/HighlightOff';
 import Edit from '@material-ui/icons/Edit';
 import Add from '@material-ui/icons/Add';
+import UserProfileForm from './UserProfileForm';
 import SkeletonImage from './SkeletonImage';
 import Infobar from './Infobar';
 import { getPublicImageURL, getValidID } from '../DBHelper/helper';
@@ -82,8 +83,9 @@ function UserProfilesForm(props: UserProfilesFormProps) {
   const styles = useStyles();
 
   const [open, setOpen] = useState(false);
-  const handleOpen = useCallback(() => setOpen(true), []);
   const handleClose = useCallback(() => setOpen(false), []);
+
+  const [openData, setOpenData] = useState<{ list: 'lock' | 'unlock', target: 'set' | number }>({ list: 'lock', target: 0 });
 
   const [selectUnlockList, setSelectUnlockList] = useState<Set<number> | null>(null);
   const [selectLockList, setSelectLockList] = useState<Set<number> | null>(null);
@@ -136,19 +138,27 @@ function UserProfilesForm(props: UserProfilesFormProps) {
     setSelectLockList(new Set(lockList.map(item => item.unit_id)));
   }, [lockList]);
 
-  const handleLockItemClick = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
-    const mode = e.currentTarget.getAttribute('data-mode')!;
-    const unitID = parseInt(e.currentTarget.getAttribute('data-unit-id')!);
-    if (mode === 'select') {
-      setSelectLockList(prev => {
+  const handleClick = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
+    const target = e.currentTarget.getAttribute('data-target')!;
+    const list = e.currentTarget.getAttribute('data-list')! as 'lock' | 'unlock';
+    const clickMode = e.currentTarget.getAttribute('data-click')!;
+    if (clickMode === 'select') {
+      const unitID = parseInt(target);
+      const setSelectList = list === 'lock' ? setSelectLockList : setSelectUnlockList;
+      setSelectList(prev => {
         if (prev!.has(unitID)) prev!.delete(unitID);
         else prev!.add(unitID);
         return (new Set(prev));
       });
     } else {
-      
+      setOpenData({ list, target: target === 'set' ? target : parseInt(target), });
+      setOpen(true);
     }
   }, []);
+
+  const charaData = useMemo(() => {
+    return openData.target !== 'set' && charaList ? charaList.find(value => value.charaData.unit_id === openData.target) : undefined;
+  }, [charaList, openData.target]);
 
   return (
     <>
@@ -177,23 +187,48 @@ function UserProfilesForm(props: UserProfilesFormProps) {
                 <IconButton
                   className={styles.editButton}
                   size="small" color="secondary"
+                  data-target="set"
+                  data-list="lock"
+                  data-click="open"
                   disabled={selectLockList.size < 1}
-                  onClick={handleOpen}
+                  onClick={handleClick}
                 >
                   <Add />
                 </IconButton>
               </>
             )}
-            <IconButton size="small" color="secondary" disabled={selectLockList === null || selectLockList.size === 0} onClick={handleClearSelectLockList}>
+            <IconButton
+              size="small"
+              color="secondary"
+              disabled={selectLockList === null || selectLockList.size === 0}
+              onClick={handleClearSelectLockList}
+            >
               <HighlightOff />
             </IconButton>
-            <IconButton size="small" color="secondary" disabled={selectLockList === null || selectLockList.size === 0 || selectLockList.size === lockCount} onClick={handleInvertSelectLockList}>
+            <IconButton
+              size="small"
+              color="secondary"
+              disabled={selectLockList === null || selectLockList.size === 0 || selectLockList.size === lockCount}
+              onClick={handleInvertSelectLockList}
+            >
               <CheckCircle />
             </IconButton>
-            <IconButton size="small" color="secondary" disabled={selectLockList === null || selectLockList.size === lockCount} onClick={handleAllSelectLockList}>
+            <IconButton
+              size="small"
+              color="secondary"
+              disabled={selectLockList === null || selectLockList.size === lockCount}
+              onClick={handleAllSelectLockList}
+            >
               <CheckCircleOutline />
             </IconButton>
-            <IconButton size="small" color={ selectLockList ? 'secondary' : 'default' } onClick={handleToggleLockListSelectable}>
+            <IconButton
+              size="small"
+              color={selectLockList ? 'secondary' : 'default'}
+              {...(selectLockList && selectLockList.size > 0
+                ? { 'data-target': 'set', 'data-list': 'lock', 'data-click': 'open', onClick: handleClick }
+                : { onClick: handleToggleLockListSelectable }
+              )}
+            >
               <DoneAll />
             </IconButton>
           </div>
@@ -204,9 +239,10 @@ function UserProfilesForm(props: UserProfilesFormProps) {
                 <ButtonBase
                   key={unitID}
                   className={clsx(styles.item, selectLockList && selectLockList.has(unitID) && styles.selected)}
-                  data-unit-id={unitID}
-                  data-mode={selectLockList ? 'select' : 'click'}
-                  onClick={handleLockItemClick}
+                  data-target={unitID}
+                  data-list="lock"
+                  data-click={selectLockList ? 'select' : 'open'}
+                  onClick={handleClick}
                 >
                   <SkeletonImage
                     classes={{ root: styles.iconRoot }}
@@ -225,12 +261,15 @@ function UserProfilesForm(props: UserProfilesFormProps) {
       </DialogActions>
       
       <Dialog open={open} fullWidth onClose={handleClose}>
-        <DialogTitle className={styles.title}></DialogTitle>
-        <DialogContent className={styles.content}></DialogContent>
-        <DialogActions>
-          <Button variant="outlined" color="primary" onClick={handleClose}>キャンセル</Button>
-          <Button variant="outlined" color="primary">OK</Button>
-        </DialogActions>
+        {open && (
+          <UserProfileForm
+            count={openData.target === 'set' ? (openData.list === 'lock' ? selectLockList!.size : selectUnlockList!.size) : undefined}
+            charaBaseData={charaData}
+            userProfile={openData.target === 'set' ? undefined : ((openData.list === 'lock' ? lockList : unlockList).find(value => value.unit_id === openData.target))}
+            onCancel={handleClose}
+            onSubmit={() => {}}
+          />
+        )}
       </Dialog>
     </>
   );

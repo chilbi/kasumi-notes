@@ -67,8 +67,8 @@ const useStyles = makeStyles((theme: Theme) => {
       backgroundPosition: 'left center',
     },
     promotion: {
-      margin: '0',
-      padding: '0',
+      margin: 0,
+      padding: 0,
       width: '3rem',
       height: h,
       lineHeight: 'inherit',
@@ -79,6 +79,7 @@ const useStyles = makeStyles((theme: Theme) => {
     list: {
       margin: 0,
       padding: 0,
+      lineHeight: h,
       listStyle: 'none',
       '&>li': {
         display: 'block',
@@ -127,15 +128,21 @@ function CharaUserProfile(props: CharaUserProfileProps) {
   } = props;
   const styles = useStyles();
 
-  const promotionLevelHeightRef = useRef(0);
-  const [promotionLevelEl, setPromotionLevelEl] = useState<Element | null>(null);
-  const handleOpenPromotionLevel = useCallback((e: React.MouseEvent) => {
-    promotionLevelHeightRef.current = e.currentTarget.clientHeight + 2;
-    setPromotionLevelEl(e.currentTarget);
+  const heightRef = useRef(0);
+  const [anchorEl, setAnchorEl] = useState<Element | null>(null);
+  const handleOpen = useCallback((e: React.MouseEvent) => {
+    heightRef.current = e.currentTarget.clientHeight + 2;
+    setAnchorEl(e.currentTarget);
   }, []);
-  const handleClosePromotionLevel = useCallback(() => {
-    setPromotionLevelEl(null);
+  const handleClose = useCallback(() => {
+    setAnchorEl(null);
   }, []);
+
+  const handleChangePromotion = useCallback((e: React.MouseEvent<HTMLLIElement>) => {
+    const value = parseInt(e.currentTarget.getAttribute('data-value')!);
+    if (onChangePromotion && userProfile.promotion_level !== value) onChangePromotion(value);
+    setAnchorEl(null);
+  }, [onChangePromotion, userProfile.promotion_level]);
 
   let chara_id = 0;
   let love_level = 1;
@@ -192,18 +199,18 @@ function CharaUserProfile(props: CharaUserProfileProps) {
           styles.promotion,
           styles['bg' + getRankPoint(userProfile.promotion_level) as keyof typeof styles]
         )}
-        onClick={handleOpenPromotionLevel}
+        onClick={handleOpen}
       >
         {'R' + userProfile.promotion_level}
       </ButtonBase>
       <Popover
         classes={{ paper: styles.promotionPaper }}
-        open={!!promotionLevelEl}
-        anchorEl={promotionLevelEl}
+        open={!!anchorEl}
+        anchorEl={anchorEl}
         marginThreshold={0}
         anchorOrigin={{ horizontal: 0, vertical: 0 }}
-        transformOrigin={{ horizontal: 0, vertical: promotionLevelHeightRef.current * (maxUserProfile.promotion_level - userProfile.promotion_level) }}
-        onClose={handleClosePromotionLevel}
+        transformOrigin={{ horizontal: 0, vertical: heightRef.current * (maxUserProfile.promotion_level - userProfile.promotion_level) }}
+        onClose={handleClose}
       >
         <ul className={styles.list}>
           {Array.from(Array(maxUserProfile.promotion_level)).map((_, i) => {
@@ -212,14 +219,9 @@ function CharaUserProfile(props: CharaUserProfileProps) {
               <ButtonBase
                 key={promotionLevel}
                 component="li"
-                className={clsx(
-                  styles.promotion,
-                  styles['bg' + getRankPoint(promotionLevel) as keyof typeof styles]
-                )}
-                onClick={onChangePromotion && (() => {
-                  if (userProfile.promotion_level !== promotionLevel) onChangePromotion(promotionLevel);
-                  setPromotionLevelEl(null);
-                })}
+                className={clsx(styles.promotion, styles['bg' + getRankPoint(promotionLevel) as keyof typeof styles])}
+                data-value={promotionLevel}
+                onClick={handleChangePromotion}
               >
                 {'R' + promotionLevel}
               </ButtonBase>

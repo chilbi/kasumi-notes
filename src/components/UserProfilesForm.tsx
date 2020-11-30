@@ -229,7 +229,7 @@ function UserProfilesForm(props: UserProfilesFormProps) {
           if (isLock) {
             return prev.sort((a, b) => a.unit_id - b.unit_id);
           } else {
-            return { ...prev };
+            return [...prev];
           }
         });
         if (isLock) setSelectLockList(new Set());
@@ -258,7 +258,7 @@ function UserProfilesForm(props: UserProfilesFormProps) {
             if (openData.list === 'lock') {
               return prev.sort((a, b) => a.unit_id - b.unit_id);
             } else {
-              return { ...prev };
+              return [...prev];
             }
           });
           if (isLock) setSelectLockList(new Set());
@@ -277,7 +277,7 @@ function UserProfilesForm(props: UserProfilesFormProps) {
             return prev.sort((a, b) => a.unit_id - b.unit_id);
           } else {
             prev[prev.findIndex(value => unitID === value.unit_id)] = userProfile;
-            return { ...prev };
+            return [...prev];
           }
         });
         setOpen(false);
@@ -290,7 +290,7 @@ function UserProfilesForm(props: UserProfilesFormProps) {
               return prev.sort((a, b) => a.unit_id - b.unit_id);
             } else {
               prev[prev.findIndex(value => unitID === value.unit_id)] = userProfile;
-              return { ...prev };
+              return [...prev];
             }
           });
           setOpen(false);

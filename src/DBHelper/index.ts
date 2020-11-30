@@ -187,7 +187,11 @@ class DBHelper extends ImageData {
     });
   }
 
-  protected getPromotions(unit_id: number): Promise<PromotionData[]> {
+  getPromotionData(unit_id: number, promotion_level: number): Promise<PromotionData> {
+    return getPromotionData(this.db, unit_id, promotion_level);
+  }
+
+  getPromotions(unit_id: number): Promise<PromotionData[]> {
     const promiseArr: Promise<PromotionData>[] = [];
     let promotionLevel = maxUserProfile.promotion_level;
     while(promotionLevel > 0) {
@@ -197,7 +201,7 @@ class DBHelper extends ImageData {
     return Promise.all(promiseArr);
   }
 
-  protected setAllCharaData(allCharaData: PCRStoreValue<'chara_data'>[]): Promise<void> {
+  setAllCharaData(allCharaData: PCRStoreValue<'chara_data'>[]): Promise<void> {
     const tx = this.db.transaction('chara_data', 'readwrite');
     const promiseArr = [];
     allCharaData.forEach(record => promiseArr.push(tx.store.put(record)));
@@ -205,12 +209,20 @@ class DBHelper extends ImageData {
     return Promise.all(promiseArr) as any;
   }
 
-  protected setUserProfiles(userProfiles: PCRStoreValue<'user_profile'>[]): Promise<void> {
+  setUserProfiles(userProfiles: PCRStoreValue<'user_profile'>[]): Promise<void> {
     const tx = this.db.transaction('user_profile', 'readwrite');
     const promiseArr = [];
     userProfiles.forEach(record => promiseArr.push(tx.store.put(record)));
     promiseArr.push(tx.done);
     return Promise.all(promiseArr) as any;
+  }
+
+  async deleteUserProfiles(userName: string): Promise<void> {
+    const store = this.db.transaction('user_profile', 'readwrite').store;
+    const keys = await store.index('user_profile_0_user_name').getAllKeys(userName);
+    const promiseArr: Promise<void>[] = [];
+    keys.forEach(key => promiseArr.push(store.delete(key)));
+    await Promise.all(promiseArr);
   }
 }
 

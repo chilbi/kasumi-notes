@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useContext, useState, useMemo, useCallback } from 'react';
 import { makeStyles, alpha, Theme } from '@material-ui/core/styles';
 import Dialog from '@material-ui/core/Dialog';
 import DialogTitle from '@material-ui/core/DialogTitle';
@@ -7,22 +7,49 @@ import DialogActions from '@material-ui/core/DialogActions';
 import ButtonBase from '@material-ui/core/ButtonBase';
 import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
-import Clear from '@material-ui/icons/Clear';
 import DoneAll from '@material-ui/icons/DoneAll';
 import CheckCircleOutline from '@material-ui/icons/CheckCircleOutline';
 import CheckCircle from '@material-ui/icons/CheckCircle';
 import HighlightOff from '@material-ui/icons/HighlightOff';
 import Edit from '@material-ui/icons/Edit';
 import Add from '@material-ui/icons/Add';
-import UserProfileForm from './UserProfileForm';
+import UserProfileForm, { EditData } from './UserProfileForm';
 import SkeletonImage from './SkeletonImage';
 import Infobar from './Infobar';
-import { getPublicImageURL, getValidID } from '../DBHelper/helper';
-import { maxChara } from '../DBHelper/maxUserProfile';
+import { DBHelperContext } from './Contexts';
+import { deepClone, getPublicImageURL, getCharaID, getValidID } from '../DBHelper/helper';
+import maxUserProfile, { maxChara, nullID } from '../DBHelper/maxUserProfile';
+import { PromotionData } from '../DBHelper/promotion';
 import { CharaBaseData } from '../DBHelper';
 import { PCRStoreValue } from '../db';
 import Big from 'big.js';
 import clsx from 'clsx';
+
+function getUserProfile(baseData: CharaBaseData, promotionData: PromotionData | undefined, editData: EditData) {
+  const maxRarity = baseData.charaData.max_rarity;
+  const userProfile = deepClone(baseData.userProfile);
+  const equip_enhance_status: Record<number, number> = {};
+  const slots = [0, 2, 4, 5, 3, 1];
+  let i = editData.slotCount;
+  while (i-- > 0) {
+    const slot = slots.pop()!;
+    if (promotionData) {
+      const equipData = promotionData.equip_slots[slot];
+      if (equipData) {
+        equip_enhance_status[slot] = equipData.max_enhance_level;
+      }
+    } else {
+      equip_enhance_status[slot] = 5;
+    }
+  }
+  userProfile.level = editData.level;
+  userProfile.rarity = Math.min(editData.rarity, maxRarity);
+  userProfile.love_level_status[getCharaID(userProfile.unit_id)] = Math.min(editData.loveLevel, maxRarity === 6 ? 12 : 8);
+  userProfile.unique_enhance_level = baseData.charaData.unique_equip_id === nullID ? 0 : editData.uniqueLevel;
+  userProfile.promotion_level = editData.promotionLevel;
+  userProfile.equip_enhance_status = equip_enhance_status;
+  return userProfile;
+}
 
 const useStyles = makeStyles((theme: Theme) => {
   const
@@ -37,6 +64,7 @@ const useStyles = makeStyles((theme: Theme) => {
     },
     content: {
       padding: theme.spacing(2),
+      overflowX: 'hidden',
     },
     list: {
       display: 'flex',
@@ -72,40 +100,35 @@ const useStyles = makeStyles((theme: Theme) => {
 });
 
 interface UserProfilesFormProps {
-  charaList?: CharaBaseData[];
+  allChara?: CharaBaseData[];
   userProfiles: PCRStoreValue<'user_profile'>[];
   onCancel: () => void;
-  onSubmit: () => void;
+  onSubmit: (userProfiles: PCRStoreValue<'user_profile'>[]) => void;
 }
 
 function UserProfilesForm(props: UserProfilesFormProps) {
-  const { charaList, onCancel, onSubmit } = props;
+  const { allChara, onCancel, onSubmit } = props;
   const styles = useStyles();
+  const dbHelper = useContext(DBHelperContext);
 
   const [open, setOpen] = useState(false);
   const handleClose = useCallback(() => setOpen(false), []);
 
   const [openData, setOpenData] = useState<{ list: 'lock' | 'unlock', target: 'set' | number }>({ list: 'lock', target: 0 });
 
-  const [selectUnlockList, setSelectUnlockList] = useState<Set<number> | null>(null);
-  const [selectLockList, setSelectLockList] = useState<Set<number> | null>(null);
-
-  const handleToggleLockListSelectable = useCallback(() => setSelectLockList(prev => prev === null ? new Set() : null), []);
-  const handleToggleUnlockListSelectable = useCallback(() => setSelectUnlockList(prev => prev === null ? new Set() : null), []);
-
-  const [unlockList, setUnkockList] = useState(props.userProfiles);
+  const [unlockList, setUnlockList] = useState(props.userProfiles);
 
   const unLockCount = unlockList.length;
 
   const lockList = useMemo(() => {
     const list: PCRStoreValue<'user_profile'>[] = [];
-    if (!charaList) return list;
-    const count = charaList.length;
+    if (!allChara) return list;
+    const count = allChara.length;
     const lockCount = count - unLockCount;
     let _count = 0;
     let _lockCount = 0;
     while (_count < count && _lockCount < lockCount) {
-      const item = charaList[_count];
+      const item = allChara[_count];
       if (!unlockList.some(value => value.unit_id === item.userProfile.unit_id)) {
         list.push(item.userProfile);
         _lockCount++;
@@ -114,29 +137,57 @@ function UserProfilesForm(props: UserProfilesFormProps) {
     }
     return list;
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [charaList, unLockCount]);
+  }, [allChara, unLockCount]);
 
-  const lockCount = lockList.length;
+  const [selectLockList, setSelectLockList] = useState<Set<number> | null>(null);
 
-  const handleClearSelectLockList = useCallback(() => {
-    setSelectLockList(new Set());
+  const [selectUnlockList, setSelectUnlockList] = useState<Set<number> | null>(null);
+
+  const handleClearSelectList = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
+    const setSelectList = e.currentTarget.getAttribute('data-list') === 'lock' ? setSelectLockList : setSelectUnlockList;
+    setSelectList(new Set());
   }, []);
 
-  const handleInvertSelectLockList = useCallback(() => {
-    setSelectLockList(prev => {
+  const handleInvertSelectList = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
+    let
+      list: PCRStoreValue<'user_profile'>[],
+      setSelectList;
+    if (e.currentTarget.getAttribute('data-list') === 'lock') {
+      list = lockList;
+      setSelectList = setSelectLockList;
+    } else {
+      list = unlockList;
+      setSelectList = setSelectUnlockList;
+    }
+    setSelectList(prev => {
       const newValue = new Set<number>();
-      for (let item of lockList) {
+      for (let item of list) {
         if (!prev!.has(item.unit_id)) {
           newValue.add(item.unit_id);
         }
       }
       return newValue;
     });
-  }, [lockList]);
+  }, [lockList, unlockList]);
 
-  const handleAllSelectLockList = useCallback(() => {
-    setSelectLockList(new Set(lockList.map(item => item.unit_id)));
-  }, [lockList]);
+  const handleAllSelectList = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
+    let
+      list: PCRStoreValue<'user_profile'>[],
+      setSelectList;
+    if (e.currentTarget.getAttribute('data-list') === 'lock') {
+      list = lockList;
+      setSelectList = setSelectLockList;
+    } else {
+      list = unlockList;
+      setSelectList = setSelectUnlockList;
+    }
+    setSelectList(new Set(list.map(item => item.unit_id)));
+  }, [lockList, unlockList]);
+
+  const handleToggleListSelectable = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
+    const setSelectList = e.currentTarget.getAttribute('data-list') === 'lock' ? setSelectLockList : setSelectUnlockList;
+    setSelectList(prev => prev === null ? new Set() : null);
+  }, []);
 
   const handleClick = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
     const target = e.currentTarget.getAttribute('data-target')!;
@@ -157,107 +208,234 @@ function UserProfilesForm(props: UserProfilesFormProps) {
   }, []);
 
   const charaData = useMemo(() => {
-    return openData.target !== 'set' && charaList ? charaList.find(value => value.charaData.unit_id === openData.target) : undefined;
-  }, [charaList, openData.target]);
+    return openData.target !== 'set' && allChara ? allChara.find(value => value.charaData.unit_id === openData.target) : undefined;
+  }, [allChara, openData.target]);
+
+  const handleSubmitUserProfile = (editData: EditData) => {
+    const allSlotLevel5 = editData.promotionLevel > 8 && editData.promotionLevel < maxUserProfile.promotion_level;
+    const isLock = openData.list === 'lock';
+    if (openData.target === 'set') {
+      if (allSlotLevel5) {
+        setUnlockList(prev => {
+          for (let unitID of selectLockList!) {
+            const baseData = allChara!.find(value => unitID === value.userProfile.unit_id)!;
+            const userProfile = getUserProfile(baseData, undefined, editData);
+            if (isLock) {
+              prev.push(userProfile);
+            } else {
+              prev[prev.findIndex(value => unitID === value.unit_id)] = userProfile;
+            }
+          }
+          if (isLock) {
+            return prev.sort((a, b) => a.unit_id - b.unit_id);
+          } else {
+            return { ...prev };
+          }
+        });
+        if (isLock) setSelectLockList(new Set());
+        else setSelectUnlockList(new Set());
+        setOpen(false);
+      } else {
+        const promiseArr = [];
+        for (let unitID of selectLockList!) {
+          promiseArr.push(dbHelper!.getPromotionData(unitID, editData.promotionLevel).then(promotionData => {
+            return {
+              baseData: allChara!.find(value => unitID === value.userProfile.unit_id)!,
+              promotionData,
+            };
+          }));
+        }
+        Promise.all(promiseArr).then(arr => {
+          setUnlockList(prev => {
+            for (let item of arr) {
+              const userProfile = getUserProfile(item.baseData, item.promotionData, editData);
+              if (openData.list === 'lock') {
+                prev.push(userProfile);
+              } else {
+                prev[prev.findIndex(value => userProfile.unit_id === value.unit_id)] = userProfile;
+              }
+            }
+            if (openData.list === 'lock') {
+              return prev.sort((a, b) => a.unit_id - b.unit_id);
+            } else {
+              return { ...prev };
+            }
+          });
+          if (isLock) setSelectLockList(new Set());
+          else setSelectUnlockList(new Set());
+          setOpen(false);
+        });
+      }
+    } else {
+      const unitID = openData.target;
+      const baseData = allChara!.find(value => unitID === value.userProfile.unit_id)!;
+      if (allSlotLevel5) {
+        setUnlockList(prev => {
+          const userProfile = getUserProfile(baseData, undefined, editData);
+          if (openData.list === 'lock') {
+            prev.push(userProfile);
+            return prev.sort((a, b) => a.unit_id - b.unit_id);
+          } else {
+            prev[prev.findIndex(value => unitID === value.unit_id)] = userProfile;
+            return { ...prev };
+          }
+        });
+        setOpen(false);
+      } else {
+        dbHelper!.getPromotionData(unitID, editData.promotionLevel).then(promotionData => {
+          setUnlockList(prev => {
+            const userProfile = getUserProfile(baseData, promotionData, editData);
+            if (openData.list === 'lock') {
+              prev.push(userProfile);
+              return prev.sort((a, b) => a.unit_id - b.unit_id);
+            } else {
+              prev[prev.findIndex(value => unitID === value.unit_id)] = userProfile;
+              return { ...prev };
+            }
+          });
+          setOpen(false);
+        });
+      }
+    }
+  };
+
+  const handleSubmit = () => {
+    for (let item of unlockList) {
+      const charaID = getCharaID(item.unit_id);
+      for (let key in item.love_level_status) {
+        const _charaID = parseInt(key);
+        if (charaID !== _charaID) {
+          const _item = unlockList.find(value => getCharaID(value.unit_id) === _charaID);
+          item.love_level_status[_charaID] = _item ? _item.love_level_status[_charaID] : 1;
+        }
+      }
+    }
+    onSubmit(unlockList);
+  };
+
+  const getList = (dataList: 'lock' | 'unlock') => {
+    let
+      label: string,
+      list: PCRStoreValue<'user_profile'>[],
+      selectList: Set<number> | null,
+      listCount: number,
+      selectCount = 0,
+      isNullSelect = true,
+      isZeroSelect = true,
+      isAllSelect = false,
+      iconEl: JSX.Element;
+
+    if (dataList === 'lock') {
+      label = '未解放キャラ';
+      list = lockList;
+      selectList = selectLockList;
+      iconEl = <Add />;
+    } else {
+      label = '解放キャラ';
+      list = unlockList;
+      selectList = selectUnlockList;
+      iconEl = <Edit />;
+    }
+    listCount = list.length;
+    if (selectList) {
+      isNullSelect = false;
+      selectCount = selectList.size;
+    } else {
+      isNullSelect = true;
+    }
+    isZeroSelect = selectCount === 0;
+    isAllSelect = selectCount === listCount;
+    return (
+      <div>
+        <Infobar className={styles.infobar} label={label} value={`${listCount}/${maxChara}`} />
+        <div className={styles.toolbar}>
+          {selectList && (
+            <>
+              <span>{selectCount}/{listCount}</span>
+              <IconButton
+                className={styles.editButton}
+                size="small" color="secondary"
+                data-target="set"
+                data-list={dataList}
+                data-click="open"
+                disabled={isZeroSelect}
+                onClick={handleClick}
+              >
+                {iconEl}
+              </IconButton>
+            </>
+          )}
+          <IconButton
+            size="small"
+            color="secondary"
+            data-list={dataList}
+            disabled={isNullSelect || isZeroSelect}
+            onClick={handleClearSelectList}
+          >
+            <HighlightOff />
+          </IconButton>
+          <IconButton
+            size="small"
+            color="secondary"
+            data-list={dataList}
+            disabled={isNullSelect || isZeroSelect || isAllSelect}
+            onClick={handleInvertSelectList}
+          >
+            <CheckCircle />
+          </IconButton>
+          <IconButton
+            size="small"
+            color="secondary"
+            data-list={dataList}
+            disabled={isNullSelect || isAllSelect}
+            onClick={handleAllSelectList}
+          >
+            <CheckCircleOutline />
+          </IconButton>
+          <IconButton
+            size="small"
+            data-list={dataList}
+            color={isNullSelect ? 'default' : 'secondary'}
+            onClick={handleToggleListSelectable}
+          >
+            <DoneAll />
+          </IconButton>
+        </div>
+        <div className={styles.list}>
+          {list.map(userProfile => {
+            const unitID = userProfile.unit_id;
+            return (
+              <ButtonBase
+                key={unitID}
+                className={clsx(styles.item, selectList && selectList.has(unitID) && styles.selected)}
+                data-target={unitID}
+                data-list={dataList}
+                data-click={isNullSelect ? 'open' : 'select'}
+                onClick={handleClick}
+              >
+                <SkeletonImage
+                  classes={{ root: styles.iconRoot }}
+                  src={getPublicImageURL('icon_unit', getValidID(unitID, userProfile.rarity))}
+                  save
+                />
+              </ButtonBase>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
 
   return (
     <>
       <DialogTitle className={styles.title}>編集チャラ</DialogTitle>
       <DialogContent className={styles.content}>
-        <div>
-          <Infobar className={styles.infobar} label="解放キャラ" value={`${unLockCount}/${maxChara}`} />
-          <div className={styles.list}>
-            {unlockList.map(userProfile => (
-              <ButtonBase className={styles.item} key={userProfile.unit_id}>
-                <SkeletonImage
-                  classes={{ root: styles.iconRoot }}
-                  src={getPublicImageURL('icon_unit', getValidID(userProfile.unit_id, userProfile.rarity))}
-                  save
-                />
-              </ButtonBase>
-            ))}
-          </div>
-        </div>
-        <div>
-          <Infobar className={styles.infobar} label="未解放キャラ" value={`${lockCount}/${maxChara}`} />
-          <div className={styles.toolbar}>
-            {selectLockList && (
-              <>
-                <span>{selectLockList.size}/{lockCount}</span>
-                <IconButton
-                  className={styles.editButton}
-                  size="small" color="secondary"
-                  data-target="set"
-                  data-list="lock"
-                  data-click="open"
-                  disabled={selectLockList.size < 1}
-                  onClick={handleClick}
-                >
-                  <Add />
-                </IconButton>
-              </>
-            )}
-            <IconButton
-              size="small"
-              color="secondary"
-              disabled={selectLockList === null || selectLockList.size === 0}
-              onClick={handleClearSelectLockList}
-            >
-              <HighlightOff />
-            </IconButton>
-            <IconButton
-              size="small"
-              color="secondary"
-              disabled={selectLockList === null || selectLockList.size === 0 || selectLockList.size === lockCount}
-              onClick={handleInvertSelectLockList}
-            >
-              <CheckCircle />
-            </IconButton>
-            <IconButton
-              size="small"
-              color="secondary"
-              disabled={selectLockList === null || selectLockList.size === lockCount}
-              onClick={handleAllSelectLockList}
-            >
-              <CheckCircleOutline />
-            </IconButton>
-            <IconButton
-              size="small"
-              color={selectLockList ? 'secondary' : 'default'}
-              {...(selectLockList && selectLockList.size > 0
-                ? { 'data-target': 'set', 'data-list': 'lock', 'data-click': 'open', onClick: handleClick }
-                : { onClick: handleToggleLockListSelectable }
-              )}
-            >
-              <DoneAll />
-            </IconButton>
-          </div>
-          <div className={styles.list}>
-            {lockList.map(userProfile => {
-              const unitID = userProfile.unit_id;
-              return (
-                <ButtonBase
-                  key={unitID}
-                  className={clsx(styles.item, selectLockList && selectLockList.has(unitID) && styles.selected)}
-                  data-target={unitID}
-                  data-list="lock"
-                  data-click={selectLockList ? 'select' : 'open'}
-                  onClick={handleClick}
-                >
-                  <SkeletonImage
-                    classes={{ root: styles.iconRoot }}
-                    src={getPublicImageURL('icon_unit', getValidID(unitID, userProfile.rarity))}
-                    save
-                  />
-                </ButtonBase>
-              );
-            })}
-          </div>
-        </div>
+        {getList('unlock')}
+        {getList('lock')}
       </DialogContent>
       <DialogActions>
         <Button variant="outlined" color="primary" onClick={onCancel}>キャンセル</Button>
-        <Button variant="outlined" color="primary" disabled={true} onClick={onSubmit}>OK</Button>
+        <Button variant="outlined" color="primary" disabled={unLockCount < 1} onClick={handleSubmit}>OK</Button>
       </DialogActions>
       
       <Dialog open={open} fullWidth onClose={handleClose}>
@@ -267,7 +445,16 @@ function UserProfilesForm(props: UserProfilesFormProps) {
             charaBaseData={charaData}
             userProfile={openData.target === 'set' ? undefined : ((openData.list === 'lock' ? lockList : unlockList).find(value => value.unit_id === openData.target))}
             onCancel={handleClose}
-            onSubmit={() => {}}
+            onSubmit={handleSubmitUserProfile}
+            onDelete={openData.list === 'lock' ? undefined : (() => {
+              if (openData.target === 'set') {
+                setUnlockList(prev => prev.filter(value => !selectUnlockList!.has(value.unit_id)));
+                setSelectUnlockList(new Set());
+              } else {
+                setUnlockList(prev => prev.filter(value => value.unit_id !== openData.target));
+              }
+              setOpen(false);
+            })}
           />
         )}
       </Dialog>

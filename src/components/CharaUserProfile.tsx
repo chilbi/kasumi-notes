@@ -73,7 +73,6 @@ const useStyles = makeStyles((theme: Theme) => {
       height: h,
       lineHeight: 'inherit',
       textAlign: 'center',
-      borderRadius: r,
       color: '#fff',
     },
     list: {
@@ -82,16 +81,20 @@ const useStyles = makeStyles((theme: Theme) => {
       lineHeight: h,
       listStyle: 'none',
       '&>li': {
-        display: 'block',
-        borderRadius: 0,
-        marginTop: 2,
+        display: 'flex',
+        margin: '2px 0 0 0',
+        padding: 0,
+        height: h,
+        lineHeight: 'inherit',
       },
       '&>li:first-child': {
-        marginTop: 0,
+        margin: 0,
       },
     },
-    promotionPaper: {
+    radius: {
       borderRadius: r,
+    },
+    promotionPaper: {
       overflow: 'hidden',
     },
     disableUnique: {
@@ -138,7 +141,7 @@ function CharaUserProfile(props: CharaUserProfileProps) {
     setAnchorEl(null);
   }, []);
 
-  const handleChangePromotion = useCallback((e: React.MouseEvent<HTMLLIElement>) => {
+  const handleChangePromotion = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
     const value = parseInt(e.currentTarget.getAttribute('data-value')!);
     if (onChangePromotion && userProfile.promotion_level !== value) onChangePromotion(value);
     setAnchorEl(null);
@@ -197,6 +200,7 @@ function CharaUserProfile(props: CharaUserProfileProps) {
       <ButtonBase
         className={clsx(
           styles.promotion,
+          styles.radius,
           styles['bg' + getRankPoint(userProfile.promotion_level) as keyof typeof styles]
         )}
         onClick={handleOpen}
@@ -204,7 +208,7 @@ function CharaUserProfile(props: CharaUserProfileProps) {
         {'R' + userProfile.promotion_level}
       </ButtonBase>
       <Popover
-        classes={{ paper: styles.promotionPaper }}
+        classes={{ paper: clsx(styles.promotionPaper, styles.radius) }}
         open={!!anchorEl}
         anchorEl={anchorEl}
         marginThreshold={0}
@@ -216,16 +220,16 @@ function CharaUserProfile(props: CharaUserProfileProps) {
           {Array.from(Array(maxUserProfile.promotion_level)).map((_, i) => {
             const promotionLevel = maxUserProfile.promotion_level - i;
             return (
-              <ButtonBase
-                key={promotionLevel}
-                component="li"
-                className={clsx(styles.promotion, styles['bg' + getRankPoint(promotionLevel) as keyof typeof styles])}
-                data-value={promotionLevel}
-                onClick={handleChangePromotion}
-              >
-                {'R' + promotionLevel}
-              </ButtonBase>
-            )
+              <li key={promotionLevel}>
+                <ButtonBase
+                  className={clsx(styles.promotion, styles['bg' + getRankPoint(promotionLevel) as keyof typeof styles])}
+                  data-value={promotionLevel}
+                  onClick={handleChangePromotion}
+                >
+                  {'R' + promotionLevel}
+                </ButtonBase>
+              </li>
+            );
           })}
         </ul>
       </Popover>

@@ -42,6 +42,9 @@ const useStyles = makeStyles((theme: Theme) => {
       color: '#fff',
       backgroundColor: theme.palette.primary.main,
     },
+    content: {
+      overflowX: 'hidden',
+    },
     line: {
       display: 'flex',
       alignItems: 'center',
@@ -53,7 +56,7 @@ const useStyles = makeStyles((theme: Theme) => {
     },
     label: {
       display: 'block',
-      flex: '0 0 4rem',
+      flex: '0 0 4.5rem',
       height: h,
       lineHeight: 'inherit',
       overflow: 'hidden',
@@ -83,7 +86,6 @@ const useStyles = makeStyles((theme: Theme) => {
       height: h,
       lineHeight: 'inherit',
       borderRadius: r,
-      color: '#fff',
     },
     promotion: {
       margin: 0,
@@ -91,11 +93,13 @@ const useStyles = makeStyles((theme: Theme) => {
       width: '2.5rem',
       lineHeight: 'inherit',
       textAlign: 'center',
+      color: '#fff',
     },
     sepa: {
       margin: theme.spacing(0, 0.5),
       padding: 0,
       lineHeight: 'inherit',
+      color: '#fff',
     },
     slot: {
       margin: 0,
@@ -103,18 +107,22 @@ const useStyles = makeStyles((theme: Theme) => {
       width: '1.5rem',
       lineHeight: 'inherit',
       textAlign: 'center',
+      color: '#fff',
     },
     list: {
       margin: 0,
       padding: 0,
+      lineHeight: h,
       listStyle: 'none',
       '&>li': {
-        display: 'block',
-        marginTop: 2,
+        display: 'flex',
+        margin: '2px 0 0 0',
+        padding: 0,
         height: h,
+        lineHeight: 'inherit',
       },
       '&>li:first-child': {
-        marginTop: 0,
+        margin: 0,
       },
     },
     popover: {
@@ -127,7 +135,7 @@ const useStyles = makeStyles((theme: Theme) => {
   };
 });
 
-interface EditData {
+export interface EditData {
   level: number;
   rarity: number;
   loveLevel: number;
@@ -141,11 +149,12 @@ interface UserProfileFormProps {
   charaBaseData?: CharaBaseData;
   userProfile?: PCRStoreValue<'user_profile'>;
   onCancel: () => void;
-  onSubmit: (data: EditData) => void;
+  onSubmit: (editData: EditData) => void;
+  onDelete?: () => void;
 }
 
 function UserProfileForm(props: UserProfileFormProps) {
-  const { count, charaBaseData, userProfile = maxUserProfile, onCancel, onSubmit } = props;
+  const { count, charaBaseData, userProfile = maxUserProfile, onCancel, onSubmit, onDelete } = props;
   const styles = useStyles();
 
   const maxRarity = charaBaseData ? charaBaseData.charaData.max_rarity : 6;
@@ -163,12 +172,12 @@ function UserProfileForm(props: UserProfileFormProps) {
   const handleChangeLevel = useCallback((value: number) => setLevel(value), []);
   const handleChangeLove = useCallback((value: number) => setLoveLevel(value), []);
   const handleChangeUnique = useCallback((value: number) => setUniqueLevel(value), []);
-  const handleChangePromotion = useCallback((e: React.MouseEvent<HTMLLIElement>) => {
+  const handleChangePromotion = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
     const value = parseInt(e.currentTarget.getAttribute('data-value')!);
     setPromotionLevel(value);
     setAnchorEl(null);
   }, []);
-  const handleChangeSlot = useCallback((e: React.MouseEvent<HTMLLIElement>) => {
+  const handleChangeSlot = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
     const value = parseInt(e.currentTarget.getAttribute('data-value')!);
     setSlotCount(value);
     setAnchorEl(null);
@@ -193,56 +202,52 @@ function UserProfileForm(props: UserProfileFormProps) {
     items = Array.from(Array(maxUserProfile.promotion_level)).map((_, i) => {
       const _promotionLevel = maxUserProfile.promotion_level - i;
       return (
-        <ButtonBase
-          key={_promotionLevel}
-          component="li"
-          className={clsx(
-            styles.promotion,
-            styles['bg' + getRankPoint(_promotionLevel) as keyof typeof styles]
-          )}
-          data-value={_promotionLevel}
-          onClick={handleChangePromotion}
-        >
-          {'R' + _promotionLevel}
-        </ButtonBase>
-      )
+        <li key={_promotionLevel}>
+          <ButtonBase
+            className={clsx(styles.promotion, styles['bg' + getRankPoint(_promotionLevel) as keyof typeof styles])}
+            data-value={_promotionLevel}
+            onClick={handleChangePromotion}
+          >
+            {'R' + _promotionLevel}
+          </ButtonBase>
+        </li>
+      );
     });
   } else {
     vertical = heightRef.current * (6 - slotCount);
-    items = Array.from(Array(6)).map((_, i) => {
+    items = Array.from(Array(7)).map((_, i) => {
       const _slotCount = 6 - i;
       return (
-        <ButtonBase
-          key={_slotCount}
-          component="li"
-          className={clsx(
-            styles.slot,
-            styles['bg' + getRankPoint(promotionLevel) as keyof typeof styles]
-          )}
-          data-value={_slotCount}
-          onClick={handleChangeSlot}
-        >
-          {_slotCount}
-        </ButtonBase>
-      )
+        <li key={_slotCount}>
+          <ButtonBase
+            className={clsx(styles.slot, styles['bg' + getRankPoint(promotionLevel) as keyof typeof styles])}
+            data-value={_slotCount}
+            onClick={handleChangeSlot}
+          >
+            {_slotCount}
+          </ButtonBase>
+        </li>
+      );
     });
   }
 
-  const handleSubmit = () => onSubmit({
-    level,
-    rarity,
-    loveLevel,
-    uniqueLevel,
-    promotionLevel,
-    slotCount,
-  });
+  const handleSubmit = () => {
+    onSubmit({
+      level,
+      rarity,
+      loveLevel,
+      uniqueLevel,
+      promotionLevel,
+      slotCount,
+    });
+  };
 
   return (
     <>
       <DialogTitle className={styles.title}>
-        {`${charaBaseData ? charaBaseData.charaData.unit_name + 'を' : `選択中の${count}キャラをまとめて`}編集`}
+        {(charaBaseData ? charaBaseData.charaData.unit_name + 'を' : `選択中の${count}キャラをまとめて`) + (onDelete ? '編集' : '追加')}
       </DialogTitle>
-      <DialogContent>
+      <DialogContent className={styles.content}>
         <div className={styles.line}>
           <Rarities maxRarity={maxRarity} rarity={rarity} onChange={handleChangeRarity} />
           <div className={clsx(styles.promotionBox, styles['bg' + getRankPoint(promotionLevel) as keyof typeof styles])}>
@@ -269,7 +274,7 @@ function UserProfileForm(props: UserProfileFormProps) {
           </Popover>
         </div>
         <div className={styles.line}>
-          <Infobar classes={{ root: clsx(styles.label, styles.level) }} size="small" label="Lv" value={level} />
+          <Infobar classes={{ root: clsx(styles.label, styles.level) }} label="Lv" value={level} />
           <DebouncedSlider
             className={styles.slider}
             orientation="horizontal"
@@ -312,6 +317,7 @@ function UserProfileForm(props: UserProfileFormProps) {
       </DialogContent>
       <DialogActions>
         <Button variant="outlined" color="primary" onClick={onCancel}>キャンセル</Button>
+        {onDelete && < Button variant="outlined" color="primary" onClick={onDelete}>削除</Button>}
         <Button variant="outlined" color="primary" onClick={handleSubmit}>OK</Button>
       </DialogActions>
     </>

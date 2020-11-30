@@ -1,4 +1,4 @@
-import { useContext, useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { makeStyles, Theme } from '@material-ui/core/styles';
 import Dialog from '@material-ui/core/Dialog';
 import DialogTitle from '@material-ui/core/DialogTitle';
@@ -12,9 +12,9 @@ import Badge from '@material-ui/core/Badge';
 import Edit from '@material-ui/icons/Edit';
 import Infobar from './Infobar';
 import UserProfilesForm from './UserProfilesForm';
-import { CharaListContext } from './Contexts';
 import { getPublicImageURL, getValidID } from '../DBHelper/helper';
 import { maxChara } from '../DBHelper/maxUserProfile';
+import { CharaBaseData } from '../DBHelper';
 import { PCRStoreValue } from '../db';
 import clsx from 'clsx';
 
@@ -26,6 +26,7 @@ const useStyles = makeStyles((theme: Theme) => {
     },
     content: {
       padding: theme.spacing(2),
+      overflowX: 'hidden',
     },
     avatars: {
       display: 'flex',
@@ -44,16 +45,19 @@ const useStyles = makeStyles((theme: Theme) => {
 });
 
 interface UserFormProps {
-  title: string;
+  user?: string;
+  avatar?: string;
+  userProfiles?: PCRStoreValue<'user_profile'>[];
+  currUser: string;
   allUser: string[];
+  allChara: CharaBaseData[];
   onCancel: () => void;
-  onSubmit: () => void;
+  onSubmit: (currUser: string, user: string, avatar: string, userProfiles: PCRStoreValue<'user_profile'>[]) => void;
 }
 
 function UserForm(props: UserFormProps) {
-  const { title, allUser, onCancel, onSubmit } = props;
+  const { currUser, allUser, allChara, onCancel, onSubmit } = props;
   const styles = useStyles();
-  const [charaList] = useContext(CharaListContext);
 
   const [openAvatars, setOpenAvatars] = useState(false);
   const handleOpen = useCallback(() => setOpenAvatars(true), []);
@@ -63,11 +67,11 @@ function UserForm(props: UserFormProps) {
   const handleOpenCharaList = useCallback(() => setOpenCharaList(true), []);
   const handleCloseCharaList = useCallback(() => setOpenCharaList(false), []);
 
-  const [userName, setUserName] = useState('');
+  const [user, setUser] = useState(props.user ? props.user : '');
 
-  const [avatars, setAvatars] = useState<string[]>([]);
+  const [avatars, setAvatars] = useState(props.avatar ? [props.avatar] : []);
 
-  const [userProfiles, setUserProfiles] = useState<PCRStoreValue<'user_profile'>[]>([]);
+  const [userProfiles, setUserProfiles] = useState(props.userProfiles ? props.userProfiles : []);
 
   const handleChangeAvatars = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
     const unitID = e.currentTarget.getAttribute('data-unit-id')!;
@@ -95,18 +99,31 @@ function UserForm(props: UserFormProps) {
   }, []);
 
   const handleChangeUserName = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setUserName(e.target.value);
+    setUser(e.target.value);
   }, []);
+
+  const handleSubmitUserProfiles = useCallback((userProfiles: PCRStoreValue<'user_profile'>[]) => {
+    setUserProfiles(userProfiles);
+    setOpenCharaList(false);
+  }, []);
+
+  const handleSubmit = () => {
+    const _userProfiles = userProfiles.map(item => {
+      item.user_name = user;
+      return item;
+    });
+    onSubmit(currUser, user, avatars[0], _userProfiles);
+  };
 
   const charaCount = userProfiles.length;
   const charaCountError = charaCount === 0;
-  const userAvatarError = avatars.length < 0;
-  const userNameError = userName === '' || allUser.indexOf(userName) > -1;
+  const userAvatarError = avatars.length < 1;
+  const userNameError = user === '' || (props.user === undefined && allUser.indexOf(user) > -1);
   const [userAvatar, ...otherAvatar] = avatars;
 
   return (
     <>
-      <DialogTitle className={styles.title}>{title}</DialogTitle>
+      <DialogTitle className={styles.title}>{props.user ? props.user : '新規ユーザー'}</DialogTitle>
       <DialogContent className={styles.content}>
         <div className={styles.avatars}>
           <IconButton onClick={handleOpen} color="primary">
@@ -127,7 +144,7 @@ function UserForm(props: UserFormProps) {
           fullWidth
           color="primary"
           error={userNameError}
-          value={userName}
+          value={user}
           onChange={handleChangeUserName}
         />
 
@@ -145,13 +162,13 @@ function UserForm(props: UserFormProps) {
       </DialogContent>
       <DialogActions>
         <Button variant="outlined" color="primary" onClick={onCancel}>キャンセル</Button>
-        <Button variant="outlined" color="primary" disabled={charaCountError || userAvatarError || userNameError} onClick={onSubmit}>OK</Button>
+        <Button variant="outlined" color="primary" disabled={charaCountError || userAvatarError || userNameError} onClick={handleSubmit}>OK</Button>
       </DialogActions>
 
       <Dialog open={openAvatars} fullWidth onClose={handleCloseAvatars}>
-        {openAvatars && charaList && (
+        {openAvatars && (
           <DialogContent className={clsx(styles.content, styles.avatars)}>
-            {charaList.map(item => {
+            {allChara.map(item => {
               const unit_id = item.charaData.unit_id;
               const rarity = item.userProfile.rarity;
               const max_rarity = item.charaData.max_rarity;
@@ -168,10 +185,10 @@ function UserForm(props: UserFormProps) {
       <Dialog open={openCharaList} fullWidth onClose={handleCloseCharaList}>
         {openCharaList && (
           <UserProfilesForm
-            charaList={charaList}
+            allChara={allChara}
             userProfiles={userProfiles}
             onCancel={handleCloseCharaList}
-            onSubmit={() => {}}
+            onSubmit={handleSubmitUserProfiles}
           />
         )}
       </Dialog>

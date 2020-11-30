@@ -17,11 +17,13 @@ import Edit from '@material-ui/icons/Edit';
 import Clear from '@material-ui/icons/Clear';
 import Header from './Header';
 import UserForm from './UserForm';
-import { PCRThemeContext, DBHelperContext } from './Contexts';
-import { getPublicImageURL } from '../DBHelper/helper';
+import { PCRThemeContext, DBHelperContext, CharaListContext } from './Contexts';
+import { deepClone, getPublicImageURL } from '../DBHelper/helper';
 import maxUserProfile from '../DBHelper/maxUserProfile';
+import { CharaBaseData } from '../DBHelper';
 import localValue from '../localValue';
 import clsx from 'clsx';
+import { PCRStoreValue } from '../db';
 
 const marks = (() => {
   const getMark = (value: number, label: string) => ({ value, label });
@@ -97,29 +99,105 @@ const useStyles = makeStyles((theme: Theme) => {
   };
 });
 
+interface UserData {
+  currUser: string;
+  allUser: string[];
+  avatars: Record<string, string>;
+}
+
 function Menu() {
   const styles = useStyles();
   const [pcrTheme, setPCRTheme] = useContext(PCRThemeContext);
   const dbHelper = useContext(DBHelperContext);
+  const [charaList, setCharaList] = useContext(CharaListContext);
 
   const [open, setOpen] = useState(false);
   const handleOpen = useCallback(() => setOpen(true), []);
   const handleClose = useCallback(() => setOpen(false), []);
 
-  const [currUser, setCurrUser] = useState(() => localValue.app.user.get());
+  const [allChara, setAllChara] = useState<CharaBaseData[]>();
 
-  const [avatars, setAvatars] = useState(() => localValue.app.avatars.get());
-
-  const [allUser, setAllUser] = useState(() => [currUser]);
+  const [state, setState] = useState<UserData>(() => {
+    const user = localValue.app.user.get();
+    return {
+      currUser: user,
+      allUser: [user],
+      avatars: localValue.app.avatars.get(),
+    };
+  });
 
   useEffect(() => {
     if (dbHelper) dbHelper.getAllUser().then(value => {
-      setAllUser(value);
+      setState(prev => ({ ...prev, allUser: value }));
     });
   }, [dbHelper]);
 
-  const handleChangeUser = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-  }, []);
+  useEffect(() => {
+    if (!allChara) {
+      if (charaList && charaList[0].userProfile.user_name === maxUserProfile.user_name) {
+        setAllChara(charaList);
+      } else if (dbHelper) {
+        dbHelper.getAllCharaBaseData(maxUserProfile.user_name).then(data => {
+          setAllChara(data);
+        });
+      }
+    }
+  }, [allChara, charaList, dbHelper]);
+
+  const handleChangeUser = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    const user = e.currentTarget.getAttribute('data-user')!;
+    const currUser = e.currentTarget.getAttribute('data-curr');
+    if (user !== currUser) {
+      dbHelper!.getAllCharaBaseData(user).then(data => {
+        setCharaList(data);
+        setState(prev => {
+          const newState = deepClone(prev);
+          newState.currUser = user;
+          localValue.app.user.set(user);
+          return newState;
+        });
+      });
+    }
+  }, [dbHelper, setCharaList]);
+
+  const handleUserMAX = useCallback(() => {}, []);
+  
+  const handleDelete = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
+    const user = e.currentTarget.getAttribute('data-user')!;
+    dbHelper!.deleteUserProfiles(user).then(() => {
+      setState(prev => {
+        const newState = deepClone(prev);
+        newState.allUser = prev.allUser.filter(value => value !== user);
+        return newState;
+      });
+    });
+  }, [dbHelper]);
+
+  const handleSubmit = useCallback((currUser: string, user: string, avatar: string, userProfiles: PCRStoreValue<'user_profile'>[]) => {
+    const p = currUser === maxUserProfile.user_name ? Promise.resolve() : dbHelper!.deleteUserProfiles(currUser);
+    p.then(() => {
+      dbHelper!.setUserProfiles(userProfiles).then(() => {
+        setState(prev => {
+          const newState = deepClone(prev);
+          newState.currUser = user;
+          if (prev.currUser === maxUserProfile.user_name) {
+            newState.allUser.push(user);
+          } else {
+            newState.allUser[prev.allUser.indexOf(prev.currUser)] = user;
+            delete newState.avatars[prev.currUser];
+          }
+          newState.avatars[user] = avatar;
+          localValue.app.user.set(user);
+          localValue.app.avatars.set(newState.avatars);
+          dbHelper!.getAllCharaBaseData(user).then(data => {
+            setCharaList(data);
+          });
+          setOpen(false);
+          return newState;
+        });
+      });
+    });
+  }, [dbHelper, setCharaList]);
 
   const handleChangeFontFamily = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setPCRTheme(prev => {
@@ -155,6 +233,7 @@ function Menu() {
   }, [setPCRTheme]);
 
   const isMarugo = pcrTheme!.fontFamily === 'Marugo';
+  const isUserMAX = state.currUser === maxUserProfile.user_name;
 
   return (
     <>
@@ -165,22 +244,27 @@ function Menu() {
         <FormControl className={styles.form} component="fieldset" color="secondary" fullWidth>
           <FormLabel component="legend">ユーザー</FormLabel>
           <div className={styles.chips}>
-            {allUser.map(user => {
-              const isCurr = user = currUser;
+            {state.allUser.map((user, i) => {
+              const _isCurr = user === state.currUser;
+              const _isUserMAX = user === maxUserProfile.user_name;
               return (
                 <Chip
-                  key={user}
+                  key={i}
                   className={styles.chip}
                   variant="outlined"
-                  color={isCurr ? 'secondary' : 'default'}
-                  avatar={<Avatar src={getPublicImageURL('icon_unit', avatars[user])} />}
+                  color={_isCurr ? 'secondary' : 'default'}
+                  clickable
+                  avatar={<Avatar src={getPublicImageURL('icon_unit', state.avatars[user])} />}
                   label={user}
-                  deleteIcon={user === maxUserProfile.user_name ? <Done /> : isCurr ? <Edit /> : <Clear />}
-                  onDelete={() => {}}
+                  deleteIcon={_isUserMAX ? <Done /> : _isCurr ? <Edit /> : <Clear data-user={user} />}
+                  data-user={user}
+                  data-curr={state.currUser}
+                  onDelete={_isUserMAX ? handleUserMAX : _isCurr ? handleOpen : handleDelete}
+                  onClick={handleChangeUser}
                 />
               );
             })}
-            {currUser === maxUserProfile.user_name && (
+            {isUserMAX && (
               <IconButton color="secondary" onClick={handleOpen}>
                 <Add />
               </IconButton>
@@ -247,12 +331,18 @@ function Menu() {
         </FormControl>
       </div>
       <Dialog open={open} fullWidth onClose={handleClose}>
-        <UserForm
-          title="新規ユーザー"
-          allUser={allUser}
-          onCancel={handleClose}
-          onSubmit={() => {}}
-        />
+        {open && (
+          <UserForm
+            user={isUserMAX ? undefined : state.currUser}
+            avatar={isUserMAX ? undefined : state.avatars[state.currUser]}
+            userProfiles={isUserMAX ? undefined : charaList!.map(item => item.userProfile)}
+            currUser={state.currUser}
+            allUser={state.allUser}
+            allChara={allChara || []}
+            onCancel={handleClose}
+            onSubmit={handleSubmit}
+          />
+        )}
       </Dialog>
     </>
   );

@@ -42,10 +42,17 @@ const localValue = (() => {
       atkTypeArr: createlocalValue('CHARA_LIST_FILTER_ATK_TYPE_KEY', [1, 2]),
       positionArr: createlocalValue('CHARA_LIST_FILTER_POSITION_KEY', [1, 2, 3]),
     },
+    quest: {
+      mode: createlocalValue<'map' | 'search'>('QUEST_MODE_KEY', 'map'),
+    },
     questMapList: {
       sort: createlocalValue<'asc' | 'desc'>('QUEST_MAP_LIST_SORT_KEY', 'asc'),
       type: createlocalValue<QuestType>('QUEST_MAP_LIST_TYPE_KEY', 'N'),
       area: createlocalValue('QUEST_MAP_LIST_AREA_KEY', 39),
+    },
+    questSearchList: {
+      sort: createlocalValue<'asc' | 'desc'>('QUEST_SEARCH_LIST_SORT_KEY', 'asc'),
+      type: createlocalValue<QuestType>('QUEST_SEARCH_LIST_TYPE_KEY', 'N'),
     },
     equipDetail: {
       sort: createlocalValue<'asc' | 'desc'>('EQUIP_DETAIL_SORT_KEY', 'desc'),

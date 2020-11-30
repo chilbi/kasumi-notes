@@ -452,9 +452,9 @@ function EquipDetail() {
                   </Fragment>
                 )
               })}
-              <label className={styles.sortLabel} htmlFor="sort-chara-list">{sort === 'asc' ? '昇順' : '降順'}</label>
+              <label className={styles.sortLabel} htmlFor="equip-detail-sort">{sort === 'asc' ? '昇順' : '降順'}</label>
               <IconButton
-                id="sort-chara-list"
+                id="equip-detail-sort"
                 className={clsx(styles.sort, sort === 'asc' && styles.sortRotate)}
                 color="secondary"
                 onClick={handleToggleSort}

@@ -26,12 +26,12 @@ const useStyles = makeStyles((theme: Theme) => {
   };
 });
 
-interface QuestMapListProps {
+interface QuestSearchListProps {
   sort: 'asc' | 'desc';
   type: QuestType;
 }
 
-function QuestMapList(props: QuestMapListProps) {
+function QuestSearchList(props: QuestSearchListProps) {
   const { sort, type } = props;
   const styles = useStyles();
 
@@ -87,4 +87,4 @@ function QuestMapList(props: QuestMapListProps) {
   );
 }
 
-export default QuestMapList;
+export default QuestSearchList;

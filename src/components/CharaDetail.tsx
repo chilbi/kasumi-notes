@@ -21,6 +21,7 @@ import useQuery from '../hooks/useQuery';
 import { EquipEnhanceStatus } from '../DBHelper/promotion';
 import { SkillEnhanceStatus } from '../DBHelper/skill';
 import { deepClone, equal, getParamsUnitID } from '../DBHelper/helper';
+import maxUserProfile from '../DBHelper/maxUserProfile';
 import { getCharaProperty, PropertyData } from '../DBHelper';
 import { PCRStoreValue } from '../db';
 import localValue from '../localValue';
@@ -73,10 +74,13 @@ function CharaDetail() {
   const query = useQuery();
   const unitID = getParamsUnitID(query.get('unit_id') || '0');
 
+  const currUser = useState(() => localValue.app.user.get())[0];
+
   const dbHelper = useContext(DBHelperContext);
   const [charaList, setCharaList] = useContext(CharaListContext);
   const [charaDetail, setDetail] = useContext(CharaDetailContext);
-  const detail = charaDetail && charaDetail.charaData.unit_id === unitID ? charaDetail : undefined
+  const detail = charaDetail && charaDetail.charaData.unit_id === unitID && charaDetail.userProfile.user_name === currUser
+    ? charaDetail : undefined;
 
   const userProfileRef = useRef<PCRStoreValue<'user_profile'>>();
   const propertyDataRef = useRef<PropertyData>();
@@ -86,9 +90,9 @@ function CharaDetail() {
   }
 
   useEffect(() => {
-    if (dbHelper && (!charaDetail || charaDetail.charaData.unit_id !== unitID)) {
+    if (dbHelper && (!charaDetail || charaDetail.charaData.unit_id !== unitID || charaDetail.userProfile.user_name !== currUser)) {
       const base = charaList && charaList.find(item => item.charaData.unit_id === unitID);
-      dbHelper.getCharaDetailData(unitID, localValue.app.user.get(), base).then(detailData => {
+      dbHelper.getCharaDetailData(unitID, currUser, base).then(detailData => {
         if (detailData) {
           userProfileRef.current = deepClone(detailData.userProfile);
           propertyDataRef.current = [...detailData.propertyData];
@@ -96,7 +100,7 @@ function CharaDetail() {
         }
       });
     }
-  }, [dbHelper, charaDetail, setDetail, unitID, charaList]);
+  }, [dbHelper, charaDetail, setDetail, unitID, currUser, charaList]);
 
   const [stillExpand, setStillExpand] = useState(() => localValue.charaBaseInfo.stillExpand.get());
   const handleToggleStillExpand = useCallback(() => {
@@ -372,14 +376,14 @@ function CharaDetail() {
       <h6 className={styles.subtitle}>キャラ詳細</h6>
       <IconButton
         color="secondary"
-        disabled={isEqual}
+        disabled={currUser === maxUserProfile.user_name || isEqual}
         onClick={handleSaveUserProfile}
       >
         <Done />
       </IconButton>
     </Header>
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  ), [isEqual, handleBack, handleSaveUserProfile]);
+  ), [isEqual, currUser, handleBack, handleSaveUserProfile]);
 
   const tabs = useMemo(() => (
     <Tabs

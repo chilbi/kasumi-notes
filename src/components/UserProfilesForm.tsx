@@ -214,10 +214,20 @@ function UserProfilesForm(props: UserProfilesFormProps) {
   const handleSubmitUserProfile = (editData: EditData) => {
     const allSlotLevel5 = editData.promotionLevel > 8 && editData.promotionLevel < maxUserProfile.promotion_level;
     const isLock = openData.list === 'lock';
+    let
+      selectList: typeof selectLockList,
+      setSelectList: typeof setSelectLockList;
+    if (isLock) {
+      selectList = selectLockList;
+      setSelectList = setSelectLockList;
+    } else {
+      selectList = selectUnlockList;
+      setSelectList = setSelectUnlockList;
+    }
     if (openData.target === 'set') {
       if (allSlotLevel5) {
         setUnlockList(prev => {
-          for (let unitID of selectLockList!) {
+          for (let unitID of selectList!) {
             const baseData = allChara!.find(value => unitID === value.userProfile.unit_id)!;
             const userProfile = getUserProfile(baseData, undefined, editData);
             if (isLock) {
@@ -232,12 +242,11 @@ function UserProfilesForm(props: UserProfilesFormProps) {
             return [...prev];
           }
         });
-        if (isLock) setSelectLockList(new Set());
-        else setSelectUnlockList(new Set());
+        setSelectList(new Set());
         setOpen(false);
       } else {
         const promiseArr = [];
-        for (let unitID of selectLockList!) {
+        for (let unitID of selectList!) {
           promiseArr.push(dbHelper!.getPromotionData(unitID, editData.promotionLevel).then(promotionData => {
             return {
               baseData: allChara!.find(value => unitID === value.userProfile.unit_id)!,
@@ -261,8 +270,7 @@ function UserProfilesForm(props: UserProfilesFormProps) {
               return [...prev];
             }
           });
-          if (isLock) setSelectLockList(new Set());
-          else setSelectUnlockList(new Set());
+          setSelectList(new Set());
           setOpen(false);
         });
       }

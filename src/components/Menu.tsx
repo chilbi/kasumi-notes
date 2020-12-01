@@ -111,9 +111,9 @@ function Menu() {
   const dbHelper = useContext(DBHelperContext);
   const [charaList, setCharaList] = useContext(CharaListContext);
 
-  const [open, setOpen] = useState(false);
-  const handleOpen = useCallback(() => setOpen(true), []);
-  const handleClose = useCallback(() => setOpen(false), []);
+  const [openMode, setOpenMode] = useState<'add' | 'edit' | null>(null);
+  const handleOpen = useCallback((e: React.MouseEvent<HTMLButtonElement>) => setOpenMode(e.currentTarget.getAttribute('data-click')! as any), []);
+  const handleClose = useCallback(() => setOpenMode(null), []);
 
   const [allChara, setAllChara] = useState<CharaBaseData[]>();
 
@@ -192,7 +192,7 @@ function Menu() {
           dbHelper!.getAllCharaBaseData(user).then(data => {
             setCharaList(data);
           });
-          setOpen(false);
+          setOpenMode(null);
           return newState;
         });
       });
@@ -233,7 +233,6 @@ function Menu() {
   }, [setPCRTheme]);
 
   const isMarugo = pcrTheme!.fontFamily === 'Marugo';
-  const isUserMAX = state.currUser === maxUserProfile.user_name;
 
   return (
     <>
@@ -256,7 +255,7 @@ function Menu() {
                   clickable
                   avatar={<Avatar src={getPublicImageURL('icon_unit', state.avatars[user])} />}
                   label={user}
-                  deleteIcon={_isUserMAX ? <Done /> : _isCurr ? <Edit /> : <Clear data-user={user} />}
+                  deleteIcon={_isUserMAX ? <Done /> : _isCurr ? <Edit data-click="edit" /> : <Clear data-user={user} />}
                   data-user={user}
                   data-curr={state.currUser}
                   onDelete={_isUserMAX ? handleUserMAX : _isCurr ? handleOpen : handleDelete}
@@ -264,11 +263,9 @@ function Menu() {
                 />
               );
             })}
-            {isUserMAX && (
-              <IconButton color="secondary" onClick={handleOpen}>
-                <Add />
-              </IconButton>
-            )}
+            <IconButton color="secondary" data-click="add" onClick={handleOpen}>
+              <Add />
+            </IconButton>
           </div>
         </FormControl>
 
@@ -330,12 +327,12 @@ function Menu() {
           </div>
         </FormControl>
       </div>
-      <Dialog open={open} fullWidth onClose={handleClose}>
-        {open && (
+      <Dialog open={openMode !== null} fullWidth onClose={handleClose}>
+        {openMode !== null && (
           <UserForm
-            user={isUserMAX ? undefined : state.currUser}
-            avatar={isUserMAX ? undefined : state.avatars[state.currUser]}
-            userProfiles={isUserMAX ? undefined : charaList!.map(item => item.userProfile)}
+            user={openMode === 'add' ? undefined : state.currUser}
+            avatar={openMode === 'add' ? undefined : state.avatars[state.currUser]}
+            userProfiles={openMode === 'add' ? undefined : charaList!.map(item => item.userProfile)}
             currUser={state.currUser}
             allUser={state.allUser}
             allChara={allChara || []}

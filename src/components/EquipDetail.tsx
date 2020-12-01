@@ -450,7 +450,7 @@ function EquipDetail() {
                     <QuestLabel type={value} component="label" htmlFor={id} />
                     <Checkbox id={id} classes={{ root: styles.checkbox }} value={value} checked={types.indexOf(value) > -1} onChange={handleChangeTypes} />
                   </Fragment>
-                )
+                );
               })}
               <label className={styles.sortLabel} htmlFor="equip-detail-sort">{sort === 'asc' ? '昇順' : '降順'}</label>
               <IconButton

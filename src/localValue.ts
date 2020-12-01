@@ -1,9 +1,15 @@
 import { QuestType } from './DBHelper/helper';
-import maxUserProfile from './DBHelper/maxUserProfile';
+import maxUserProfile, { maxArea } from './DBHelper/maxUserProfile';
 export interface PCRTheme {
   fontFamily: string;
   fontSize: number;
   fontWeight: number;
+}
+
+export interface SearchSet {
+  name: string;
+  search: (number | null)[];
+  types: QuestType[];
 }
 
 const localValue = (() => {
@@ -25,6 +31,13 @@ const localValue = (() => {
       },
     };
   };
+  const sets = (() => {
+    let _sets: SearchSet[] = [];
+    for (let i = 1; i < 6; i++) {
+      _sets.push({ name: 'セット' + i, search: [null, null, null], types: ['N', 'H', 'VH', 'S'] });
+    }
+    return _sets;
+  })();
   return {
     app: {
       theme: createlocalValue<PCRTheme>('APP_THEME_KEY', {
@@ -48,11 +61,13 @@ const localValue = (() => {
     questMapList: {
       sort: createlocalValue<'asc' | 'desc'>('QUEST_MAP_LIST_SORT_KEY', 'asc'),
       type: createlocalValue<QuestType>('QUEST_MAP_LIST_TYPE_KEY', 'N'),
-      area: createlocalValue('QUEST_MAP_LIST_AREA_KEY', 39),
+      area: createlocalValue('QUEST_MAP_LIST_AREA_KEY', maxArea),
     },
     questSearchList: {
       sort: createlocalValue<'asc' | 'desc'>('QUEST_SEARCH_LIST_SORT_KEY', 'asc'),
       type: createlocalValue<QuestType>('QUEST_SEARCH_LIST_TYPE_KEY', 'N'),
+      sets: createlocalValue<SearchSet[]>('QUEST_SEARCH_LIST_SETS_KEY', sets),
+      index: createlocalValue('QUEST_SEARCH_LIST_INDEX_KEY', 0),
     },
     equipDetail: {
       sort: createlocalValue<'asc' | 'desc'>('EQUIP_DETAIL_SORT_KEY', 'desc'),

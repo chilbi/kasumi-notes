@@ -53,8 +53,8 @@ function Quest() {
   }, []);
 
   const [mode, setMode] = useState(() => localValue.quest.mode.get());
-  const [sort, setSort] = useState(() => localValue.questMapList.sort.get());
-  const [type, setType] = useState(() => localValue.questMapList.type.get());
+  const [sort, setSort] = useState(() => mode === 'map' ? localValue.questMapList.sort.get() : localValue.questSearchList.sort.get());
+  const [type, setType] = useState(() => mode === 'map' ? localValue.questMapList.type.get() : localValue.questSearchList.type.get());
 
   const handleToggleSort = useCallback(() => {
     setSort(prev => {
@@ -143,7 +143,7 @@ function Quest() {
           <Search />
         </IconButton>
       </Header>
-      {isSearchMode ? <QuestSearchList sort={sort} type={type} /> : <QuestMapList sort={sort} type={type} />}
+      {isSearchMode ? <QuestSearchList sort={sort} /> : <QuestMapList sort={sort} type={type} />}
     </>
   );
 }

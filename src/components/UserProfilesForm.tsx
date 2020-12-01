@@ -434,6 +434,8 @@ function UserProfilesForm(props: UserProfilesFormProps) {
     );
   };
 
+  const disabledOK = unLockCount < 1 || (selectLockList !== null && selectLockList.size > 0) || (selectLockList !== null && selectLockList.size > 0);
+
   return (
     <>
       <DialogTitle className={styles.title}>編集チャラ</DialogTitle>
@@ -443,7 +445,7 @@ function UserProfilesForm(props: UserProfilesFormProps) {
       </DialogContent>
       <DialogActions>
         <Button variant="outlined" color="primary" onClick={onCancel}>キャンセル</Button>
-        <Button variant="outlined" color="primary" disabled={unLockCount < 1} onClick={handleSubmit}>OK</Button>
+        <Button variant="outlined" color="primary" disabled={disabledOK} onClick={handleSubmit}>OK</Button>
       </DialogActions>
       
       <Dialog open={open} fullWidth onClose={handleClose}>

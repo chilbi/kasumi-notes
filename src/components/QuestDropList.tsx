@@ -85,7 +85,7 @@ function QuestDropList(props: QuestDropListProps) {
   const { classes = {}, sort, search, rangeTypes, onRewardClick } = props;
   const styles = useStyles();
 
-    const isMapMode = typeof rangeTypes[0] === 'number';
+  const isMapMode = typeof rangeTypes[0] === 'number';
 
   const [loading, setLoading] = useState(true);
 

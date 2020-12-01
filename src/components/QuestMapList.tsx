@@ -67,7 +67,7 @@ function QuestMapList(props: QuestMapListProps) {
           classes={{ root: styles.nav, ul: styles.ul }}
           size="small"
           shape="rounded"
-          color="secondary"
+          color="primary"
           siblingCount={3}
           boundaryCount={1}
           hidePrevButton

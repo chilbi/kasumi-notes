@@ -1,37 +1,64 @@
-// import { Property } from './property';
-// import Big from 'big.js';
+import { Property } from './property';
+import { PCRStoreValue } from '../db';
+import Big from 'big.js';
 
-// interface OtherProperty {
-//   skill_lv: number; // 10.0
-//   exskill_evolution: number; // 15.0
-//   overall: number; // 1.0
-//   skill1_evolution: number; // 10
-//   skill1_evolution_slv: number; // 1.2
-//   ub_evolution: number; // 200
-//   ub_evolution_slv: number; // 1.5
-// }
+export interface OtherProperty {
+  skill_lv: number; // 10
+  exskill_evolution: number; // 15
+  overall: number; // 1
+  skill1_evolution: number; // 10
+  skill1_evolution_slv: number; // 1
+  ub_evolution: number; // 200
+  ub_evolution_slv: number; // 1.5
+}
 
-// export function getFightingCapacity(property: Property/*, other: OtherProperty*/): number {
-//   return [
-//     [property.hp, 0.1],
-//     [property.atk, 1.0],
-//     [property.magic_str, 1.0],
-//     [property.def, 4.5],
-//     [property.magic_def, 4.5],
-//     [property.physical_critical, 0.5],
-//     [property.magic_critical, 0.5],
-//     [property.wave_hp_recovery, 0.1],
-//     [property.wave_energy_recovery, 0.3],
-//     [property.dodge, 6.0],
-//     [property.physical_penetrate, 6.0],
-//     [property.magic_penetrate, 6.0],
-//     [property.life_steal, 4.5],
-//     [property.hp_recovery_rate, 1.0],
-//     [property.energy_recovery_rate, 1.5],
-//     [property.energy_reduce_rate, 3.0],
-//     [property.accuracy, 2.0]
-//   ].reduce((calc, item) => calc.plus(Big(item[0]).times(item[1])), Big(0)).toNumber();
-// }
+// TODO 计算公式错误
+export function getOtherProperty(userProfile: PCRStoreValue<'user_profile'>): OtherProperty {
+  const skillStatus = userProfile.skill_enhance_status;
+  const hasUnique = userProfile.unique_enhance_level > 0;
+  const hasExEvo = userProfile.rarity > 4;
+  const hasUBEvo = userProfile.rarity > 5;
+  let skillLv = skillStatus['ub'] + skillStatus[1] + skillStatus[2];
+  if (!hasExEvo) skillLv += skillStatus['ex'];
+  return {
+    skill_lv: skillLv,
+    exskill_evolution: hasExEvo ? skillStatus['ex'] : 0,
+    overall: 0,
+    skill1_evolution: hasUnique ? skillStatus[1] : 0,
+    skill1_evolution_slv: hasUnique ? skillStatus[1] : 0,
+    ub_evolution: hasUBEvo ? 1 : 0,
+    ub_evolution_slv: hasUBEvo ? skillStatus['ub'] : 0,
+  };
+}
+
+export function getFightingCapacity(property: Property<Big>, other: OtherProperty): Big {
+  return [
+    [property.hp, 0.1],
+    [property.atk, 1],
+    [property.magic_str, 1],
+    [property.def, 4.5],
+    [property.magic_def, 4.5],
+    [property.physical_critical, 0.5],
+    [property.magic_critical, 0.5],
+    [property.wave_hp_recovery, 0.1],
+    [property.wave_energy_recovery, 0.3],
+    [property.dodge, 6],
+    [property.physical_penetrate, 6],
+    [property.magic_penetrate, 6],
+    [property.life_steal, 4.5],
+    [property.hp_recovery_rate, 1],
+    [property.energy_recovery_rate, 1.5],
+    [property.energy_reduce_rate, 3.0],
+    [property.accuracy, 2],
+    [other.skill_lv, 10],
+    [other.exskill_evolution, 15],
+    [other.overall, 1],
+    [other.skill1_evolution, 10],
+    [other.skill1_evolution_slv, 1.2],
+    [other.ub_evolution, 200],
+    [other.ub_evolution_slv, 1.5],
+  ].reduce((calc, item) => calc.plus(Big(item[0]).times(item[1])), Big(0));
+}
 
 export function getPositionText(position: number): string {
   if (position === 1) return '前衛';

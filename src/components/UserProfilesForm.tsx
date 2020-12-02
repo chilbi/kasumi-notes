@@ -488,23 +488,21 @@ function UserProfilesForm(props: UserProfilesFormProps) {
       </DialogActions>
       
       <Dialog open={open} fullWidth onClose={handleClose}>
-        {open && (
-          <UserProfileForm
-            charaBaseData={charaData}
-            userProfile={openData.target === 'set' ? undefined : ((openData.list === 'lock' ? lockList : unlockList).find(value => value.unit_id === openData.target))}
-            onCancel={handleClose}
-            onSubmit={handleSubmitUserProfile}
-            onDelete={openData.list === 'lock' ? undefined : (() => {
-              if (openData.target === 'set') {
-                setUnlockList(prev => prev.filter(value => !selectUnlockList!.has(value.unit_id)));
-                setSelectUnlockList(new Set());
-              } else {
-                setUnlockList(prev => prev.filter(value => value.unit_id !== openData.target));
-              }
-              setOpen(false);
-            })}
-          />
-        )}
+        <UserProfileForm
+          charaBaseData={charaData}
+          userProfile={openData.target === 'set' ? undefined : ((openData.list === 'lock' ? lockList : unlockList).find(value => value.unit_id === openData.target))}
+          onCancel={handleClose}
+          onSubmit={handleSubmitUserProfile}
+          onDelete={openData.list === 'lock' ? undefined : (() => {
+            if (openData.target === 'set') {
+              setUnlockList(prev => prev.filter(value => !selectUnlockList!.has(value.unit_id)));
+              setSelectUnlockList(new Set());
+            } else {
+              setUnlockList(prev => prev.filter(value => value.unit_id !== openData.target));
+            }
+            setOpen(false);
+          })}
+        />
       </Dialog>
     </>
   );

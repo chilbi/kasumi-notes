@@ -165,7 +165,6 @@ function CharaList() {
         </IconButton>
         <Popover
           classes={{ paper: styles.popover }}
-          keepMounted
           marginThreshold={0}
           anchorEl={anchorEl}
           open={!!anchorEl}

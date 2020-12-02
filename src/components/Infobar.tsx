@@ -70,7 +70,7 @@ const useStyles = makeStyles((theme: Theme) => ({
 interface InfobarProps extends ClassesProps<typeof useStyles> {
   label: string;
   value?: string | number;
-  diffValue?: string | number;
+  diffValue?: number;
   showDiff?: boolean;
   width?: 50 | 100;
   size?: 'small' | 'medium' | 'large';

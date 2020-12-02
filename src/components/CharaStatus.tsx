@@ -1,7 +1,7 @@
 import Infobar from './Infobar';
 import { Property, PropertyKeys } from '../DBHelper/property';
 import Big from 'big.js';
-// import { getFightingCapacity } from '../DBHelper/helper';
+import { getFightingCapacity, OtherProperty } from '../DBHelper/helper';
 
 const allPropertyKeys: PropertyKeys[] = [
   'atk', // 2
@@ -66,15 +66,24 @@ const keyAbbrLabel = {
 interface CharaStatusProps {
   property?: Partial<Property<Big>>;
   refProperty?: Partial<Property<Big>>;
+  otherProperty?: OtherProperty;
+  refOtherProperty?: OtherProperty;
   partial?: boolean;
   abbr?: boolean;
   showDiff?: boolean;
-  // showFightingCapacity?: boolean;
 }
 
 function CharaStatus(props: CharaStatusProps) {
-  const { property = {}, refProperty = {}, partial, abbr, showDiff } = props;
+  const { property = {}, refProperty = {}, otherProperty, refOtherProperty, partial, abbr, showDiff } = props;
   const keys = partial ? Object.keys(property) as PropertyKeys[] : allPropertyKeys;
+  let fValue: Big, fDiffValue: Big;
+  if (otherProperty && refOtherProperty) {
+    fValue = getFightingCapacity(property as any, otherProperty).round(0, 1);
+    if (showDiff) {
+      const fRefValue = getFightingCapacity(refProperty as any, refOtherProperty).round(0, 1);
+      fDiffValue = fValue!.minus(fRefValue);
+    }
+  }
   return (
     <>
       {keys.map(key => {
@@ -100,6 +109,17 @@ function CharaStatus(props: CharaStatusProps) {
           />
         );
       })}
+      {otherProperty && (
+        <Infobar
+          key="fighting_capacity"
+          size="large"
+          width={50}
+          label="戦力"
+          value={fValue!.toString()}
+          diffValue={fDiffValue! ? fDiffValue.toNumber() : undefined}
+          showDiff={showDiff}
+        />
+      )}
     </>
   );
 }

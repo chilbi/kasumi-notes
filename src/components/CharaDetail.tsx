@@ -20,7 +20,7 @@ import { DBHelperContext, CharaDetailContext, CharaListContext } from './Context
 import useQuery from '../hooks/useQuery';
 import { EquipEnhanceStatus } from '../DBHelper/promotion';
 import { SkillEnhanceStatus } from '../DBHelper/skill';
-import { deepClone, equal, getParamsUnitID } from '../DBHelper/helper';
+import { deepClone, equal, getParamsUnitID, getOtherProperty } from '../DBHelper/helper';
 import maxUserProfile from '../DBHelper/maxUserProfile';
 import { getCharaProperty, PropertyData } from '../DBHelper';
 import { PCRStoreValue } from '../db';
@@ -226,6 +226,13 @@ function CharaDetail() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userProfileRef.current, propertyDataRef.current]);
 
+  const otherProperty = useMemo(() => detail && getOtherProperty(detail.userProfile), [detail]);
+
+  const refOtherProperty = useMemo(() => {
+    return userProfileRef.current && getOtherProperty(userProfileRef.current);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userProfileRef.current]);
+
   const isEqual = useMemo(() => {
     return userProfileRef.current && detail ? equal(userProfileRef.current, detail.userProfile) : true;
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -361,6 +368,8 @@ function CharaDetail() {
           <CharaStatus
             property={property}
             refProperty={refProperty}
+            otherProperty={otherProperty}
+            refOtherProperty={refOtherProperty}
             showDiff={!isEqual}
           />
         </div>

@@ -7,19 +7,25 @@ import DialogActions from '@material-ui/core/DialogActions';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
-import Avatar from '@material-ui/core/Avatar';
 import Badge from '@material-ui/core/Badge';
 import ArrowBack from '@material-ui/icons/ArrowBack';
 import Edit from '@material-ui/icons/Edit';
+import SkeletonImage from './SkeletonImage';
 import Infobar from './Infobar';
 import UserProfilesForm from './UserProfilesForm';
 import { getPublicImageURL, getValidID } from '../DBHelper/helper';
 import { maxChara } from '../DBHelper/maxUserProfile';
 import { CharaBaseData } from '../DBHelper';
 import { PCRStoreValue } from '../db';
+import Big from 'big.js';
 import clsx from 'clsx';
 
 const useStyles = makeStyles((theme: Theme) => {
+  const
+    rem = 16,
+    scalage = 0.375,
+    iconSize = Big(128).times(scalage).div(rem);
+
   return {
     gup: {
       marginLeft: theme.spacing(3),
@@ -42,6 +48,12 @@ const useStyles = makeStyles((theme: Theme) => {
       flexWrap: 'wrap',
       justifyContent: 'space-between',
       marginBottom: theme.spacing(2),
+    },
+    iconRoot: {
+      width: iconSize + 'rem',
+      height: iconSize + 'rem',
+      borderRadius: '50%',
+      overflow: 'hidden',
     },
     charaEdit: {
       display: 'flex',
@@ -146,12 +158,12 @@ function UserForm(props: UserFormProps) {
         <div className={styles.avatars}>
           <IconButton onClick={handleOpen} color="primary">
             <Badge variant="dot" color={userAvatarError ? 'error' : 'primary'}>
-              <Avatar src={getPublicImageURL('icon_unit', userAvatar)} />
+              <SkeletonImage classes={{ root: styles.iconRoot }} src={getPublicImageURL('icon_unit', userAvatar)} save />
             </Badge>
           </IconButton>
           {otherAvatar.map(avatar => (
             <IconButton key={avatar} color="primary" data-avatar={avatar} onClick={handleChangeOtherAvatars}>
-              <Avatar src={getPublicImageURL('icon_unit', avatar)} />
+              <SkeletonImage classes={{ root: styles.iconRoot }} src={getPublicImageURL('icon_unit', avatar)} save />
             </IconButton>
           ))}
         </div>
@@ -188,34 +200,30 @@ function UserForm(props: UserFormProps) {
           </IconButton>
           <span>アイコンを選択</span>
         </DialogTitle>
-        {openAvatars && (
-          <DialogContent className={clsx(styles.content, styles.avatars)}>
-            {allChara.map(item => {
-              const unit_id = item.charaData.unit_id;
-              const rarity = item.userProfile.rarity;
-              const max_rarity = item.charaData.max_rarity;
-              return (
-                <IconButton key={unit_id} data-unit-id={unit_id} data-rarity={rarity} data-max-rarity={max_rarity} onClick={handleChangeAvatars}>
-                  <Avatar src={getPublicImageURL('icon_unit', getValidID(unit_id, rarity))} />
-                </IconButton>
-              );
-            })}
-          </DialogContent>
-        )}
+        <DialogContent className={clsx(styles.content, styles.avatars)}>
+          {allChara.map(item => {
+            const unit_id = item.charaData.unit_id;
+            const rarity = item.userProfile.rarity;
+            const max_rarity = item.charaData.max_rarity;
+            return (
+              <IconButton key={unit_id} data-unit-id={unit_id} data-rarity={rarity} data-max-rarity={max_rarity} onClick={handleChangeAvatars}>
+                <SkeletonImage classes={{ root: styles.iconRoot }} src={getPublicImageURL('icon_unit', getValidID(unit_id, rarity))} save />
+              </IconButton>
+            );
+          })}
+        </DialogContent>
         <DialogActions>
           <Button variant="outlined" color="primary" onClick={handleCloseAvatars}>キャンセル</Button>
         </DialogActions>
       </Dialog>
 
       <Dialog classes={{ paperFullScreen: styles.fullScreen }} open={openCharaList} fullScreen onClose={handleCloseCharaList}>
-        {openCharaList && (
-          <UserProfilesForm
-            allChara={allChara}
-            userProfiles={userProfiles}
-            onCancel={handleCloseCharaList}
-            onSubmit={handleSubmitUserProfiles}
-          />
-        )}
+        <UserProfilesForm
+          allChara={allChara}
+          userProfiles={userProfiles}
+          onCancel={handleCloseCharaList}
+          onSubmit={handleSubmitUserProfiles}
+        />
       </Dialog>
     </>
   );

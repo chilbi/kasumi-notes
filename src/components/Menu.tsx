@@ -10,13 +10,13 @@ import Divider from '@material-ui/core/Divider';
 import Dialog from '@material-ui/core/Dialog';
 import Chip from '@material-ui/core/Chip';
 import IconButton from '@material-ui/core/IconButton';
-import Avatar from '@material-ui/core/Avatar';
 import Add from '@material-ui/icons/Add';
 import Done from '@material-ui/icons/Done';
 import Edit from '@material-ui/icons/Edit';
 import Clear from '@material-ui/icons/Clear';
 import Header from './Header';
 import UserForm from './UserForm';
+import SkeletonImage from './SkeletonImage';
 import { PCRThemeContext, DBHelperContext, CharaListContext } from './Contexts';
 import { deepClone, getPublicImageURL } from '../DBHelper/helper';
 import maxUserProfile from '../DBHelper/maxUserProfile';
@@ -69,6 +69,13 @@ const useStyles = makeStyles((theme: Theme) => {
     },
     chip: {
       margin: theme.spacing(2),
+    },
+    iconRoot: {
+      margin: theme.spacing(0, -1.5, 0, 1),
+      width: '1.5rem',
+      height: '1.5rem',
+      borderRadius: '50%',
+      overflow: 'hidden',
     },
     sliderBox: {
       display: 'flex',
@@ -243,17 +250,17 @@ function Menu() {
         <FormControl className={styles.form} component="fieldset" color="secondary" fullWidth>
           <FormLabel component="legend">ユーザー</FormLabel>
           <div className={styles.chips}>
-            {state.allUser.map((user, i) => {
+            {state.allUser.map(user => {
               const _isCurr = user === state.currUser;
               const _isUserMAX = user === maxUserProfile.user_name;
               return (
                 <Chip
-                  key={i}
+                  key={user}
                   className={styles.chip}
-                  variant="outlined"
+                  variant="filled"
                   color={_isCurr ? 'secondary' : 'default'}
                   clickable
-                  avatar={<Avatar src={getPublicImageURL('icon_unit', state.avatars[user])} />}
+                  avatar={<SkeletonImage classes={{ root: styles.iconRoot }} src={getPublicImageURL('icon_unit', state.avatars[user])} save />}
                   label={user}
                   deleteIcon={_isUserMAX ? <Done /> : _isCurr ? <Edit data-click="edit" /> : <Clear data-user={user} />}
                   data-user={user}
@@ -328,18 +335,16 @@ function Menu() {
         </FormControl>
       </div>
       <Dialog open={openMode !== null} fullWidth onClose={handleClose}>
-        {openMode !== null && (
-          <UserForm
-            user={openMode === 'add' ? undefined : state.currUser}
-            avatar={openMode === 'add' ? undefined : state.avatars[state.currUser]}
-            userProfiles={openMode === 'add' || !charaList ? undefined : charaList.map(item => item.userProfile)}
-            currUser={state.currUser}
-            allUser={state.allUser}
-            allChara={allChara || []}
-            onCancel={handleClose}
-            onSubmit={handleSubmit}
-          />
-        )}
+        <UserForm
+          user={openMode === 'add' ? undefined : state.currUser}
+          avatar={openMode === 'add' ? undefined : state.avatars[state.currUser]}
+          userProfiles={openMode === 'add' || !charaList ? undefined : charaList.map(item => item.userProfile)}
+          currUser={state.currUser}
+          allUser={state.allUser}
+          allChara={allChara || []}
+          onCancel={handleClose}
+          onSubmit={handleSubmit}
+        />
       </Dialog>
     </>
   );

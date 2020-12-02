@@ -5,7 +5,6 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import { DBHelperContext } from './Contexts';
 import openPCRDB, { PCRDB } from '../db';
 import DBHelper from '../DBHelper';
-import localValue from '../localValue';
 import Big from 'big.js';
 
 const useStyles = makeStyles((theme: Theme) => createStyles({

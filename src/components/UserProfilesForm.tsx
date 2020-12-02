@@ -128,7 +128,7 @@ const useStyles = makeStyles((theme: Theme) => {
 });
 
 interface UserProfilesFormProps {
-  allChara?: CharaBaseData[];
+  allChara: CharaBaseData[];
   userProfiles: PCRStoreValue<'user_profile'>[];
   onCancel: () => void;
   onSubmit: (userProfiles: PCRStoreValue<'user_profile'>[]) => void;
@@ -150,8 +150,8 @@ function UserProfilesForm(props: UserProfilesFormProps) {
 
   const lockList = useMemo(() => {
     const list: PCRStoreValue<'user_profile'>[] = [];
-    if (!allChara) return list;
     const count = allChara.length;
+    if (count < 1) return list;
     const lockCount = count - unLockCount;
     let _count = 0;
     let _lockCount = 0;
@@ -236,7 +236,7 @@ function UserProfilesForm(props: UserProfilesFormProps) {
   }, []);
 
   const charaData = useMemo(() => {
-    return openData.target !== 'set' && allChara ? allChara.find(value => value.charaData.unit_id === openData.target) : undefined;
+    return openData.target !== 'set' ? allChara.find(value => value.charaData.unit_id === openData.target) : undefined;
   }, [allChara, openData.target]);
 
   const handleSubmitUserProfile = (editData: EditData) => {
@@ -256,7 +256,7 @@ function UserProfilesForm(props: UserProfilesFormProps) {
       if (allSlotLevel5) {
         setUnlockList(prev => {
           for (let unitID of selectList!) {
-            const baseData = allChara!.find(value => unitID === value.userProfile.unit_id)!;
+            const baseData = allChara.find(value => unitID === value.userProfile.unit_id)!;
             const originUserProfile = isLock ? baseData.userProfile : prev.find(value => unitID === value.unit_id)!;
             const userProfile = getUserProfile(baseData.charaData, originUserProfile, undefined, editData);
             if (isLock) {
@@ -278,7 +278,7 @@ function UserProfilesForm(props: UserProfilesFormProps) {
         for (let unitID of selectList!) {
           promiseArr.push(dbHelper!.getPromotionData(unitID, editData.promotionLevel).then(promotionData => {
             return {
-              baseData: allChara!.find(value => unitID === value.userProfile.unit_id)!,
+              baseData: allChara.find(value => unitID === value.userProfile.unit_id)!,
               promotionData,
             };
           }));
@@ -300,7 +300,7 @@ function UserProfilesForm(props: UserProfilesFormProps) {
       }
     } else {
       const unitID = openData.target;
-      const baseData = allChara!.find(value => unitID === value.userProfile.unit_id)!;
+      const baseData = allChara.find(value => unitID === value.userProfile.unit_id)!;
       if (allSlotLevel5) {
         setUnlockList(prev => {
           const originUserProfile = isLock ? baseData.userProfile : prev.find(value => unitID === value.unit_id)!;

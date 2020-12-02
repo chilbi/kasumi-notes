@@ -175,6 +175,8 @@ function Menu() {
       setState(prev => {
         const newState = deepClone(prev);
         newState.allUser = prev.allUser.filter(value => value !== user);
+        delete newState.avatars[user];
+        localValue.app.avatars.set(newState.avatars);
         return newState;
       });
     });

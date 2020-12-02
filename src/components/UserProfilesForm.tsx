@@ -476,7 +476,7 @@ function UserProfilesForm(props: UserProfilesFormProps) {
         <IconButton color="inherit" onClick={onCancel}>
           <ArrowBack />
         </IconButton>
-        <span>編集チャラ</span>
+        <span>編集キャラ</span>
       </DialogTitle>
       <DialogContent className={styles.content}>
         {getList('unlock')}

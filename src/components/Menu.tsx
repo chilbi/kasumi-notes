@@ -180,14 +180,15 @@ function Menu() {
     });
   }, [dbHelper]);
 
-  const handleSubmit = useCallback((currUser: string, user: string, avatar: string, userProfiles: PCRStoreValue<'user_profile'>[]) => {
-    const p = currUser === maxUserProfile.user_name ? Promise.resolve() : dbHelper!.deleteUserProfiles(currUser);
+  const handleSubmit = useCallback((user: string, avatar: string, userProfiles: PCRStoreValue<'user_profile'>[]) => {
+    const isAddMode = openMode === 'add';
+    const p = isAddMode ? Promise.resolve() : dbHelper!.deleteUserProfiles(state.currUser);
     p.then(() => {
       dbHelper!.setUserProfiles(userProfiles).then(() => {
         setState(prev => {
           const newState = deepClone(prev);
           newState.currUser = user;
-          if (prev.currUser === maxUserProfile.user_name) {
+          if (isAddMode) {
             newState.allUser.push(user);
           } else {
             newState.allUser[prev.allUser.indexOf(prev.currUser)] = user;
@@ -204,7 +205,7 @@ function Menu() {
         });
       });
     });
-  }, [dbHelper, setCharaList]);
+  }, [openMode, state.currUser, dbHelper, setCharaList]);
 
   const handleChangeFontFamily = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setPCRTheme(prev => {
@@ -339,7 +340,6 @@ function Menu() {
           user={openMode === 'add' ? undefined : state.currUser}
           avatar={openMode === 'add' ? undefined : state.avatars[state.currUser]}
           userProfiles={openMode === 'add' || !charaList ? undefined : charaList.map(item => item.userProfile)}
-          currUser={state.currUser}
           allUser={state.allUser}
           allChara={allChara || []}
           onCancel={handleClose}

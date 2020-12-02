@@ -76,15 +76,14 @@ interface UserFormProps {
   user?: string;
   avatar?: string;
   userProfiles?: PCRStoreValue<'user_profile'>[];
-  currUser: string;
   allUser: string[];
   allChara: CharaBaseData[];
   onCancel: () => void;
-  onSubmit: (currUser: string, user: string, avatar: string, userProfiles: PCRStoreValue<'user_profile'>[]) => void;
+  onSubmit: ( user: string, avatar: string, userProfiles: PCRStoreValue<'user_profile'>[]) => void;
 }
 
 function UserForm(props: UserFormProps) {
-  const { currUser, allUser, allChara, onCancel, onSubmit } = props;
+  const { allUser, allChara, onCancel, onSubmit } = props;
   const styles = useStyles();
 
   const [openAvatars, setOpenAvatars] = useState(false);
@@ -140,7 +139,7 @@ function UserForm(props: UserFormProps) {
       item.user_name = user;
       return item;
     });
-    onSubmit(currUser, user, avatars[0], _userProfiles);
+    onSubmit(user, avatars[0], _userProfiles);
   };
 
   const charaCount = userProfiles.length;

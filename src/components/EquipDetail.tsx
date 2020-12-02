@@ -380,7 +380,7 @@ function EquipDetail() {
             )}
             {enhanceLevel !== undefined && onChangeEnhance && (
               <Checkbox
-                classes={{ root: styles.checkbox }}
+                className={styles.checkbox}
                 checked={level > min}
                 onChange={() => {
                   const newLevel = level > min ? min : max;
@@ -448,7 +448,7 @@ function EquipDetail() {
                 return (
                   <Fragment key={value}>
                     <QuestLabel type={value} component="label" htmlFor={id} />
-                    <Checkbox id={id} classes={{ root: styles.checkbox }} value={value} checked={types.indexOf(value) > -1} onChange={handleChangeTypes} />
+                    <Checkbox id={id} className={styles.checkbox} value={value} checked={types.indexOf(value) > -1} onChange={handleChangeTypes} />
                   </Fragment>
                 );
               })}

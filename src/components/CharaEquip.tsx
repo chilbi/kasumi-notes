@@ -367,7 +367,7 @@ function CharaEquip(props: CharaEquipProps) {
             <div className={styles.labelBox}>
               <span className={clsx(styles.label, styles.uniqueColor)}>専用装備</span>
               <Checkbox
-                classes={{ root: styles.checkbox }}
+                className={styles.checkbox}
                 indeterminate={!hasUnique}
                 disabled={!hasUnique}
                 checked={!invalidUnique}

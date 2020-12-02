@@ -17,7 +17,7 @@ import UserProfileForm, { EditData } from './UserProfileForm';
 import SkeletonImage from './SkeletonImage';
 import Infobar from './Infobar';
 import { DBHelperContext } from './Contexts';
-import { deepClone, getPublicImageURL, getCharaID, getValidID } from '../DBHelper/helper';
+import { getPublicImageURL, getCharaID, getValidID } from '../DBHelper/helper';
 import maxUserProfile, { maxChara, nullID } from '../DBHelper/maxUserProfile';
 import { PromotionData } from '../DBHelper/promotion';
 import { CharaBaseData } from '../DBHelper';
@@ -25,30 +25,48 @@ import { PCRStoreValue } from '../db';
 import Big from 'big.js';
 import clsx from 'clsx';
 
-function getUserProfile(baseData: CharaBaseData, promotionData: PromotionData | undefined, editData: EditData) {
-  const maxRarity = baseData.charaData.max_rarity;
-  const userProfile = deepClone(baseData.userProfile);
-  const equip_enhance_status: Record<number, number> = {};
-  const slots = [0, 2, 4, 5, 3, 1];
-  let i = editData.slotCount;
-  while (i-- > 0) {
-    const slot = slots.pop()!;
-    if (promotionData) {
-      const equipData = promotionData.equip_slots[slot];
-      if (equipData) {
-        equip_enhance_status[slot] = equipData.max_enhance_level;
+function getUserProfile(charaData: PCRStoreValue<'chara_data'>, originUserProfile: PCRStoreValue<'user_profile'>, promotionData: PromotionData | undefined, editData: EditData): PCRStoreValue<'user_profile'> {
+  const { disabledObj } = editData;
+  const maxRarity = charaData.max_rarity;
+  let equipEnhanceStatus: Record<number, number> = {};
+  if (disabledObj.promotion) {
+    equipEnhanceStatus = { ...originUserProfile.equip_enhance_status };
+  } else {
+    const slots = [0, 2, 4, 5, 3, 1];
+    let i = editData.slotCount;
+    while (i-- > 0) {
+      const slot = slots.pop()!;
+      if (promotionData) {
+        const equipData = promotionData.equip_slots[slot];
+        if (equipData) {
+          equipEnhanceStatus[slot] = equipData.max_enhance_level;
+        }
+      } else {
+        equipEnhanceStatus[slot] = 5;
       }
-    } else {
-      equip_enhance_status[slot] = 5;
     }
   }
-  userProfile.level = editData.level;
-  userProfile.rarity = Math.min(editData.rarity, maxRarity);
-  userProfile.love_level_status[getCharaID(userProfile.unit_id)] = Math.min(editData.loveLevel, maxRarity === 6 ? 12 : 8);
-  userProfile.unique_enhance_level = baseData.charaData.unique_equip_id === nullID ? 0 : editData.uniqueLevel;
-  userProfile.promotion_level = editData.promotionLevel;
-  userProfile.equip_enhance_status = equip_enhance_status;
-  return userProfile;
+  const skillEnhanceStatus = disabledObj.level ? { ...originUserProfile.skill_enhance_status } : {
+    ub: editData.level,
+    1: editData.level,
+    2: editData.level,
+    ex: editData.level,
+  };
+  const loveLevelStatus = { ...originUserProfile.love_level_status };
+  if (!disabledObj.loveLevel) {
+    loveLevelStatus[getCharaID(originUserProfile.unit_id)] = Math.min(editData.loveLevel, maxRarity === 6 ? 12 : 8);
+  }
+  return {
+    user_name: originUserProfile.user_name,
+    unit_id: originUserProfile.unit_id,
+    level: disabledObj.level ? originUserProfile.level : editData.level,
+    rarity: disabledObj.rarity ? originUserProfile.rarity : Math.min(editData.rarity, maxRarity),
+    promotion_level: disabledObj.promotion ? originUserProfile.promotion_level : editData.promotionLevel,
+    unique_enhance_level: disabledObj.uniqueLevel ? originUserProfile.unique_enhance_level : charaData.unique_equip_id === nullID ? 0 : editData.uniqueLevel,
+    skill_enhance_status: skillEnhanceStatus,
+    equip_enhance_status: equipEnhanceStatus,
+    love_level_status: loveLevelStatus,
+  };
 }
 
 const useStyles = makeStyles((theme: Theme) => {
@@ -63,7 +81,7 @@ const useStyles = makeStyles((theme: Theme) => {
       backgroundColor: theme.palette.primary.main,
     },
     content: {
-      padding: theme.spacing(2),
+      padding: theme.spacing(0, 2),
       overflowX: 'hidden',
     },
     list: {
@@ -82,7 +100,17 @@ const useStyles = makeStyles((theme: Theme) => {
       borderRadius: '0.25rem',
     },
     infobar: {
-      padding: 0,
+      padding: theme.spacing(1, 0),
+    },
+    sticky: {
+      zIndex: theme.zIndex.modal,
+      position: 'sticky',
+      top: 0,
+      right: 0,
+      bottom: 'auto',
+      left: 0,
+      borderBottom: '1px solid ' + theme.palette.grey[100],
+      backgroundColor: '#fff',
     },
     toolbar: {
       display: 'flex',
@@ -229,7 +257,8 @@ function UserProfilesForm(props: UserProfilesFormProps) {
         setUnlockList(prev => {
           for (let unitID of selectList!) {
             const baseData = allChara!.find(value => unitID === value.userProfile.unit_id)!;
-            const userProfile = getUserProfile(baseData, undefined, editData);
+            const originUserProfile = isLock ? baseData.userProfile : prev.find(value => unitID === value.unit_id)!;
+            const userProfile = getUserProfile(baseData.charaData, originUserProfile, undefined, editData);
             if (isLock) {
               prev.push(userProfile);
             } else {
@@ -257,18 +286,13 @@ function UserProfilesForm(props: UserProfilesFormProps) {
         Promise.all(promiseArr).then(arr => {
           setUnlockList(prev => {
             for (let item of arr) {
-              const userProfile = getUserProfile(item.baseData, item.promotionData, editData);
-              if (openData.list === 'lock') {
-                prev.push(userProfile);
-              } else {
-                prev[prev.findIndex(value => userProfile.unit_id === value.unit_id)] = userProfile;
-              }
+              const originUserProfile = isLock ? item.baseData.userProfile : prev.find(value => item.baseData.userProfile.unit_id === value.unit_id)!;
+              const userProfile = getUserProfile(item.baseData.charaData, originUserProfile, item.promotionData, editData);
+              if (isLock) prev.push(userProfile);
+              else prev[prev.findIndex(value => userProfile.unit_id === value.unit_id)] = userProfile;
             }
-            if (openData.list === 'lock') {
-              return prev.sort((a, b) => a.unit_id - b.unit_id);
-            } else {
-              return [...prev];
-            }
+            if (isLock) return prev.sort((a, b) => a.unit_id - b.unit_id);
+            return [...prev];
           });
           setSelectList(new Set());
           setOpen(false);
@@ -279,7 +303,8 @@ function UserProfilesForm(props: UserProfilesFormProps) {
       const baseData = allChara!.find(value => unitID === value.userProfile.unit_id)!;
       if (allSlotLevel5) {
         setUnlockList(prev => {
-          const userProfile = getUserProfile(baseData, undefined, editData);
+          const originUserProfile = isLock ? baseData.userProfile : prev.find(value => unitID === value.unit_id)!;
+          const userProfile = getUserProfile(baseData.charaData, originUserProfile, undefined, editData);
           if (openData.list === 'lock') {
             prev.push(userProfile);
             return prev.sort((a, b) => a.unit_id - b.unit_id);
@@ -292,7 +317,8 @@ function UserProfilesForm(props: UserProfilesFormProps) {
       } else {
         dbHelper!.getPromotionData(unitID, editData.promotionLevel).then(promotionData => {
           setUnlockList(prev => {
-            const userProfile = getUserProfile(baseData, promotionData, editData);
+            const originUserProfile = isLock ? baseData.userProfile : prev.find(value => unitID === value.unit_id)!;
+            const userProfile = getUserProfile(baseData.charaData, originUserProfile, promotionData, editData);
             if (openData.list === 'lock') {
               prev.push(userProfile);
               return prev.sort((a, b) => a.unit_id - b.unit_id);
@@ -355,59 +381,61 @@ function UserProfilesForm(props: UserProfilesFormProps) {
     isAllSelect = selectCount === listCount;
     return (
       <div>
-        <Infobar className={styles.infobar} label={label} value={`${listCount}/${maxChara}`} />
-        <div className={styles.toolbar}>
-          {selectList && (
-            <>
-              <span>{selectCount}/{listCount}</span>
-              <IconButton
-                className={styles.editButton}
-                size="small" color="secondary"
-                data-target="set"
-                data-list={dataList}
-                data-click="open"
-                disabled={isZeroSelect}
-                onClick={handleClick}
-              >
-                {iconEl}
-              </IconButton>
-            </>
-          )}
-          <IconButton
-            size="small"
-            color="secondary"
-            data-list={dataList}
-            disabled={isNullSelect || isZeroSelect}
-            onClick={handleClearSelectList}
-          >
-            <HighlightOff />
-          </IconButton>
-          <IconButton
-            size="small"
-            color="secondary"
-            data-list={dataList}
-            disabled={isNullSelect || isZeroSelect || isAllSelect}
-            onClick={handleInvertSelectList}
-          >
-            <CheckCircle />
-          </IconButton>
-          <IconButton
-            size="small"
-            color="secondary"
-            data-list={dataList}
-            disabled={isNullSelect || isAllSelect}
-            onClick={handleAllSelectList}
-          >
-            <CheckCircleOutline />
-          </IconButton>
-          <IconButton
-            size="small"
-            data-list={dataList}
-            color={isNullSelect ? 'default' : 'secondary'}
-            onClick={handleToggleListSelectable}
-          >
-            <DoneAll />
-          </IconButton>
+        <div className={styles.sticky}>
+          <Infobar className={styles.infobar} label={label} value={`${listCount}/${maxChara}`} />
+          <div className={styles.toolbar}>
+            {selectList && (
+              <>
+                <span>{selectCount}/{listCount}</span>
+                <IconButton
+                  className={styles.editButton}
+                  size="small" color="secondary"
+                  data-target="set"
+                  data-list={dataList}
+                  data-click="open"
+                  disabled={isZeroSelect}
+                  onClick={handleClick}
+                >
+                  {iconEl}
+                </IconButton>
+              </>
+            )}
+            <IconButton
+              size="small"
+              color="secondary"
+              data-list={dataList}
+              disabled={isNullSelect || isZeroSelect}
+              onClick={handleClearSelectList}
+            >
+              <HighlightOff />
+            </IconButton>
+            <IconButton
+              size="small"
+              color="secondary"
+              data-list={dataList}
+              disabled={isNullSelect || isZeroSelect || isAllSelect}
+              onClick={handleInvertSelectList}
+            >
+              <CheckCircle />
+            </IconButton>
+            <IconButton
+              size="small"
+              color="secondary"
+              data-list={dataList}
+              disabled={isNullSelect || isAllSelect}
+              onClick={handleAllSelectList}
+            >
+              <CheckCircleOutline />
+            </IconButton>
+            <IconButton
+              size="small"
+              data-list={dataList}
+              color={isNullSelect ? 'default' : 'secondary'}
+              onClick={handleToggleListSelectable}
+            >
+              <DoneAll />
+            </IconButton>
+          </div>
         </div>
         <div className={styles.list}>
           {list.map(userProfile => {
@@ -451,7 +479,6 @@ function UserProfilesForm(props: UserProfilesFormProps) {
       <Dialog open={open} fullWidth onClose={handleClose}>
         {open && (
           <UserProfileForm
-            count={openData.target === 'set' ? (openData.list === 'lock' ? selectLockList!.size : selectUnlockList!.size) : undefined}
             charaBaseData={charaData}
             userProfile={openData.target === 'set' ? undefined : ((openData.list === 'lock' ? lockList : unlockList).find(value => value.unit_id === openData.target))}
             onCancel={handleClose}

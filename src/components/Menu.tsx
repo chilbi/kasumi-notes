@@ -332,7 +332,7 @@ function Menu() {
           <UserForm
             user={openMode === 'add' ? undefined : state.currUser}
             avatar={openMode === 'add' ? undefined : state.avatars[state.currUser]}
-            userProfiles={openMode === 'add' ? undefined : charaList!.map(item => item.userProfile)}
+            userProfiles={openMode === 'add' || !charaList ? undefined : charaList.map(item => item.userProfile)}
             currUser={state.currUser}
             allUser={state.allUser}
             allChara={allChara || []}

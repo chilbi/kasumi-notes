@@ -6,6 +6,7 @@ import DialogActions from '@material-ui/core/DialogActions';
 import Button from '@material-ui/core/Button';
 import ButtonBase from '@material-ui/core/ButtonBase';
 import Popover from '@material-ui/core/Popover';
+import Checkbox from '@material-ui/core/Checkbox';
 import Rarities from './Rarities';
 import DebouncedSlider from './DebouncedSlider';
 import { marks } from './ComboSlider';
@@ -61,6 +62,9 @@ const useStyles = makeStyles((theme: Theme) => {
       lineHeight: 'inherit',
       overflow: 'hidden',
     },
+    rarities: {
+      marginRight: 'auto',
+    },
     level: {
       padding: 0,
     },
@@ -81,7 +85,6 @@ const useStyles = makeStyles((theme: Theme) => {
     promotionBox: {
       display: 'inline-flex',
       alignItems: 'stretch',
-      marginLeft: 'auto',
       padding: theme.spacing(0, 2),
       height: h,
       lineHeight: 'inherit',
@@ -128,12 +131,23 @@ const useStyles = makeStyles((theme: Theme) => {
     popover: {
       overflow: 'hidden',
     },
-    disableUnique: {
+    checkbox: {
+      padding: 0,
+    },
+    disabled: {
       filter: 'grayscale(100%)',
     },
     ...bgStyles,
   };
 });
+
+export interface DisabledObj {
+  level: boolean;
+  rarity: boolean;
+  loveLevel: boolean;
+  uniqueLevel: boolean;
+  promotion: boolean;
+}
 
 export interface EditData {
   level: number;
@@ -142,6 +156,7 @@ export interface EditData {
   uniqueLevel: number;
   promotionLevel: number;
   slotCount: number;
+  disabledObj: DisabledObj;
 }
 
 interface UserProfileFormProps {
@@ -154,8 +169,26 @@ interface UserProfileFormProps {
 }
 
 function UserProfileForm(props: UserProfileFormProps) {
-  const { count, charaBaseData, userProfile = maxUserProfile, onCancel, onSubmit, onDelete } = props;
+  const { charaBaseData, userProfile = maxUserProfile, onCancel, onSubmit, onDelete } = props;
   const styles = useStyles();
+
+  const [disabledObj, setDisabledObj] = useState<DisabledObj>(() => {
+    return {
+      level: false,
+      rarity: false,
+      loveLevel: false,
+      uniqueLevel: false,
+      promotion: false,
+    };
+  });
+
+  const handleChangeDisabledObj = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
+    const key = e.currentTarget.getAttribute('data-key') as keyof DisabledObj;
+    setDisabledObj(prev => {
+      prev[key] = !prev[key];
+      return { ...prev };
+    });
+  }, []);
 
   const maxRarity = charaBaseData ? charaBaseData.charaData.max_rarity : 6;
   const maxLoveLevel = maxRarity === 6 ? 12 : 8;
@@ -239,23 +272,31 @@ function UserProfileForm(props: UserProfileFormProps) {
       uniqueLevel,
       promotionLevel,
       slotCount,
+      disabledObj,
     });
   };
 
   return (
     <>
       <DialogTitle className={styles.title}>
-        {(charaBaseData ? charaBaseData.charaData.unit_name + 'を' : `選択中の${count}キャラをまとめて`) + (onDelete ? '編集' : '追加')}
+        {(charaBaseData ? charaBaseData.charaData.unit_name + 'を' : 'まとめて') + (onDelete ? '編集' : '追加')}
       </DialogTitle>
       <DialogContent className={styles.content}>
         <div className={styles.line}>
-          <Rarities maxRarity={maxRarity} rarity={rarity} onChange={handleChangeRarity} />
-          <div className={clsx(styles.promotionBox, styles['bg' + getRankPoint(promotionLevel) as keyof typeof styles])}>
-            <ButtonBase className={styles.promotion} data-popover="promotion" onClick={handleOpen}>
+          {!charaBaseData && <Checkbox className={styles.checkbox} checked={!disabledObj.rarity} data-key="rarity" onClick={handleChangeDisabledObj} />}
+          <Rarities
+            classes={{ root: clsx(styles.rarities, disabledObj.rarity && styles.disabled) }}
+            maxRarity={maxRarity}
+            rarity={rarity}
+            onChange={disabledObj.rarity ? undefined : handleChangeRarity}
+          />
+          {!charaBaseData && <Checkbox className={styles.checkbox} checked={!disabledObj.promotion} data-key="promotion" onClick={handleChangeDisabledObj} />}
+          <div className={clsx(styles.promotionBox, styles['bg' + getRankPoint(promotionLevel) as keyof typeof styles], disabledObj.promotion && styles.disabled)}>
+            <ButtonBase className={styles.promotion} data-popover="promotion" disabled={disabledObj.promotion} onClick={handleOpen}>
               {'R' + promotionLevel}
             </ButtonBase>
             <span className={styles.sepa}>-</span>
-            <ButtonBase className={styles.slot} data-popover="slot" onClick={handleOpen}>
+            <ButtonBase className={styles.slot} data-popover="slot" disabled={disabledObj.promotion} onClick={handleOpen}>
               {slotCount}
             </ButtonBase>
           </div>
@@ -274,7 +315,8 @@ function UserProfileForm(props: UserProfileFormProps) {
           </Popover>
         </div>
         <div className={styles.line}>
-          <Infobar classes={{ root: clsx(styles.label, styles.level) }} label="Lv" value={level} />
+          {!charaBaseData && <Checkbox className={styles.checkbox} checked={!disabledObj.level} data-key="level" onClick={handleChangeDisabledObj} />}
+          <Infobar classes={{ root: clsx(styles.label, styles.level, disabledObj.level && styles.disabled) }} label="Lv" value={level} />
           <DebouncedSlider
             className={styles.slider}
             orientation="horizontal"
@@ -283,11 +325,13 @@ function UserProfileForm(props: UserProfileFormProps) {
             min={1}
             max={maxUserProfile.level}
             defaultValue={level}
+            disabled={disabledObj.level}
             onDebouncedChange={handleChangeLevel}
           />
         </div>
         <div className={styles.line}>
-          <span className={clsx(styles.label, styles.love)}>{loveLevel}</span>
+          {!charaBaseData && <Checkbox className={styles.checkbox} checked={!disabledObj.loveLevel} data-key="loveLevel" onClick={handleChangeDisabledObj} />}
+          <span className={clsx(styles.label, styles.love, disabledObj.loveLevel && styles.disabled)}>{loveLevel}</span>
           <DebouncedSlider
             className={styles.slider}
             orientation="horizontal"
@@ -296,12 +340,14 @@ function UserProfileForm(props: UserProfileFormProps) {
             min={1}
             max={maxLoveLevel}
             defaultValue={loveLevel}
+            disabled={disabledObj.loveLevel}
             onDebouncedChange={handleChangeLove}
           />
         </div>
         {hasUnique && (
           <div className={styles.line}>
-            <span className={clsx(styles.label, styles.unique, uniqueLevel < 1 && styles.disableUnique)}>{uniqueLevel}</span>
+            {!charaBaseData && <Checkbox className={styles.checkbox} checked={!disabledObj.uniqueLevel} data-key="uniqueLevel" onClick={handleChangeDisabledObj} />}
+            <span className={clsx(styles.label, styles.unique, (disabledObj.uniqueLevel || uniqueLevel < 1) && styles.disabled)}>{uniqueLevel}</span>
             <DebouncedSlider
               className={styles.slider}
               orientation="horizontal"
@@ -310,6 +356,7 @@ function UserProfileForm(props: UserProfileFormProps) {
               min={0}
               max={maxUserProfile.unique_enhance_level}
               defaultValue={uniqueLevel}
+              disabled={disabledObj.uniqueLevel}
               onDebouncedChange={handleChangeUnique}
             />
           </div>

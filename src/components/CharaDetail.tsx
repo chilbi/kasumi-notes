@@ -145,12 +145,13 @@ function CharaDetail() {
   const handleChangeLevel = useCallback((level: number) => {
     setDetail(prevDetail => {
       if (prevDetail) {
-        const skill_enhance_status = prevDetail.userProfile.skill_enhance_status;
-        skill_enhance_status['ub'] = level;
-        skill_enhance_status[1] = level;
-        skill_enhance_status[2] = level;
-        skill_enhance_status['ex'] = level;
         prevDetail.userProfile.level = level;
+        prevDetail.userProfile.skill_enhance_status = {
+          ub: level,
+          1: level,
+          2: level,
+          ex: level,
+        };
         return { ...prevDetail };
       }
     });

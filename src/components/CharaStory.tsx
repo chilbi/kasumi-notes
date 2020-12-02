@@ -141,7 +141,7 @@ function CharaStory(props: CharaStoryProps) {
               <span className={styles.title}>{story.title}</span>
               <span className={styles.subTitle}>{story.sub_title}</span>
               <Checkbox
-                classes={{ root: styles.checkbox }}
+                className={styles.checkbox}
                 checked={checked}
                 onChange={onChangeLoveLevel && (() => newLoveLevel !== loveLevel && onChangeLoveLevel(newLoveLevel, charaID))}
               />

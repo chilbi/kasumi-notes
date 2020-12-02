@@ -160,7 +160,7 @@ function CharaList() {
   return (
     <>
       <Header>
-        <IconButton color="primary" onClick={handleOpen}>
+        <IconButton color="inherit" onClick={handleOpen}>
           <FilterList />
         </IconButton>
         <Popover

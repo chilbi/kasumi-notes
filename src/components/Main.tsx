@@ -18,7 +18,7 @@ const useStyles = makeStyles((theme: Theme) => {
       display: 'flex',
       flexDirection: 'column',
       margin: '0 auto',
-      maxWidth: theme.maxWidth,
+      maxWidth: theme.breakpoints.width('sm'),
       minHeight: '100vh',
       backgroundColor: theme.palette.grey[100],
     },
@@ -53,16 +53,6 @@ function Main() {
   }, url);
   const charaDetailMatch = url.indexOf('/chara?unit_id=') > -1;
   const equipDetailMatch = url.indexOf('equip_id=') > -1;
-  // const charaDetailMatch = matchPath({
-  //   path: '/chara?unit_id=*',
-  //   caseSensitive: true,
-  //   end: true,
-  // }, url);
-  // const equipDetailMatch = matchPath({
-  //   path: '*&equip_id=*',
-  //   caseSensitive: true,
-  //   end: true,
-  // }, url);
   const noMatch = !charaMatch && !charaDetailMatch && !equipDetailMatch && !questMatch && !menuMatch;
 
   const [path, setPath] = useState('/chara');

@@ -5,6 +5,7 @@ import Popover from '@material-ui/core/Popover';
 import Radio from '@material-ui/core/Radio';
 import Divider from '@material-ui/core/Divider';
 import Search from '@material-ui/icons/Search';
+import SearchOff from '@material-ui/icons/SearchOff';
 import FilterList from '@material-ui/icons/FilterList';
 import SortRounded from '@material-ui/icons/SortRounded';
 import QuestLabel from './QuestLabel';
@@ -94,7 +95,7 @@ function Quest() {
   return (
     <>
       <Header>
-        <IconButton color="primary" onClick={handleOpen}>
+        <IconButton color="inherit" onClick={handleOpen}>
           <FilterList />
         </IconButton>
         <Popover
@@ -139,8 +140,8 @@ function Quest() {
           </div>
         </Popover>
         <h6 className={styles.subtitle}>{`クエスト${isSearchMode ? '検索' : '一覧'}`}</h6>
-        <IconButton color={isSearchMode ? 'secondary' : 'default'} onClick={handleToggleMode}>
-          <Search />
+        <IconButton color="inherit" onClick={handleToggleMode}>
+          {isSearchMode ? <Search /> : <SearchOff />}
         </IconButton>
       </Header>
       {isSearchMode ? <QuestSearchList sort={sort} /> : <QuestMapList sort={sort} type={type} />}

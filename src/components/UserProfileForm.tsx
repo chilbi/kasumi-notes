@@ -39,9 +39,17 @@ const useStyles = makeStyles((theme: Theme) => {
   }
 
   return {
+    gup: {
+      marginLeft: theme.spacing(3),
+    },
     title: {
+      display: 'flex',
+      alignItems: 'center',
+      padding: 0,
+      height: '3rem',
       color: '#fff',
       backgroundColor: theme.palette.primary.main,
+      overflow: 'hidden',
     },
     content: {
       overflowX: 'hidden',
@@ -279,7 +287,7 @@ function UserProfileForm(props: UserProfileFormProps) {
   return (
     <>
       <DialogTitle className={styles.title}>
-        {(charaBaseData ? charaBaseData.charaData.unit_name + 'を' : 'まとめて') + (onDelete ? '編集' : '追加')}
+        <span className={styles.gup}>{(charaBaseData ? `${charaBaseData.charaData.unit_name}を` : 'まとめて') + (onDelete ? '編集' : '追加')}</span>
       </DialogTitle>
       <DialogContent className={styles.content}>
         <div className={styles.line}>

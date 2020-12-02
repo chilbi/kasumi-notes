@@ -15,7 +15,6 @@ const useStyles = makeStyles((theme: Theme) => {
       bottom: 0,
       left: 0,
       height: '3.5rem',
-      flex: '0 0 auto',
       borderTop: '1px solid ' + theme.palette.grey[100],
       overflow: 'hidden',
     },

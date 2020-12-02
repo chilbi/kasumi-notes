@@ -279,10 +279,10 @@ function EquipDetail() {
   const handleBack = useCallback(() => {
     navigate(-1);
   }, [navigate]);
-  
+
   const header = useMemo(() => (
     <Header>
-      <IconButton color="primary" onClick={handleBack}>
+      <IconButton color="inherit" onClick={handleBack}>
         <ArrowBack />
       </IconButton>
       <h6 className={styles.subtitle}>装備詳細</h6>

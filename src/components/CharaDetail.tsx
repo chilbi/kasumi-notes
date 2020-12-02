@@ -371,12 +371,12 @@ function CharaDetail() {
 
   const header = useMemo(() => (
     <Header>
-      <IconButton color={isEqual ? 'primary' : 'secondary'} onClick={handleBack}>
+      <IconButton color="inherit" onClick={handleBack}>
         {isEqual ? <ArrowBack /> : <Clear />}
       </IconButton>
       <h6 className={styles.subtitle}>キャラ詳細</h6>
       <IconButton
-        color="secondary"
+        color="inherit"
         disabled={currUser === maxUserProfile.user_name || isEqual}
         onClick={handleSaveUserProfile}
       >

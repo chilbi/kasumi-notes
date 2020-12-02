@@ -9,6 +9,7 @@ import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
 import Avatar from '@material-ui/core/Avatar';
 import Badge from '@material-ui/core/Badge';
+import ArrowBack from '@material-ui/icons/ArrowBack';
 import Edit from '@material-ui/icons/Edit';
 import Infobar from './Infobar';
 import UserProfilesForm from './UserProfilesForm';
@@ -20,9 +21,17 @@ import clsx from 'clsx';
 
 const useStyles = makeStyles((theme: Theme) => {
   return {
+    gup: {
+      marginLeft: theme.spacing(3),
+    },
     title: {
+      display: 'flex',
+      alignItems: 'center',
+      padding: 0,
+      height: '3rem',
       color: '#fff',
       backgroundColor: theme.palette.primary.main,
+      overflow: 'hidden',
     },
     content: {
       padding: theme.spacing(2),
@@ -32,14 +41,21 @@ const useStyles = makeStyles((theme: Theme) => {
       display: 'flex',
       flexWrap: 'wrap',
       justifyContent: 'space-between',
+      marginBottom: theme.spacing(2),
     },
     charaEdit: {
       display: 'flex',
       alignItems: 'center',
-      padding: theme.spacing(2, 0),
+      marginTop: theme.spacing(2),
     },
     editButton: {
       marginLeft: theme.spacing(2),
+    },
+    iconButton: {
+      padding: 0,
+    },
+    fullScreen: {
+      maxWidth: theme.breakpoints.width('sm'),
     },
   };
 });
@@ -123,7 +139,9 @@ function UserForm(props: UserFormProps) {
 
   return (
     <>
-      <DialogTitle className={styles.title}>{props.user ? props.user : '新規ユーザー'}</DialogTitle>
+      <DialogTitle className={styles.title}>
+        <span className={styles.gup}>{props.user ? `${props.user}を編集` : '新規ユーザー'}</span>
+      </DialogTitle>
       <DialogContent className={styles.content}>
         <div className={styles.avatars}>
           <IconButton onClick={handleOpen} color="primary">
@@ -137,7 +155,6 @@ function UserForm(props: UserFormProps) {
             </IconButton>
           ))}
         </div>
-
         <TextField
           label="ユーザー名"
           required
@@ -147,7 +164,6 @@ function UserForm(props: UserFormProps) {
           value={user}
           onChange={handleChangeUserName}
         />
-
         <div className={styles.charaEdit}>
           <Badge variant="dot" color={charaCountError ? 'error' : 'primary'}>
             <Infobar
@@ -165,7 +181,13 @@ function UserForm(props: UserFormProps) {
         <Button variant="outlined" color="primary" disabled={charaCountError || userAvatarError || userNameError} onClick={handleSubmit}>OK</Button>
       </DialogActions>
 
-      <Dialog open={openAvatars} fullWidth onClose={handleCloseAvatars}>
+      <Dialog classes={{ paperFullScreen: styles.fullScreen }} open={openAvatars} fullScreen onClose={handleCloseAvatars}>
+        <DialogTitle className={styles.title}>
+          <IconButton color="inherit" onClick={handleCloseAvatars}>
+            <ArrowBack />
+          </IconButton>
+          <span>アイコンを選択</span>
+        </DialogTitle>
         {openAvatars && (
           <DialogContent className={clsx(styles.content, styles.avatars)}>
             {allChara.map(item => {
@@ -180,9 +202,12 @@ function UserForm(props: UserFormProps) {
             })}
           </DialogContent>
         )}
+        <DialogActions>
+          <Button variant="outlined" color="primary" onClick={handleCloseAvatars}>キャンセル</Button>
+        </DialogActions>
       </Dialog>
 
-      <Dialog open={openCharaList} fullWidth onClose={handleCloseCharaList}>
+      <Dialog classes={{ paperFullScreen: styles.fullScreen }} open={openCharaList} fullScreen onClose={handleCloseCharaList}>
         {openCharaList && (
           <UserProfilesForm
             allChara={allChara}

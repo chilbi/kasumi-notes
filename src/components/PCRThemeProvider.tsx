@@ -8,18 +8,15 @@ import HanziPenTtf from '../fonts/DF-HanziPen-W5.ttf';
 
 declare module '@material-ui/core/styles/createMuiTheme' {
   interface Theme {
-    maxWidth: string;
     rankColor: Record<1 | 2 | 4 | 7 | 11 | 18, string>;
   }
   interface ThemeOptions {
-    maxWidth?: string;
     rankColor?: Record<1 | 2 | 4 | 7 | 11 | 18, string>;
   }
 }
 
 function createTheme(pcrTheme: PCRTheme) {
   return createMuiTheme({
-    maxWidth: '37.5rem',
     rankColor: {
       1: '#94b5ee',
       2: '#f0ac8a',

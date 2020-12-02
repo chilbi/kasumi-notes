@@ -7,6 +7,7 @@ import DialogActions from '@material-ui/core/DialogActions';
 import ButtonBase from '@material-ui/core/ButtonBase';
 import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
+import ArrowBack from '@material-ui/icons/ArrowBack';
 import DoneAll from '@material-ui/icons/DoneAll';
 import CheckCircleOutline from '@material-ui/icons/CheckCircleOutline';
 import CheckCircle from '@material-ui/icons/CheckCircle';
@@ -77,8 +78,13 @@ const useStyles = makeStyles((theme: Theme) => {
 
   return {
     title: {
+      display: 'flex',
+      alignItems: 'center',
+      padding: 0,
+      height: '3rem',
       color: '#fff',
       backgroundColor: theme.palette.primary.main,
+      overflow: 'hidden',
     },
     content: {
       padding: theme.spacing(0, 2),
@@ -103,7 +109,7 @@ const useStyles = makeStyles((theme: Theme) => {
       padding: theme.spacing(1, 0),
     },
     sticky: {
-      zIndex: theme.zIndex.modal,
+      zIndex: theme.zIndex.appBar,
       position: 'sticky',
       top: 0,
       right: 0,
@@ -466,7 +472,12 @@ function UserProfilesForm(props: UserProfilesFormProps) {
 
   return (
     <>
-      <DialogTitle className={styles.title}>編集チャラ</DialogTitle>
+      <DialogTitle className={styles.title}>
+        <IconButton color="inherit" onClick={onCancel}>
+          <ArrowBack />
+        </IconButton>
+        <span>編集チャラ</span>
+      </DialogTitle>
       <DialogContent className={styles.content}>
         {getList('unlock')}
         {getList('lock')}

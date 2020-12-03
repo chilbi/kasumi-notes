@@ -535,7 +535,7 @@ function main() {
     // 'unlock_rarity_6.sql',
     // 'experience_team.sql',
     // 'guild.sql',
-    'item_data.sql',
+    // 'item_data.sql',
     // 'clan_battle_period.sql',
     // 'clan_battle_map_data.sql',
     // 'clan_battle_2_map_data.sql',

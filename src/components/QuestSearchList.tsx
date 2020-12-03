@@ -1,10 +1,13 @@
-import { Fragment, useState, useCallback, useMemo } from 'react';
-import { makeStyles, Theme } from '@material-ui/core/styles';
+import { Fragment, useContext, useState, useCallback, useMemo, useEffect } from 'react';
+import { makeStyles, alpha, Theme } from '@material-ui/core/styles';
+import IconButton from '@material-ui/core/IconButton';
 import ButtonBase from '@material-ui/core/ButtonBase';
 import QuestDropList from './QuestDropList';
 import Checkbox from '@material-ui/core/Checkbox';
+import Search from '@material-ui/icons/Search';
 import SkeletonImage from './SkeletonImage';
 import QuestLabel from './QuestLabel';
+import { DBHelperContext } from './Contexts';
 import { getPublicImageURL, QuestType } from '../DBHelper/helper';
 import localValue from '../localValue';
 import Big from 'big.js';
@@ -66,14 +69,57 @@ const useStyles = makeStyles((theme: Theme) => {
       alignItems: 'center',
       marginLeft: 'auto',
     },
+    iconButton: {
+      margin: theme.spacing(0.5),
+      padding: theme.spacing(1),
+    },
     iconRoot: {
-      marginRight: theme.spacing(1),
       width: iconSize + 'rem',
       height: iconSize + 'rem',
       borderRadius: iconRadius + 'rem',
     },
     checkbox: {
       padding: 0,
+    },
+    material: {
+      backgroundColor: '#fff',
+    },
+    mToolbar: {
+      flex: '1 1 auto',
+      display: 'flex',
+      alignItems: 'center',
+    },
+    mTypes: {
+      display: 'inline-flex',
+      marginLeft: 'auto',
+      borderRadius: '0.25rem',
+      border: '1px solid ' + theme.palette.secondary.main,
+      overflow: 'hidden',
+    },
+    mType: {
+      margin: 0,
+      padding: theme.spacing(0, 1),
+      borderLeft: '1px solid ' + theme.palette.secondary.main,
+      color: '#000',
+      backgroundColor: '#fff',
+      '&:first-child': {
+        borderLeft: 'none',
+      },
+    },
+    mCheck: {
+      color: '#fff',
+      backgroundColor: theme.palette.secondary.main,
+    },
+    items: {
+      display: 'flex',
+      flexWrap: 'wrap',
+      justifyContent: 'space-between',
+    },
+    hidden: {
+      display: 'none',
+    },
+    selected: {
+      backgroundColor: alpha(theme.palette.warning.main, 0.35),
     },
   };
 });
@@ -85,6 +131,18 @@ interface QuestSearchListProps {
 function QuestSearchList(props: QuestSearchListProps) {
   const { sort } = props;
   const styles = useStyles();
+  const dbHelper = useContext(DBHelperContext);
+
+  const [items, setItmes] = useState({ equipMaterial: [] as number[], memoryPiece: [] as number[] });
+
+  useEffect(() => {
+    if (dbHelper) Promise.all([dbHelper.getAllEquipMaterial(), dbHelper.getAllMemoryPiece()]).then(([equipMaterial, memoryPiece]) => {
+      setItmes({
+        equipMaterial: equipMaterial.sort((a, b) => b - a),
+        memoryPiece: memoryPiece.sort((a, b) => b - a),
+      });
+    });
+  }, [dbHelper]);
 
   const [index, setIndex] = useState(() => localValue.questSearchList.index.get());
   const handleChangeIndex = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
@@ -116,7 +174,98 @@ function QuestSearchList(props: QuestSearchListProps) {
     return new Set(sets[index].search.filter(item => item !== null) as number[]);
   }, [index, sets]);
 
+  const [open, setOpen] = useState(() => search.size < 1);
+  const handleClose = useCallback(() => setOpen(false), []);
+
+  const [listIndex, setListIndex] = useState('0');
+  const handleChangeListIndex = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
+    setListIndex(e.currentTarget.getAttribute('data-i')!);
+  }, []);
+
+  const [searchIndex, setSearchIndex] = useState<number | null>(null);
+
+  const [select, setSelect] = useState<number | null>(null);
+
+  const handleClickSearch = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
+    const currSearchIndex = parseInt(e.currentTarget.getAttribute('data-i')!);
+    setSearchIndex(prevSearchIndex => {
+      if (select !== null) {
+        setSets(prev => {
+          const newValue = [...prev];
+          const newSearch = [...prev[index].search];
+          newSearch[currSearchIndex] = select;
+          newValue[index].search = newSearch;
+          localValue.questSearchList.sets.set(newValue);
+          return newValue;
+        });
+        setSelect(null);
+        return null;
+      } else {
+        if (prevSearchIndex !== null) {
+          if (prevSearchIndex === currSearchIndex) {
+            setSets(prev => {
+              const newValue = [...prev];
+              const newSearch = [...prev[index].search];
+              newSearch[currSearchIndex] = null;
+              newValue[index].search = newSearch;
+              localValue.questSearchList.sets.set(newValue);
+              return newValue;
+            });
+          } else {
+            setSets(prev => {
+              const newValue = [...prev];
+              const newSearch = [...prev[index].search];
+              const currIndexValue = newSearch[currSearchIndex];
+              const prevIndexValue = newSearch[prevSearchIndex];
+              newSearch[currSearchIndex] = prevIndexValue;
+              newSearch[prevSearchIndex] = currIndexValue;
+              newValue[index].search = newSearch;
+              localValue.questSearchList.sets.set(newValue);
+              return newValue;
+            });
+          }
+          return null;
+        } else {
+          return currSearchIndex;
+        }
+      }
+    });
+    setOpen(true);
+  }, [index, select]);
+
+  const handleClickItem = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
+    const currSelect = parseInt(e.currentTarget.getAttribute('data-item')!);
+    setSelect(prevSelect => {
+      if (searchIndex !== null) {
+        setSets(prev => {
+          const newValue = [...prev];
+          const newSearch = [...prev[index].search];
+          newSearch[searchIndex] = currSelect;
+          newValue[index].search = newSearch;
+          localValue.questSearchList.sets.set(newValue);
+          return newValue;
+        });
+        setSearchIndex(null);
+        return null;
+      } else {
+        if (prevSelect === currSelect) {
+          return null;
+        } else {
+          return currSelect;
+        }
+      }
+    });
+  }, [index, searchIndex]);
+
   const types = sets[index].types;
+
+  const renderList = (list: number[], type: 'icon_equipment' | 'icon_item') => list.map(item => {
+    return (
+      <ButtonBase key={item} className={clsx(styles.iconButton, select === item && styles.selected)} data-item={item} onClick={handleClickItem}>
+        <SkeletonImage classes={{ root: styles.iconRoot }} src={getPublicImageURL(type, item)} save />
+      </ButtonBase>
+    );
+  });
 
   return (
     <>
@@ -135,16 +284,29 @@ function QuestSearchList(props: QuestSearchListProps) {
         </div>
         <div className={styles.seting}>
           <div className={styles.search}>
-            {sets[index].search.map((rewardID, i) => (
-              <ButtonBase key={i}>
+            {sets[index].search.map((materialID, i) => (
+              <ButtonBase key={i} className={clsx(styles.iconButton, searchIndex === i && styles.selected)} data-i={i} onClick={handleClickSearch}>
                 <SkeletonImage
                   classes={{ root: styles.iconRoot }}
-                  src={rewardID === null ? undefined : getPublicImageURL('icon_equipment', rewardID)}
+                  src={materialID === null ? undefined : getPublicImageURL(materialID > 33000 ? 'icon_equipment' : 'icon_item', materialID)}
                 />
               </ButtonBase>
             ))}
           </div>
-          <div className={styles.types}>
+          <div className={clsx(styles.mToolbar, !open && styles.hidden)}>
+            <IconButton color="primary" onClick={handleClose}>
+              <Search />
+            </IconButton>
+            <div className={styles.mTypes}>
+              <ButtonBase className={clsx(styles.mType, listIndex === '0' && styles.mCheck)} data-i="0" onClick={handleChangeListIndex}>
+                装備品
+              </ButtonBase>
+              <ButtonBase className={clsx(styles.mType, listIndex === '1' && styles.mCheck)} data-i="1" onClick={handleChangeListIndex}>
+                メモリーピース
+              </ButtonBase>
+            </div>
+          </div>
+          <div className={clsx(styles.types, open && styles.hidden)}>
             {(['N', 'H', 'VH', 'S'] as const).map(value => {
               const id = 'quest-search-types-' + value;
               return (
@@ -157,7 +319,11 @@ function QuestSearchList(props: QuestSearchListProps) {
           </div>
         </div>
       </div>
-      {search.size > 0 && (
+      <div className={clsx(styles.material, !open && styles.hidden)}>
+        <div className={clsx(styles.items, listIndex !== '0' && styles.hidden)}>{renderList(items.equipMaterial, 'icon_equipment')}</div>
+        <div className={clsx(styles.items, listIndex !== '1' && styles.hidden)}>{renderList(items.memoryPiece, 'icon_item')}</div>
+      </div>
+      {!open && search.size > 0 && (
         <QuestDropList
           sort={sort}
           search={search}

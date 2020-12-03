@@ -484,8 +484,8 @@ function UserProfilesForm(props: UserProfilesFormProps) {
         {getList('lock')}
       </DialogContent>
       <DialogActions>
-        <Button variant="outlined" color="primary" onClick={onCancel}>キャンセル</Button>
-        <Button variant="outlined" color="primary" disabled={disabledOK} onClick={handleSubmit}>OK</Button>
+        <Button color="primary" variant="contained" disableElevation onClick={onCancel}>キャンセル</Button>
+        <Button color="primary" variant="contained" disableElevation disabled={disabledOK} onClick={handleSubmit}>OK</Button>
       </DialogActions>
       
       <Dialog open={open} fullWidth onClose={handleClose}>

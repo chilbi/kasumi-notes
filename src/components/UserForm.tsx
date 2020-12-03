@@ -188,8 +188,8 @@ function UserForm(props: UserFormProps) {
         </div>
       </DialogContent>
       <DialogActions>
-        <Button variant="outlined" color="primary" onClick={onCancel}>キャンセル</Button>
-        <Button variant="outlined" color="primary" disabled={charaCountError || userAvatarError || userNameError} onClick={handleSubmit}>OK</Button>
+        <Button color="primary" variant="contained" disableElevation onClick={onCancel}>キャンセル</Button>
+        <Button color="primary" variant="contained" disableElevation disabled={charaCountError || userAvatarError || userNameError} onClick={handleSubmit}>OK</Button>
       </DialogActions>
 
       <Dialog classes={{ paperFullScreen: styles.fullScreen }} open={openAvatars} fullScreen onClose={handleCloseAvatars}>
@@ -212,7 +212,7 @@ function UserForm(props: UserFormProps) {
           })}
         </DialogContent>
         <DialogActions>
-          <Button variant="outlined" color="primary" onClick={handleCloseAvatars}>キャンセル</Button>
+          <Button color="primary" variant="contained" disableElevation onClick={handleCloseAvatars}>キャンセル</Button>
         </DialogActions>
       </Dialog>
 

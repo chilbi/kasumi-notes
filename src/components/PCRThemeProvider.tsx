@@ -29,7 +29,10 @@ function createTheme(pcrTheme: PCRTheme) {
       typeof abs === 'string' ? abs
         : abs === 0 ? '0' : `${0.25 * abs}rem`,
     palette: {
-      primary: { main: '#5f96f5' },
+      primary: {
+        main: '#5f96f5',
+        contrastText: '#fff',
+      },
       secondary: { main: '#f84e90' },
     },
     typography: {
@@ -63,7 +66,7 @@ function createTheme(pcrTheme: PCRTheme) {
             fontFamily: 'inherit',
             fontWeight: 700,
           },
-        }
+        },
       },
       MuiTab: {
         styleOverrides: {
@@ -71,7 +74,7 @@ function createTheme(pcrTheme: PCRTheme) {
             fontFamily: 'inherit',
             fontWeight: 700,
           },
-        }
+        },
       },
     },
   });

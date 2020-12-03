@@ -371,9 +371,9 @@ function UserProfileForm(props: UserProfileFormProps) {
         )}
       </DialogContent>
       <DialogActions>
-        <Button variant="outlined" color="primary" onClick={onCancel}>キャンセル</Button>
-        {onDelete && < Button variant="outlined" color="primary" onClick={onDelete}>削除</Button>}
-        <Button variant="outlined" color="primary" onClick={handleSubmit}>OK</Button>
+        <Button color="primary" variant="contained" disableElevation onClick={onCancel}>キャンセル</Button>
+        {onDelete && <Button color="primary" variant="contained" disableElevation onClick={onDelete}>削除</Button>}
+        <Button color="primary" variant="contained" disableElevation onClick={handleSubmit}>OK</Button>
       </DialogActions>
     </>
   );

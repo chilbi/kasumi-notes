@@ -12,7 +12,7 @@ import { getQuestList, QuestData } from './quest';
 import { plus, Property } from './property';
 import ImageData from './ImageData';
 import maxUserProfile, { nullID } from './maxUserProfile';
-import { deepClone, Range } from './helper';
+import { deepClone, mapQuestType, Range } from './helper';
 import Big from 'big.js';
 
 export type PropertyData = [RarityData, PromotionStatusData, PromotionData, StoryStatusData, UniqueEquipData | undefined];
@@ -199,6 +199,37 @@ class DBHelper extends ImageData {
       promotionLevel--;
     }
     return Promise.all(promiseArr);
+  }
+
+  async getAllEquipMaterial(): Promise<number[]> {
+    const equipments = await this.db.transaction('equipment_data', 'readonly').store.getAll();
+    const result: number[] = [];
+    for (let item of equipments) {
+      if (item.craft_flg === 0) {
+        result.push(item.equipment_id);
+      }
+    }
+    return result;
+  }
+
+  async getAllMemoryPiece(): Promise<number[]> {
+    const tx = this.db.transaction('quest_data', 'readonly');
+    const hRange = mapQuestType('H');
+    const vhRange = mapQuestType('VH');
+    const [hQuestList, vhQuestList] = await Promise.all([
+      tx.store.getAll(IDBKeyRange.bound(hRange[0], hRange[1])),
+      tx.store.getAll(IDBKeyRange.bound(vhRange[0], vhRange[1]))
+    ]);
+    const resultSet: Set<number> = new Set();
+    for (let item of hQuestList) {
+      resultSet.add(item.reward_image_1);
+    }
+    for (let item of vhQuestList) {
+      if (item.reward_image_1 > 0) {
+        resultSet.add(item.reward_image_1);
+      }
+    }
+    return [...resultSet];
   }
 
   setAllCharaData(allCharaData: PCRStoreValue<'chara_data'>[]): Promise<void> {

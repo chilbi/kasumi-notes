@@ -97,11 +97,11 @@ const useStyles = makeStyles((theme: Theme) => {
 interface CharaStoryProps {
   storyStatus?: StoryStatusData;
   userProfile?: PCRStoreValue<'user_profile'>;
-  onChangeLove?: (loveLevel: number, charaID: number) => void;
+  onChangeLove: (loveLevel: number, charaID: number) => void;
 }
 
 function CharaStory(props: CharaStoryProps) {
-  const { storyStatus = {} as Partial<StoryStatusData>, userProfile = maxUserProfile, onChangeLove: onChangeLoveLevel } = props;
+  const { storyStatus = {} as Partial<StoryStatusData>, userProfile = maxUserProfile, onChangeLove } = props;
   const { love_level_status } = userProfile;
   const styles = useStyles();
 
@@ -143,7 +143,7 @@ function CharaStory(props: CharaStoryProps) {
               <Checkbox
                 className={styles.checkbox}
                 checked={checked}
-                onChange={onChangeLoveLevel && (() => newLoveLevel !== loveLevel && onChangeLoveLevel(newLoveLevel, charaID))}
+                onChange={() => newLoveLevel !== loveLevel && onChangeLove(newLoveLevel, charaID)}
               />
             </div>
             <div className={styles.contentBox}>

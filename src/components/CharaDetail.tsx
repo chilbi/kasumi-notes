@@ -207,7 +207,7 @@ function CharaDetail() {
           const equip_enhance_status: EquipEnhanceStatus = {};
           for (let i = 0; i < 6; i++) {
             const slot = promotionData.equip_slots[i];
-            if (slot) equip_enhance_status[i] = slot.max_enhance_level;
+            equip_enhance_status[i] = slot ? slot.max_enhance_level : -1;
           }
           prevDetail.userProfile.equip_enhance_status = equip_enhance_status;
           prevDetail.userProfile.promotion_level = promotion_level;

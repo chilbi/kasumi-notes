@@ -67,7 +67,7 @@ function ComboSlider(props: ComboSliderProps) {
         <IconButton
           className={clsx(styles.iconButton, classes.iconButton)}
           disabled={defaultValue === max}
-          onClick={onDebouncedChange && (() => onDebouncedChange(defaultValue as number + 1))}
+          onClick={() => onDebouncedChange(defaultValue as number + 1)}
         >
           <Add />
         </IconButton>
@@ -83,7 +83,7 @@ function ComboSlider(props: ComboSliderProps) {
         <IconButton
           className={clsx(styles.iconButton, classes.iconButton)}
           disabled={defaultValue === min}
-          onClick={onDebouncedChange && (() => onDebouncedChange(defaultValue as number - 1))}
+          onClick={() => onDebouncedChange(defaultValue as number - 1)}
         >
           <Remove />
         </IconButton>

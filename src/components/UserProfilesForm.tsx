@@ -33,18 +33,19 @@ function getUserProfile(charaData: PCRStoreValue<'chara_data'>, originUserProfil
   if (disabledObj.promotion) {
     equipEnhanceStatus = { ...originUserProfile.equip_enhance_status };
   } else {
-    const slots = [0, 2, 4, 5, 3, 1];
-    let i = editData.slotCount;
-    while (i-- > 0) {
-      const slot = slots.pop()!;
+    const slotsIndex = [0, 2, 4, 5, 3, 1];
+    let count = editData.slotCount;
+    while (count-- > 0) {
+      const i = slotsIndex.pop()!;
       if (promotionData) {
-        const equipData = promotionData.equip_slots[slot];
-        if (equipData) {
-          equipEnhanceStatus[slot] = equipData.max_enhance_level;
-        }
+        const slot = promotionData.equip_slots[i];
+        equipEnhanceStatus[i] = slot ? slot.max_enhance_level : -1;
       } else {
-        equipEnhanceStatus[slot] = 5;
+        equipEnhanceStatus[i] = 5;
       }
+    }
+    for (let i of slotsIndex) {
+      equipEnhanceStatus[i] = -1;
     }
   }
   const skillEnhanceStatus = disabledObj.level ? { ...originUserProfile.skill_enhance_status } : {

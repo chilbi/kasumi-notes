@@ -168,7 +168,7 @@ interface CharaSkillProps {
   property?: Property<Big>;
   unitSkillData?: UnitSkillData;
   userProfile?: PCRStoreValue<'user_profile'>;
-  onChangeSkill?: (level: number, skillKey: keyof SkillEnhanceStatus) => void;
+  onChangeSkill: (level: number, skillKey: keyof SkillEnhanceStatus) => void;
 }
 
 function CharaSkill(props: CharaSkillProps) {
@@ -301,7 +301,7 @@ function CharaSkill(props: CharaSkillProps) {
             min={1}
             max={maxUserProfile.level}
             defaultValue={skillLevel}
-            onDebouncedChange={onChangeSkill && (value => onChangeSkill(value, skillKey))} 
+            onDebouncedChange={value => onChangeSkill(value, skillKey)} 
           >
             <span>{'Lv' + skillLevel}</span>
           </ComboSlider>

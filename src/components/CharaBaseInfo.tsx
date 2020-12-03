@@ -86,8 +86,8 @@ interface CharaBaseInfoProps {
   actualName?: string;
   rarity?: number;
   position?: number;
-  stillExpand?: boolean;
-  onToggleStillExpand?: () => void;
+  stillExpand: boolean;
+  onToggleStillExpand: () => void;
 }
 
 function CharaBaseInfo(props: CharaBaseInfoProps) {

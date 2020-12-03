@@ -14,7 +14,7 @@ import { EquipData } from '../DBHelper/equip';
 import { PromotionData } from '../DBHelper/promotion';
 import { UniqueEquipData } from '../DBHelper/unique_equip';
 import { getPublicImageURL, getRankPoint, getValidID } from '../DBHelper/helper';
-import maxUserProfile from '../DBHelper/maxUserProfile';
+import maxUserProfile, { nullID } from '../DBHelper/maxUserProfile';
 import { PCRStoreValue } from '../db';
 import localValue from '../localValue';
 import Big from 'big.js';
@@ -220,9 +220,9 @@ interface CharaEquipProps {
   promotions?: PromotionData[];
   uniqueEquip?: UniqueEquipData;
   userProfile?: PCRStoreValue<'user_profile'>;
-  onChangeEquip?: (equipEnhanceLevel: number, i: number) => void;
-  onChangeUnique?: (uniqueEnhanceLevel: number) => void;
-  onChangePromotion?: (promotionLevel: number) => void;
+  onChangeEquip: (equipEnhanceLevel: number, i: number) => void;
+  onChangeUnique: (uniqueEnhanceLevel: number) => void;
+  onChangePromotion: (promotionLevel: number) => void;
 }
 
 function CharaEquip(props: CharaEquipProps) {
@@ -247,18 +247,17 @@ function CharaEquip(props: CharaEquipProps) {
     : promotions.find(item => item.promotion_level === promotion_level)!.equip_slots;
 
   const getSlotData = (promotionLevel: number, slot: EquipData | undefined, i: number) => {
-    let srcName: number | string = 999999;
+    let srcName: number | string = nullID;
     let maxEnhanceLevel = 5;
     let enhanceLevel = 5;
     let invalid = true;
     let isCurr = false;
     if (slot) {
-      let enhance_level = equip_enhance_status[i];
-      enhance_level = enhance_level === undefined ? -1 : enhance_level;
+      const _enhanceLevel = equip_enhance_status[i];
       isCurr = promotionLevel === promotion_level;
-      invalid = (isCurr && enhance_level < 0);
+      invalid = (isCurr && _enhanceLevel < 0);
       maxEnhanceLevel = slot.max_enhance_level;
-      enhanceLevel = enhance_level;
+      enhanceLevel = _enhanceLevel;
       srcName = (invalid ? 'invalid_' : '') + slot.equipment_id;
     }
     const imgSrc = getPublicImageURL('icon_equipment', srcName);
@@ -282,7 +281,7 @@ function CharaEquip(props: CharaEquipProps) {
     setEquipDetail({ uniqueEquipData: uniqueEquip, enhanceLevel: unique_enhance_level, onChangeEnhance: onChangeUnique })
   }, [setEquipDetail, onChangeUnique, uniqueEquip, unique_enhance_level]);
   const handleToggleUnique = useCallback(() => {
-    onChangeUnique && onChangeUnique(invalidUnique ? maxUserProfile.unique_enhance_level : 0);
+    onChangeUnique(invalidUnique ? maxUserProfile.unique_enhance_level : 0);
   }, [invalidUnique, onChangeUnique]);
 
   return (
@@ -332,14 +331,14 @@ function CharaEquip(props: CharaEquipProps) {
             let handleClick;
             if (quick) {
               handleClick = () => {
-                onChangeEquip && onChangeEquip(enhanceLevel > -1 ? -1 : maxEnhanceLevel, i);
+                onChangeEquip(enhanceLevel > -1 ? -1 : maxEnhanceLevel, i);
               };
             } else {
               handleClick = () => {
                 setEquipDetail({
                   equipData: slot,
                   enhanceLevel: enhanceLevel,
-                  onChangeEnhance: onChangeEquip && (enhanceLevel => onChangeEquip(enhanceLevel, i)),
+                  onChangeEnhance: enhanceLevel => onChangeEquip(enhanceLevel, i),
                 });
               };
             }
@@ -402,7 +401,7 @@ function CharaEquip(props: CharaEquipProps) {
                   <Radio
                     classes={{ root: styles.checkbox }}
                     checked={isEqual}
-                    onChange={onChangePromotion && (() => !isEqual && onChangePromotion(promotionLevel))}
+                    onChange={() => !isEqual && onChangePromotion(promotionLevel)}
                   />
                 </div>
                 <div className={styles.equipBox}>

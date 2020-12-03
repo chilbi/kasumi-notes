@@ -111,11 +111,11 @@ interface CharaUserProfileProps {
   maxRarity?: number;
   uniqueEquipID?: number;
   userProfile?: PCRStoreValue<'user_profile'>;
-  onChangeRarity?: (rarity: number) => void;
-  onChangeLevel?: (level: number) => void;
-  onChangeLove?: (loveLevel: number, charaID: number) => void;
-  onChangeUnique?: (uniqueEnhanceLevel: number) => void;
-  onChangePromotion?: (promotionLevel: number) => void;
+  onChangeRarity: (rarity: number) => void;
+  onChangeLevel: (level: number) => void;
+  onChangeLove: (loveLevel: number, charaID: number) => void;
+  onChangeUnique: (uniqueEnhanceLevel: number) => void;
+  onChangePromotion: (promotionLevel: number) => void;
 }
 
 function CharaUserProfile(props: CharaUserProfileProps) {
@@ -143,7 +143,7 @@ function CharaUserProfile(props: CharaUserProfileProps) {
 
   const handleChangePromotion = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
     const value = parseInt(e.currentTarget.getAttribute('data-value')!);
-    if (onChangePromotion && userProfile.promotion_level !== value) onChangePromotion(value);
+    if (userProfile.promotion_level !== value) onChangePromotion(value);
     setAnchorEl(null);
   }, [onChangePromotion, userProfile.promotion_level]);
 
@@ -179,7 +179,7 @@ function CharaUserProfile(props: CharaUserProfileProps) {
         min={1}
         max={maxRarity === 6 ? 12 : 8}
         defaultValue={userProfile.unit_id ? userProfile.love_level_status[chara_id] : love_level}
-        onDebouncedChange={onChangeLove && (value => userProfile.unit_id && onChangeLove(value, chara_id))}
+        onDebouncedChange={value => userProfile.unit_id && onChangeLove(value, chara_id)}
       >
         <span>{love_level}</span>
       </ComboSlider>

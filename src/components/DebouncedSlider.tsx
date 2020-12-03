@@ -4,7 +4,7 @@ import useDebounced from '../hooks/useDebounced';
 
 export interface DebouncedSliderProps extends SliderProps {
   wait?: number;
-  onDebouncedChange?: (value: number) => void;
+  onDebouncedChange: (value: number) => void;
 }
 
 function DebouncedSlider(props: DebouncedSliderProps) {
@@ -18,7 +18,7 @@ function DebouncedSlider(props: DebouncedSliderProps) {
   }, [defaultValue]);
 
   const handleDebouncedChange = useDebounced((value: number) => {
-    onDebouncedChange && onDebouncedChange(value);
+    onDebouncedChange(value);
   }, wait);
 
   const handleChange = useCallback((e: React.SyntheticEvent, value: number | number[]) => {

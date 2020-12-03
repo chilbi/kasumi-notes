@@ -6,7 +6,6 @@ import { EnemyRewardData } from './enemy_reward_data';
 import { EquipmentCraft } from './equipment_craft';
 import { EquipmentData } from './equipment_data';
 import { EquipmentEnhanceRate } from './equipment_enhance_rate';
-import { ItemData } from './item_data';
 import { QuestData } from './quest_data';
 import { SkillAction } from './skill_action';
 import { SkillData } from './skill_data';
@@ -52,10 +51,6 @@ export interface PCRDBSchema extends DBSchema {
   'equipment_enhance_rate': {
     key: number;
     value: EquipmentEnhanceRate;
-  };
-  'item_data': {
-    key: number;
-    value: ItemData;
   };
   'quest_data': {
     key: number;

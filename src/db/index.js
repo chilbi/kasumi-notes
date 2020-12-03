@@ -6,7 +6,7 @@ import { openDB } from 'idb';
  * @returns {Promise<import('.').PCRDB>}
  */
 export default function openPCRDB(options = {}) {
-  return openDB('pcr', 10023302, {
+  return openDB('pcr', 10023303, {
     upgrade(db, oldVersion, newVersion, transaction) {
       if (newVersion !== oldVersion) {
         if (db.objectStoreNames.length > 0) {
@@ -41,10 +41,6 @@ export default function openPCRDB(options = {}) {
 
       db.createObjectStore('equipment_enhance_rate', {
         keyPath: 'equipment_id',
-      });
-
-      db.createObjectStore('item_data', {
-        keyPath: 'item_id',
       });
 
       db.createObjectStore('quest_data', {

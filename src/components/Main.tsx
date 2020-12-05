@@ -13,7 +13,7 @@ import clsx from 'clsx';
 const useStyles = makeStyles((theme: Theme) => {
   return {
     root: {
-      backgroundColor: '#263238',
+      backgroundColor: theme.palette.grey.A400,
     },
     container: {
       display: 'flex',

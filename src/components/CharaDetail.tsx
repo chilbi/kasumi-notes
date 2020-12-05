@@ -6,6 +6,7 @@ import IconButton from '@material-ui/core/IconButton';
 import ArrowBack from '@material-ui/icons/ArrowBack';
 import Clear from '@material-ui/icons/Clear';
 import Done from '@material-ui/icons/Done';
+import Slide from '@material-ui/core/Slide';
 import Collapse from '@material-ui/core/Collapse';
 import { useNavigate } from 'react-router-dom';
 import Header from './Header';
@@ -417,6 +418,12 @@ function CharaDetail() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   ), [tabsValue]);
 
+  const currRef = useRef(tabsValue);
+  const prev = currRef.current;
+  useEffect(() => {
+    currRef.current = tabsValue;
+  }, [tabsValue]);
+
   return (
     <>
       {header}
@@ -426,24 +433,34 @@ function CharaDetail() {
         {userProfileMemo.userProfile}
         {tabs}
       </div>
-      <div className={clsx(styles.tabpanel, tabsValue !== 0 && styles.hidden)} role="tabpanel">
-        {userProfileMemo.skill}
-      </div>
-      <div className={clsx(styles.tabpanel, tabsValue !== 1 && styles.hidden)} role="tabpanel">
-        {userProfileMemo.equip}
-      </div>
-      <div className={clsx(styles.tabpanel, tabsValue !== 2 && styles.hidden)} role="tabpanel">
-        {userProfileMemo.story}
-      </div>
-      <div className={clsx(styles.tabpanel, tabsValue !== 3 && styles.hidden)} role="tabpanel">
-        {userProfileMemo.status}
-        {detailMemo.comment}
-      </div>
-      <div className={clsx(styles.tabpanel, tabsValue !== 4 && styles.hidden)} role="tabpanel">
-        {detailMemo.profile}
-        {detailMemo.catchCopy}
-        {detailMemo.selfText}
-      </div>
+      <Slide in={tabsValue === 0} direction={prev > 0 ? 'right' : 'left'}>
+        <div className={clsx(styles.tabpanel, tabsValue !== 0 && styles.hidden)} role="tabpanel">
+          {userProfileMemo.skill}
+        </div>
+      </Slide>
+      <Slide in={tabsValue === 1} direction={prev > 1 ? 'right' : 'left'}>
+        <div className={clsx(styles.tabpanel, tabsValue !== 1 && styles.hidden)} role="tabpanel">
+          {userProfileMemo.equip}
+        </div>
+      </Slide>
+      <Slide in={tabsValue === 2} direction={prev > 2 ? 'right' : 'left'}>
+        <div className={clsx(styles.tabpanel, tabsValue !== 2 && styles.hidden)} role="tabpanel">
+          {userProfileMemo.story}
+        </div>
+      </Slide >
+      <Slide in={tabsValue === 3} direction={prev > 3 ? 'right' : 'left'}>
+        <div className={clsx(styles.tabpanel, tabsValue !== 3 && styles.hidden)} role="tabpanel">
+          {userProfileMemo.status}
+          {detailMemo.comment}
+        </div>
+      </Slide>
+      <Slide in={tabsValue === 4} direction="left">
+        <div className={clsx(styles.tabpanel, tabsValue !== 4 && styles.hidden)} role="tabpanel">
+          {detailMemo.profile}
+          {detailMemo.catchCopy}
+          {detailMemo.selfText}
+        </div>
+      </Slide>
     </>
   );
 }

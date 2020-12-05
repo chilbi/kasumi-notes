@@ -76,10 +76,18 @@ const useStyles = makeStyles((theme: Theme) => {
       display: 'inline-flex',
       marginRight: theme.spacing(0, 1),
     },
+    rightPart: {
+      flex: '1 1 auto',
+      position: 'relative',
+    },
     types: {
+      position: 'absolute',
+      top: 0,
+      right: 0,
+      bottom: 0,
+      left: 'auto',
       display: 'inline-flex',
       alignItems: 'center',
-      marginLeft: 'auto',
     },
     iconButton: {
       margin: theme.spacing(0.5),
@@ -97,8 +105,12 @@ const useStyles = makeStyles((theme: Theme) => {
       backgroundColor: '#fff',
     },
     mToolbar: {
-      flex: '1 1 auto',
-      display: 'flex',
+      position: 'absolute',
+      top: 0,
+      right: 0,
+      bottom: 0,
+      left: 0,
+      display: 'inline-flex',
       alignItems: 'center',
     },
     mTypes: {
@@ -311,34 +323,36 @@ function QuestSearchList(props: QuestSearchListProps) {
               </ButtonBase>
             ))}
           </div>
-          <Fade in={open}>
-            <div className={clsx(styles.mToolbar, !open && styles.hidden)}>
-              <IconButton color="primary" onClick={handleSearch}>
-                <Search />
-              </IconButton>
-              <div className={styles.mTypes}>
-                <ButtonBase className={clsx(styles.mType, listIndex === '0' && styles.mCheck)} data-i="0" onClick={handleChangeListIndex}>
-                  装備品
-                </ButtonBase>
-                <ButtonBase className={clsx(styles.mType, listIndex === '1' && styles.mCheck)} data-i="1" onClick={handleChangeListIndex}>
-                  メモリーピース
-                </ButtonBase>
+          <div className={styles.rightPart}>
+            <Fade in={open}>
+              <div className={styles.mToolbar}>
+                <IconButton color="primary" onClick={handleSearch}>
+                  <Search />
+                </IconButton>
+                <div className={styles.mTypes}>
+                  <ButtonBase className={clsx(styles.mType, listIndex === '0' && styles.mCheck)} data-i="0" onClick={handleChangeListIndex}>
+                    装備品
+                  </ButtonBase>
+                  <ButtonBase className={clsx(styles.mType, listIndex === '1' && styles.mCheck)} data-i="1" onClick={handleChangeListIndex}>
+                    メモリーピース
+                  </ButtonBase>
+                </div>
               </div>
-            </div>
-          </Fade>
-          <Fade in={!open}>
-            <div className={clsx(styles.types, open && styles.hidden)}>
-              {(['N', 'H', 'VH', 'S'] as const).map(value => {
-                const id = 'quest-search-types-' + value;
-                return (
-                  <Fragment key={value}>
-                    <QuestLabel type={value} component="label" htmlFor={id} />
-                    <Checkbox id={id} value={value} className={styles.checkbox} checked={types.indexOf(value) > -1} onChange={handleChangeTypes} />
-                  </Fragment>
-                );
-              })}
-            </div>
-          </Fade>
+            </Fade>
+            <Fade in={!open}>
+              <div className={styles.types}>
+                {(['N', 'H', 'VH', 'S'] as const).map(value => {
+                  const id = 'quest-search-types-' + value;
+                  return (
+                    <Fragment key={value}>
+                      <QuestLabel type={value} component="label" htmlFor={id} />
+                      <Checkbox id={id} value={value} className={styles.checkbox} checked={types.indexOf(value) > -1} onChange={handleChangeTypes} />
+                    </Fragment>
+                  );
+                })}
+              </div>
+            </Fade>
+          </div>
         </div>
       </div>
       <Fade in={open}>

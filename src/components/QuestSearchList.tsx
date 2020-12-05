@@ -2,6 +2,8 @@ import { Fragment, useContext, useState, useCallback, useMemo, useEffect } from 
 import { makeStyles, alpha, Theme } from '@material-ui/core/styles';
 import IconButton from '@material-ui/core/IconButton';
 import ButtonBase from '@material-ui/core/ButtonBase';
+import Slide from '@material-ui/core/Slide';
+import Fade from '@material-ui/core/Fade';
 import QuestDropList from './QuestDropList';
 import Checkbox from '@material-ui/core/Checkbox';
 import Search from '@material-ui/icons/Search';
@@ -40,6 +42,9 @@ const useStyles = makeStyles((theme: Theme) => {
       border: '1px solid ' + theme.palette.primary.main,
       overflow: 'hidden',
     },
+    disabledSets: {
+      borderColor: theme.palette.action.disabled,
+    },
     set: {
       flex: '1 1 auto',
       margin: 0,
@@ -51,9 +56,15 @@ const useStyles = makeStyles((theme: Theme) => {
         borderLeft: 'none',
       },
     },
-    check: {
+    disabledSet: {
+      borderLeftColor: theme.palette.action.disabled,
+    },
+    checked: {
       color: '#fff',
       backgroundColor: theme.palette.primary.main,
+    },
+    disabledChecked: {
+      backgroundColor: theme.palette.action.disabled,
     },
     seting: {
       display: 'flex',
@@ -175,7 +186,6 @@ function QuestSearchList(props: QuestSearchListProps) {
   }, [index, sets]);
 
   const [open, setOpen] = useState(() => search.size < 1);
-  const handleClose = useCallback(() => setOpen(false), []);
 
   const [listIndex, setListIndex] = useState('0');
   const handleChangeListIndex = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
@@ -185,6 +195,12 @@ function QuestSearchList(props: QuestSearchListProps) {
   const [searchIndex, setSearchIndex] = useState<number | null>(null);
 
   const [select, setSelect] = useState<number | null>(null);
+
+  const handleSearch = useCallback(() => {
+    setSearchIndex(null);
+    setSelect(null);
+    setOpen(false);
+  }, []);
 
   const handleClickSearch = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
     const currSearchIndex = parseInt(e.currentTarget.getAttribute('data-i')!);
@@ -270,12 +286,13 @@ function QuestSearchList(props: QuestSearchListProps) {
   return (
     <>
       <div className={styles.toolbar}>
-        <div className={styles.sets}>
+        <div className={clsx(styles.sets, open && styles.disabledSets)}>
           {sets.map((set, i) => (
             <ButtonBase
               key={i}
-              className={clsx(styles.set, index === i && styles.check)}
+              className={clsx(styles.set, { [styles.disabledSet]: open, [styles.checked]: index === i, [styles.disabledChecked]: index === i && open })}
               data-index={i}
+              disabled={open}
               onClick={handleChangeIndex}
             >
               {set.name}
@@ -293,43 +310,57 @@ function QuestSearchList(props: QuestSearchListProps) {
               </ButtonBase>
             ))}
           </div>
-          <div className={clsx(styles.mToolbar, !open && styles.hidden)}>
-            <IconButton color="primary" onClick={handleClose}>
-              <Search />
-            </IconButton>
-            <div className={styles.mTypes}>
-              <ButtonBase className={clsx(styles.mType, listIndex === '0' && styles.mCheck)} data-i="0" onClick={handleChangeListIndex}>
-                装備品
-              </ButtonBase>
-              <ButtonBase className={clsx(styles.mType, listIndex === '1' && styles.mCheck)} data-i="1" onClick={handleChangeListIndex}>
-                メモリーピース
-              </ButtonBase>
+          <Fade in={open}>
+            <div className={clsx(styles.mToolbar, !open && styles.hidden)}>
+              <IconButton color="primary" onClick={handleSearch}>
+                <Search />
+              </IconButton>
+              <div className={styles.mTypes}>
+                <ButtonBase className={clsx(styles.mType, listIndex === '0' && styles.mCheck)} data-i="0" onClick={handleChangeListIndex}>
+                  装備品
+                </ButtonBase>
+                <ButtonBase className={clsx(styles.mType, listIndex === '1' && styles.mCheck)} data-i="1" onClick={handleChangeListIndex}>
+                  メモリーピース
+                </ButtonBase>
+              </div>
             </div>
-          </div>
-          <div className={clsx(styles.types, open && styles.hidden)}>
-            {(['N', 'H', 'VH', 'S'] as const).map(value => {
-              const id = 'quest-search-types-' + value;
-              return (
-                <Fragment key={value}>
-                  <QuestLabel type={value} component="label" htmlFor={id} />
-                  <Checkbox id={id} value={value} className={styles.checkbox} checked={types.indexOf(value) > -1} onChange={handleChangeTypes} />
-                </Fragment>
-              );
-            })}
-          </div>
+          </Fade>
+          <Fade in={!open}>
+            <div className={clsx(styles.types, open && styles.hidden)}>
+              {(['N', 'H', 'VH', 'S'] as const).map(value => {
+                const id = 'quest-search-types-' + value;
+                return (
+                  <Fragment key={value}>
+                    <QuestLabel type={value} component="label" htmlFor={id} />
+                    <Checkbox id={id} value={value} className={styles.checkbox} checked={types.indexOf(value) > -1} onChange={handleChangeTypes} />
+                  </Fragment>
+                );
+              })}
+            </div>
+          </Fade>
         </div>
       </div>
-      <div className={clsx(styles.material, !open && styles.hidden)}>
-        <div className={clsx(styles.items, listIndex !== '0' && styles.hidden)}>{renderList(items.equipMaterial, 'icon_equipment')}</div>
-        <div className={clsx(styles.items, listIndex !== '1' && styles.hidden)}>{renderList(items.memoryPiece, 'icon_item')}</div>
-      </div>
-      {!open && search.size > 0 && (
-        <QuestDropList
-          sort={sort}
-          search={search}
-          rangeTypes={types}
-        />
-      )}
+      <Fade in={open}>
+        <div className={clsx(styles.material, !open && styles.hidden)}>
+          <Slide in={listIndex === '0'} direction="right">
+            <div className={clsx(styles.items, listIndex !== '0' && styles.hidden)}>{renderList(items.equipMaterial, 'icon_equipment')}</div>
+          </Slide>
+          <Slide in={listIndex === '1'} direction="left">
+            <div className={clsx(styles.items, listIndex !== '1' && styles.hidden)}>{renderList(items.memoryPiece, 'icon_item')}</div>
+          </Slide>
+        </div>
+      </Fade>
+      <Fade in={!open} mountOnEnter unmountOnExit>
+        <div>
+          {search.size > 0 && (
+            <QuestDropList
+              sort={sort}
+              search={search}
+              rangeTypes={types}
+            />
+          )}
+        </div>
+      </Fade>
     </>
   );
 }

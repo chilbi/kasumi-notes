@@ -17,6 +17,7 @@ import Add from '@material-ui/icons/Add';
 import UserProfileForm, { EditData } from './UserProfileForm';
 import SkeletonImage from './SkeletonImage';
 import Infobar from './Infobar';
+import Transitions from './Transitions';
 import { DBHelperContext } from './Contexts';
 import { getPublicImageURL, getCharaID, getValidID } from '../DBHelper/helper';
 import maxUserProfile, { maxChara, nullID } from '../DBHelper/maxUserProfile';
@@ -488,7 +489,7 @@ function UserProfilesForm(props: UserProfilesFormProps) {
         <Button color="primary" variant="contained" disableElevation disabled={disabledOK} onClick={handleSubmit}>OK</Button>
       </DialogActions>
       
-      <Dialog open={open} fullWidth onClose={handleClose}>
+      <Dialog open={open} TransitionComponent={Transitions.SlideUp} fullWidth onClose={handleClose}>
         <UserProfileForm
           charaBaseData={charaData}
           userProfile={openData.target === 'set' ? undefined : ((openData.list === 'lock' ? lockList : unlockList).find(value => value.unit_id === openData.target))}

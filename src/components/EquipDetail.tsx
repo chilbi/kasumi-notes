@@ -6,6 +6,8 @@ import IconButton from '@material-ui/core/IconButton';
 import ArrowBack from '@material-ui/icons/ArrowBack';
 import SortRounded from '@material-ui/icons/SortRounded';
 import Checkbox from '@material-ui/core/Checkbox';
+import Collapse from '@material-ui/core/Collapse';
+import Fade from '@material-ui/core/Fade';
 import ExpandLess from '@material-ui/icons/ExpandLess';
 import { useNavigate } from 'react-router-dom';
 import Header from './Header';
@@ -37,10 +39,10 @@ const useStyles = makeStyles((theme: Theme) => {
 
   return {
     paper: {
-      flex: '0 0 auto',
       marginTop: theme.spacing(1),
       padding: theme.spacing(1),
       backgroundColor: '#fff',
+      overflowX: 'hidden',
     },
     flexBox: {
       display: 'flex',
@@ -168,9 +170,6 @@ const useStyles = makeStyles((theme: Theme) => {
     sortRotate: {
       transform: 'rotateX(180deg)',
     },
-    hidden: {
-      display: 'none',
-    },
   };
 });
 
@@ -188,7 +187,7 @@ function EquipDetail() {
     if (dbHelper && (!equipDetail || (isUnique ? equipDetail.uniqueEquipData!.equipment_id : equipDetail.equipData!.equipment_id) !== equipID)) {
       if (isUnique) {
         dbHelper.getUniqueEquipData(equipID).then(uniqueEquipData => {
-          if(uniqueEquipData) setEquipDetail({ uniqueEquipData });
+          if (uniqueEquipData) setEquipDetail({ uniqueEquipData });
         });
       } else {
         dbHelper.getEquipData(equipID).then(equipData => {
@@ -250,7 +249,7 @@ function EquipDetail() {
     max = equipData ? equipData.max_enhance_level : 5;
     id = equipData ? equipData.equipment_id : 999999;
     name = equipData ? equipData.equipment_data.equipment_name : '???';
-    desc = equipData ? equipData.equipment_data.description: '???';
+    desc = equipData ? equipData.equipment_data.description : '???';
   }
 
   const [level, setLevel] = useState(() => {
@@ -392,11 +391,13 @@ function EquipDetail() {
           </div>
         </div>
       </div>
-      <div className={clsx(styles.paper, styles.desc, !descExpand && styles.hidden)}>
-        {desc.split('\n').map((txt, i) => (
-          <Fragment key={i}>{txt}<br /></Fragment>
-        ))}
-      </div>
+      <Collapse in={descExpand}>
+        <div className={clsx(styles.paper, styles.desc)}>
+          {desc.split('\n').map((txt, i) => (
+            <Fragment key={i}>{txt}<br /></Fragment>
+          ))}
+        </div>
+      </Collapse>
       <div className={clsx(styles.property, styles.paper)}>
         <CharaStatus property={property} partial />
       </div>
@@ -408,64 +409,70 @@ function EquipDetail() {
               <ExpandLess />
             </IconButton>
           </div>
-          {equipCraft && (
-            <div className={clsx(styles.craftList, !craftExpand && styles.hidden)}>
-              {equipCraft.craft_data.map(renderCraftItem)}
-            </div>
-          )}
-          {uniqueCraft && (
-            <div className={clsx(styles.uniqueCraftList, !craftExpand && styles.hidden)}>
-              {uniqueCraft.map(item => {
-                const lv = item[0];
-                return (
-                  <div key={lv} className={styles.uniqueCraftItem}>
-                    {item[1].map(renderCraftItem)}
-                    <Button
-                      className={styles.button}
-                      variant="outlined"
-                      color="secondary"
-                      onClick={() => {
-                        onChangeEnhance && onChangeEnhance(lv);
-                        setLevel(lv);
-                      }}
-                    >
-                      {'Lv' + item[0]}
-                    </Button>
-                  </div>
-                );
-              })}
-            </div>
-          )}
+          <Collapse in={craftExpand}>
+            {equipCraft && (
+              <div className={styles.craftList}>
+                {equipCraft.craft_data.map(renderCraftItem)}
+              </div>
+            )}
+            {uniqueCraft && (
+              <div className={styles.uniqueCraftList}>
+                {uniqueCraft.map(item => {
+                  const lv = item[0];
+                  return (
+                    <div key={lv} className={styles.uniqueCraftItem}>
+                      {item[1].map(renderCraftItem)}
+                      <Button
+                        className={styles.button}
+                        variant="outlined"
+                        color="secondary"
+                        onClick={() => {
+                          onChangeEnhance && onChangeEnhance(lv);
+                          setLevel(lv);
+                        }}
+                      >
+                        {'Lv' + item[0]}
+                      </Button>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </Collapse>
         </div>
       )}
-      {search.size > 0 && (
-        <>
-          <div className={clsx(styles.paper, styles.labelBox)}>
-            <div className={styles.label}>入手場所</div>
-            <div className={styles.types}>
-              {(['N', 'H', 'VH', 'S'] as const).map(value => {
-                const id = 'equip-detail-types-' + value;
-                return (
-                  <Fragment key={value}>
-                    <QuestLabel type={value} component="label" htmlFor={id} />
-                    <Checkbox id={id} className={styles.checkbox} value={value} checked={types.indexOf(value) > -1} onChange={handleChangeTypes} />
-                  </Fragment>
-                );
-              })}
-              <label className={styles.sortLabel} htmlFor="equip-detail-sort">{sort === 'asc' ? '昇順' : '降順'}</label>
-              <IconButton
-                id="equip-detail-sort"
-                className={clsx(styles.sort, sort === 'asc' && styles.sortRotate)}
-                color="secondary"
-                onClick={handleToggleSort}
-              >
-                <SortRounded />
-              </IconButton>
-            </div>
-          </div>
-          <QuestDropList sort={sort} search={search} rangeTypes={types} />
-        </>
-      )}
+      <Fade in={search.size > 0}>
+        <div>
+          {search.size > 0 && (
+            <>
+              <div className={clsx(styles.paper, styles.labelBox)}>
+                <div className={styles.label}>入手場所</div>
+                <div className={styles.types}>
+                  {(['N', 'H', 'VH', 'S'] as const).map(value => {
+                    const id = 'equip-detail-types-' + value;
+                    return (
+                      <Fragment key={value}>
+                        <QuestLabel type={value} component="label" htmlFor={id} />
+                        <Checkbox id={id} className={styles.checkbox} value={value} checked={types.indexOf(value) > -1} onChange={handleChangeTypes} />
+                      </Fragment>
+                    );
+                  })}
+                  <label className={styles.sortLabel} htmlFor="equip-detail-sort">{sort === 'asc' ? '昇順' : '降順'}</label>
+                  <IconButton
+                    id="equip-detail-sort"
+                    className={clsx(styles.sort, sort === 'asc' && styles.sortRotate)}
+                    color="secondary"
+                    onClick={handleToggleSort}
+                  >
+                    <SortRounded />
+                  </IconButton>
+                </div>
+              </div>
+              <QuestDropList sort={sort} search={search} rangeTypes={types} />
+            </>
+          )}
+        </div>
+      </Fade>
     </>
   );
 }

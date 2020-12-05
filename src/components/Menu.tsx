@@ -17,6 +17,7 @@ import Clear from '@material-ui/icons/Clear';
 import Header from './Header';
 import UserForm from './UserForm';
 import SkeletonImage from './SkeletonImage';
+import Transitions from './Transitions';
 import { PCRThemeContext, DBHelperContext, CharaListContext } from './Contexts';
 import { deepClone, getPublicImageURL } from '../DBHelper/helper';
 import maxUserProfile from '../DBHelper/maxUserProfile';
@@ -337,7 +338,7 @@ function Menu() {
           </div>
         </FormControl>
       </div>
-      <Dialog open={openMode !== null} fullWidth onClose={handleClose}>
+      <Dialog open={openMode !== null} TransitionComponent={Transitions.SlideUp} fullWidth onClose={handleClose}>
         <UserForm
           user={openMode === 'add' ? undefined : state.currUser}
           avatar={openMode === 'add' ? undefined : state.avatars[state.currUser]}

@@ -77,12 +77,14 @@ function QuestMapList(props: QuestMapListProps) {
           onChange={handleChangeArea}
         />
       )}
-      <QuestDropList
-        sort={sort}
-        search={search}
-        rangeTypes={range}
-        onRewardClick={handleRewardClick}
-      />
+      <div>
+        <QuestDropList
+          sort={sort}
+          search={search}
+          rangeTypes={range}
+          onRewardClick={handleRewardClick}
+        />
+      </div>
     </>
   );
 }

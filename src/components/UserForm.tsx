@@ -13,6 +13,7 @@ import Edit from '@material-ui/icons/Edit';
 import SkeletonImage from './SkeletonImage';
 import Infobar from './Infobar';
 import UserProfilesForm from './UserProfilesForm';
+import Transitions from './Transitions';
 import { getPublicImageURL, getValidID } from '../DBHelper/helper';
 import { maxChara } from '../DBHelper/maxUserProfile';
 import { CharaBaseData } from '../DBHelper';
@@ -192,7 +193,7 @@ function UserForm(props: UserFormProps) {
         <Button color="primary" variant="contained" disableElevation disabled={charaCountError || userAvatarError || userNameError} onClick={handleSubmit}>OK</Button>
       </DialogActions>
 
-      <Dialog classes={{ paperFullScreen: styles.fullScreen }} open={openAvatars} fullScreen onClose={handleCloseAvatars}>
+      <Dialog classes={{ paperFullScreen: styles.fullScreen }} open={openAvatars} TransitionComponent={Transitions.SlideLeft} fullScreen onClose={handleCloseAvatars}>
         <DialogTitle className={styles.title}>
           <IconButton color="inherit" onClick={handleCloseAvatars}>
             <ArrowBack />
@@ -216,7 +217,7 @@ function UserForm(props: UserFormProps) {
         </DialogActions>
       </Dialog>
 
-      <Dialog classes={{ paperFullScreen: styles.fullScreen }} open={openCharaList} fullScreen onClose={handleCloseCharaList}>
+      <Dialog classes={{ paperFullScreen: styles.fullScreen }} open={openCharaList} TransitionComponent={Transitions.SlideLeft} fullScreen onClose={handleCloseCharaList}>
         <UserProfilesForm
           allChara={allChara}
           userProfiles={userProfiles}

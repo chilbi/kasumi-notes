@@ -6,6 +6,7 @@ import IconButton from '@material-ui/core/IconButton';
 import ArrowBack from '@material-ui/icons/ArrowBack';
 import Clear from '@material-ui/icons/Clear';
 import Done from '@material-ui/icons/Done';
+import Collapse from '@material-ui/core/Collapse';
 import { useNavigate } from 'react-router-dom';
 import Header from './Header';
 import CharaStillImage from './CharaStillImage';
@@ -267,8 +268,10 @@ function CharaDetail() {
       self_text = unitProfile.self_text;
     }
     return {
-      stillImage: stillExpand && (
-        <CharaStillImage unitID={unit_id} rarity={rarity} />
+      stillImage: (
+        <Collapse in={stillExpand} mountOnEnter unmountOnExit>
+          <CharaStillImage unitID={unit_id} rarity={rarity} />
+        </Collapse>
       ),
       baseInfo: (
         <CharaBaseInfo

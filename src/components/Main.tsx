@@ -1,6 +1,7 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { Navigate, useNavigate, useLocation, matchPath } from 'react-router-dom';
 import { makeStyles, Theme } from '@material-ui/core/styles';
+import Slide from '@material-ui/core/Slide';
 import Footer from './Footer';
 import CharaList from './CharaList';
 import CharaDetail from './CharaDetail';
@@ -24,6 +25,7 @@ const useStyles = makeStyles((theme: Theme) => {
     },
     item: {
       flex: '1 0 auto',
+      backgroundColor: theme.palette.grey[100],
     },
     hidden: {
       display: 'none',
@@ -63,27 +65,50 @@ function Main() {
 
   if (charaMatch && path !== '/chara') setPath('/chara');
   else if (questMatch && path !== '/quest') setPath('/quest');
-  else if (menuMatch && path !== '/menu') setPath('/menu')
+  else if (menuMatch && path !== '/menu') setPath('/menu');
+
+  const hiddenCharaList = !charaMatch || charaDetailMatch || equipDetailMatch;
+  const hiddenCharaDetail = !charaDetailMatch || equipDetailMatch;
+  const hiddenEquipDetail = !equipDetailMatch;
+  const hiddenQuest = !questMatch;
+  const hiddenMenu = !menuMatch;
+
+  const currRef = useRef(equipDetailMatch ? 4 : charaDetailMatch ? 3 : menuMatch ? 2 : questMatch ? 1 : 0);
+  const prev = currRef.current;
+  useEffect(() => {
+    currRef.current = equipDetailMatch ? 4 : charaDetailMatch ? 3 : menuMatch ? 2 : questMatch ? 1 : 0;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [equipDetailMatch, charaDetailMatch, !menuMatch, !questMatch]);
  
   return (
     <div className={styles.root}>
       <div className={styles.container}>
-        <div id="chara-list" className={clsx(styles.item, (!charaMatch || charaDetailMatch || equipDetailMatch) && styles.hidden)}>
-          <CharaList />
-        </div>
-        <div id="chara-detail" className={clsx(styles.item, (!charaDetailMatch || equipDetailMatch) && styles.hidden)}>
-          {charaDetailMatch && <CharaDetail />}
-        </div>
-        <div id="equip-detail" className={clsx(styles.item, !equipDetailMatch && styles.hidden)}>
-          {equipDetailMatch && <EquipDetail />}
-        </div>
-        <div id="quest" className={clsx(styles.item, !questMatch && styles.hidden)}>
-          {questMatch && <Quest />}
-        </div>
-        <div id="menu" className={clsx(styles.item, !menuMatch && styles.hidden)}>
-          {menuMatch && <Menu />}
-        </div>
-        {!charaDetailMatch && <Footer value={path} onChange={handleChange} />}
+        <Slide in={!hiddenCharaList} direction={prev > 0 ? 'right' : 'left'}>
+          <div id="chara-list" className={clsx(styles.item, hiddenCharaList && styles.hidden)}>
+            <CharaList />
+          </div>
+        </Slide>
+        <Slide in={!hiddenQuest} direction={prev > 1 ? 'right' : 'left'}>
+          <div id="quest" className={clsx(styles.item, hiddenQuest && styles.hidden)}>
+            {questMatch && <Quest />}
+          </div>
+        </Slide>
+        <Slide in={!hiddenMenu} direction="left">
+          <div id="menu" className={clsx(styles.item, hiddenMenu && styles.hidden)}>
+            {menuMatch && <Menu />}
+          </div>
+        </Slide>
+        <Slide in={!hiddenCharaDetail} direction={prev > 3 ? 'right' : 'left'}>
+          <div id="chara-detail" className={clsx(styles.item, hiddenCharaDetail && styles.hidden)}>
+            {charaDetailMatch && <CharaDetail />}
+          </div>
+        </Slide>
+        <Slide in={!hiddenEquipDetail} direction="left">
+          <div id="equip-detail" className={clsx(styles.item, hiddenEquipDetail && styles.hidden)}>
+            {equipDetailMatch && <EquipDetail />}
+          </div>
+        </Slide>
+        <Footer className={clsx(charaDetailMatch && styles.hidden)} value={path} onChange={handleChange} />
         {noMatch && <Navigate to="/chara" replace />}
       </div>
     </div>

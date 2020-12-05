@@ -4,6 +4,7 @@ import BottomNavigationAction from '@material-ui/core/BottomNavigationAction';
 import PeopleAlt from '@material-ui/icons/PeopleAlt';
 import Gavel from '@material-ui/icons/Gavel';
 import Menu from '@material-ui/icons/Menu';
+import clsx from 'clsx';
 
 const useStyles = makeStyles((theme: Theme) => {
   return {
@@ -22,16 +23,17 @@ const useStyles = makeStyles((theme: Theme) => {
 });
 
 interface FooterProps {
+  className?: string;
   value: string;
   onChange: (e: React.SyntheticEvent, newValue: string) => void;
 }
 
 function Footer(props: FooterProps) {
-  const { value, onChange } = props;
+  const { className, value, onChange } = props;
   const styles = useStyles();
 
   return (
-    <BottomNavigation className={styles.root} showLabels value={value} onChange={onChange}>
+    <BottomNavigation className={clsx(styles.root, className)} showLabels value={value} onChange={onChange}>
       <BottomNavigationAction value="/chara" label="キャラ" icon={<PeopleAlt />} />
       <BottomNavigationAction value="/quest" label="クエスト" icon={<Gavel />} />
       <BottomNavigationAction value="/menu" label="メニュー" icon={<Menu />} />

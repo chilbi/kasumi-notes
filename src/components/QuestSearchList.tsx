@@ -43,21 +43,22 @@ const useStyles = makeStyles((theme: Theme) => {
       overflow: 'hidden',
     },
     disabledSets: {
-      borderColor: theme.palette.action.disabled,
+      border: '1px solid ' + theme.palette.action.disabled,
     },
     set: {
       flex: '1 1 auto',
       margin: 0,
       padding: 0,
       borderLeft: '1px solid ' + theme.palette.primary.main,
-      color: '#000',
+      color: 'inherit',
       backgroundColor: '#fff',
       '&:first-child': {
         borderLeft: 'none',
       },
     },
     disabledSet: {
-      borderLeftColor: theme.palette.action.disabled,
+      borderLeft: '1px solid ' + theme.palette.action.disabled,
+      color: theme.palette.text.disabled,
     },
     checked: {
       color: '#fff',

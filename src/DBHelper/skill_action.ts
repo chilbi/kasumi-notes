@@ -156,7 +156,8 @@ function insertFormula(desc: string, formula: [/*calc*/number | string, /*formul
 
 function getCoefficient(thisAction: SkillAction): string {
   const actionValue1 = thisAction.action_value_1;
-  if (actionValue1 > 200 && actionValue1 < 290) return `{${actionValue1.toString().substr(1)}}の数`; //　クロエ Main2
+  if (actionValue1 === 290) return 'UBの使用回数';
+  if (actionValue1 > 200 && actionValue1 < 300) return `{${actionValue1.toString().substr(1)}}の数`; //　クロエ Main2
   switch (actionValue1) {
     case 0:
       return '残りＨＰ'; // ぺコリーヌ UB+
@@ -178,8 +179,6 @@ function getCoefficient(thisAction: SkillAction): string {
       return '後方にいる味方の数'; // ノゾミ（クリスマス）
     case 102:
       return 'オメメちゃんの数';
-    case 290:
-      return 'UBの使用回数';
     default:
       return '???';
   }
@@ -254,12 +253,12 @@ const actionMap: Record</*action_type*/number, /*getDescription*/(this: SkillAct
         desc += `、クリティカル時のダメージは2倍ではなく${this.action_value_6 * 2}倍になる`;
       }
       if (this.action_detail_1 === 3 && this.action_detail_2 === 1 && this.action_value_5 === 1) {
-        desc += '、攻撃は必ず命中し、クリティカルする'
+        desc += '、攻撃は必ず命中し、1ヒットのダメージはクリティカルする'
       } else {
         if (this.action_detail_1 === 3 && this.action_detail_2 === 1)
           desc += '、攻撃は必ず命中する';
         if (this.action_value_5 === 1)
-          desc += '、ダメージは必ずクリティカルする';
+          desc += '、1ヒットのダメージは必ずクリティカルする';
       }
     }
     return insertFormula(desc, formula);
@@ -915,6 +914,14 @@ const actionMap: Record</*action_type*/number, /*getDescription*/(this: SkillAct
   75: function () {
     const actionObj = getActionObj(getActionNum(this.action_detail_2));
     return [actionObj, `が${this.action_value_1}回ダメージを与えるたびに発動するようになる。`];
+  },
+  77: function () {
+    const stateID = this.action_value_2;
+    const stateObj = getStateObj(stateID);
+    if(stateID === 92) { // アキノ（クリスマス） Main1
+      return ['ステータスアップ効果を受けるたびに、自分に', stateObj, 'の数を1増やせるようになる。', stateObj, `の数は最大${this.action_value_1}まで追加される` + getEffectTime(this.action_value_3)];
+    }
+    return this.description;
   },
   // ex
   90: function (skillLevel) {

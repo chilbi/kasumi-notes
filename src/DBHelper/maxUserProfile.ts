@@ -4,7 +4,7 @@ export const nullID = 999999;
 
 export const maxArea = 40;
 
-export const maxChara = 132;
+export const maxChara = 134;
 
 const maxUserProfile: PCRStoreValue<'user_profile'> = {
   user_name: 'MAX',

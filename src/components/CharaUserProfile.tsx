@@ -2,7 +2,8 @@ import { useRef, useState, useCallback } from 'react';
 import { makeStyles, Theme, StyleRules } from '@material-ui/core/styles';
 import ButtonBase from '@material-ui/core/ButtonBase';
 import Popover from '@material-ui/core/Popover';
-import ComboSlider, { marks } from './ComboSlider';
+import PopoverSlider from './PopoverSlider';
+import { marks } from './DebouncedSlider';
 import Rarities from './Rarities';
 import Infobar from './Infobar';
 import { getCharaID, getRankPoint } from '../DBHelper/helper';
@@ -162,7 +163,7 @@ function CharaUserProfile(props: CharaUserProfileProps) {
         onChange={onChangeRarity}
       />
 
-      <ComboSlider
+      <PopoverSlider
         classes={{ button: styles.level }}
         marks={marks.level}
         min={1}
@@ -171,9 +172,9 @@ function CharaUserProfile(props: CharaUserProfileProps) {
         onDebouncedChange={onChangeLevel}
       >
         <Infobar classes={{ root: styles.infobar }} width={100} size="small" label="Lv" value={userProfile.level} />
-      </ComboSlider>
+      </PopoverSlider>
 
-      <ComboSlider
+      <PopoverSlider
         classes={{ button: styles.love }}
         marks={marks.love}
         min={1}
@@ -182,10 +183,10 @@ function CharaUserProfile(props: CharaUserProfileProps) {
         onDebouncedChange={value => userProfile.unit_id && onChangeLove(value, chara_id)}
       >
         <span>{love_level}</span>
-      </ComboSlider>
+      </PopoverSlider>
 
       {uniqueEquipID !== nullID && (
-        <ComboSlider
+        <PopoverSlider
           classes={{ button: clsx(styles.unique, userProfile.unique_enhance_level < 1 && styles.disableUnique) }}
           marks={marks.unique}
           min={0}
@@ -194,7 +195,7 @@ function CharaUserProfile(props: CharaUserProfileProps) {
           onDebouncedChange={onChangeUnique}
         >
           <span>{userProfile.unique_enhance_level}</span>
-        </ComboSlider>
+        </PopoverSlider>
       )}
 
       <ButtonBase

@@ -8,8 +8,8 @@ import ButtonBase from '@material-ui/core/ButtonBase';
 import Popover from '@material-ui/core/Popover';
 import Checkbox from '@material-ui/core/Checkbox';
 import Rarities from './Rarities';
-import DebouncedSlider from './DebouncedSlider';
-import { marks } from './ComboSlider';
+import SliderPlus from './SliderPlus';
+import { marks } from './DebouncedSlider';
 import Infobar from './Infobar';
 import { CharaBaseData } from '../DBHelper';
 import { PCRStoreValue } from '../db';
@@ -52,6 +52,7 @@ const useStyles = makeStyles((theme: Theme) => {
       overflow: 'hidden',
     },
     content: {
+      padding: theme.spacing(2),
       overflowX: 'hidden',
     },
     line: {
@@ -60,12 +61,13 @@ const useStyles = makeStyles((theme: Theme) => {
       padding: theme.spacing(2, 0),
       lineHeight: h,
     },
-    slider: {
-      margin: theme.spacing(0, 2, 0, 1.5),
+    iconButton: {
+      margin: theme.spacing(0, 2),
+      padding: 0,
     },
     label: {
       display: 'block',
-      flex: '0 0 4.5rem',
+      flex: '0 0 4rem',
       height: h,
       lineHeight: 'inherit',
       overflow: 'hidden',
@@ -325,10 +327,9 @@ function UserProfileForm(props: UserProfileFormProps) {
         <div className={styles.line}>
           {!charaBaseData && <Checkbox className={styles.checkbox} checked={!disabledObj.level} data-key="level" onClick={handleChangeDisabledObj} />}
           <Infobar classes={{ root: clsx(styles.label, styles.level, disabledObj.level && styles.disabled) }} label="Lv" value={level} />
-          <DebouncedSlider
-            className={styles.slider}
+          <SliderPlus
+            classes={{ iconButton: styles.iconButton }}
             orientation="horizontal"
-            valueLabelDisplay="auto"
             marks={marks.level}
             min={1}
             max={maxUserProfile.level}
@@ -340,10 +341,9 @@ function UserProfileForm(props: UserProfileFormProps) {
         <div className={styles.line}>
           {!charaBaseData && <Checkbox className={styles.checkbox} checked={!disabledObj.loveLevel} data-key="loveLevel" onClick={handleChangeDisabledObj} />}
           <span className={clsx(styles.label, styles.love, disabledObj.loveLevel && styles.disabled)}>{loveLevel}</span>
-          <DebouncedSlider
-            className={styles.slider}
+          <SliderPlus
+            classes={{ iconButton: styles.iconButton }}
             orientation="horizontal"
-            valueLabelDisplay="auto"
             marks={marks.love}
             min={1}
             max={maxLoveLevel}
@@ -356,10 +356,9 @@ function UserProfileForm(props: UserProfileFormProps) {
           <div className={styles.line}>
             {!charaBaseData && <Checkbox className={styles.checkbox} checked={!disabledObj.uniqueLevel} data-key="uniqueLevel" onClick={handleChangeDisabledObj} />}
             <span className={clsx(styles.label, styles.unique, (disabledObj.uniqueLevel || uniqueLevel < 1) && styles.disabled)}>{uniqueLevel}</span>
-            <DebouncedSlider
-              className={styles.slider}
+            <SliderPlus
+              classes={{ iconButton: styles.iconButton }}
               orientation="horizontal"
-              valueLabelDisplay="auto"
               marks={marks.unique}
               min={0}
               max={maxUserProfile.unique_enhance_level}

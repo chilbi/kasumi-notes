@@ -3,7 +3,8 @@ import { makeStyles, Theme } from '@material-ui/core/styles';
 import Divider from '@material-ui/core/Divider';
 import LinearProgress from '@material-ui/core/LinearProgress';
 import SkeletonImage from './SkeletonImage';
-import ComboSlider, { marks } from './ComboSlider';
+import PopoverSlider from './PopoverSlider';
+import { marks } from './DebouncedSlider';
 import { AttackPattern, SkillData, UnitSkillData, SkillEnhanceStatus } from '../DBHelper/skill';
 import { DescData } from '../DBHelper/skill_action';
 import { getPublicImageURL } from '../DBHelper/helper';
@@ -294,7 +295,7 @@ function CharaSkill(props: CharaSkillProps) {
       <div key={label} className={styles.item}>
         <div className={styles.flexBox}>
           <div className={styles.label}>{label}</div>
-          <ComboSlider 
+          <PopoverSlider 
             classes={{ button: styles.level }}
             position="left"
             marks={marks.level}
@@ -304,7 +305,7 @@ function CharaSkill(props: CharaSkillProps) {
             onDebouncedChange={value => onChangeSkill(value, skillKey)} 
           >
             <span>{'Lv' + skillLevel}</span>
-          </ComboSlider>
+          </PopoverSlider>
         </div>
         <div className={styles.flexBox}>
           <SkeletonImage classes={{ root: styles.imgRoot }} src={getPublicImageURL('icon_skill', skillData.icon_type)} save />

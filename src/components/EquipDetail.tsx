@@ -13,8 +13,8 @@ import { useNavigate } from 'react-router-dom';
 import Header from './Header';
 import SkeletonImage from './SkeletonImage';
 import Rarities from './Rarities';
-import DebouncedSlider from './DebouncedSlider';
-import { marks } from './ComboSlider';
+import SliderPlus from './SliderPlus';
+import { marks } from './DebouncedSlider';
 import QuestDropList from './QuestDropList';
 import QuestLabel from './QuestLabel';
 import CharaStatus from './CharaStatus';
@@ -42,7 +42,6 @@ const useStyles = makeStyles((theme: Theme) => {
       marginTop: theme.spacing(1),
       padding: theme.spacing(1),
       backgroundColor: '#fff',
-      overflowX: 'hidden',
     },
     flexBox: {
       display: 'flex',
@@ -58,6 +57,10 @@ const useStyles = makeStyles((theme: Theme) => {
     control: {
       flexGrow: 1,
       marginRight: theme.spacing(2),
+      padding: 0,
+    },
+    iconButton: {
+      margin: theme.spacing(0, 1),
       padding: 0,
     },
     name: {
@@ -363,8 +366,9 @@ function EquipDetail() {
               />)
             }
             {uniqueEquipData && (
-              <DebouncedSlider
+              <SliderPlus
                 className={styles.control}
+                classes={{ iconButton: styles.iconButton }}
                 orientation="horizontal"
                 valueLabelDisplay="auto"
                 marks={marks.unique}

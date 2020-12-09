@@ -2,20 +2,9 @@ import { useState, useCallback } from 'react';
 import { makeStyles, Theme } from '@material-ui/core/styles';
 import ButtonBase from '@material-ui/core/ButtonBase';
 import Popover from '@material-ui/core/Popover';
-import IconButton from '@material-ui/core/IconButton';
-import Add from '@material-ui/icons/Add';
-import Remove from '@material-ui/icons/Remove';
-import DebouncedSlider, { DebouncedSliderProps } from './DebouncedSlider';
+import { DebouncedSliderProps } from './DebouncedSlider';
+import SliderPlus from './SliderPlus';
 import clsx from 'clsx';
-
-export const marks = (() => {
-  const getMark = (value: number) => ({ value, label: undefined });
-  return {
-    level: [50, 100, 150].map(value => getMark(value)),
-    love: [2, 4, 6, 8, 10].map(value => getMark(value)),
-    unique: [30, 50, 70, 90, 110, 130].map(value => getMark(value)),
-  };
-})();
 
 const useStyles = makeStyles((theme: Theme) => {
   return {
@@ -40,7 +29,7 @@ interface ComboSliderProps extends DebouncedSliderProps {
 }
 
 function ComboSlider(props: ComboSliderProps) {
-  const { classes = {}, position = 'right', children, defaultValue, min, max, onDebouncedChange, ...other } = props;
+  const { classes = {}, position = 'right', children, orientation = 'vertical', ...other } = props;
   const styles = useStyles();
 
   const [anchorEl, setAnchorEl] = useState<Element | null>(null);
@@ -64,29 +53,7 @@ function ComboSlider(props: ComboSliderProps) {
         transformOrigin={{ horizontal: position === 'right' ? 'left' : 'right', vertical: 'bottom' }}
         onClose={handleClose}
       >
-        <IconButton
-          className={clsx(styles.iconButton, classes.iconButton)}
-          disabled={defaultValue === max}
-          onClick={() => onDebouncedChange(defaultValue as number + 1)}
-        >
-          <Add />
-        </IconButton>
-        <DebouncedSlider
-          orientation="vertical"
-          valueLabelDisplay="auto"
-          min={min}
-          max={max}
-          defaultValue={defaultValue}
-          onDebouncedChange={onDebouncedChange}
-          {...other}
-        />
-        <IconButton
-          className={clsx(styles.iconButton, classes.iconButton)}
-          disabled={defaultValue === min}
-          onClick={() => onDebouncedChange(defaultValue as number - 1)}
-        >
-          <Remove />
-        </IconButton>
+        <SliderPlus classes={{ iconButton: clsx( styles.iconButton, classes.iconButton) }} orientation={orientation} {...other} />
       </Popover>
     </>
   );

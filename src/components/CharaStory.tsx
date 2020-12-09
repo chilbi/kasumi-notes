@@ -1,8 +1,9 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { makeStyles, Theme } from '@material-ui/core/styles';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import Checkbox from '@material-ui/core/Checkbox';
+import Slide from '@material-ui/core/Slide';
 import SkeletonImage from './SkeletonImage';
 import CharaStatus from './CharaStatus';
 import { StoryStatus, StoryStatusData } from '../DBHelper/story_status';
@@ -10,6 +11,7 @@ import { getPublicImageURL } from '../DBHelper/helper';
 import maxUserProfile from '../DBHelper/maxUserProfile';
 import { PCRStoreValue } from '../db';
 import Big from 'big.js';
+import clsx from 'clsx';
 
 const useStyles = makeStyles((theme: Theme) => {
   const
@@ -214,13 +216,21 @@ function CharaStory(props: CharaStoryProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }), [dataStatusMemo, tabsValue]);
 
+  const currRef = useRef(tabsValue);
+  const prev = currRef.current;
+  useEffect(() => {
+    currRef.current = tabsValue;
+  }, [tabsValue]);
+
   return (
     <div>
       {tabsValueMemo.tabs}
       {dataStatusMemo.storyViewArr.map((item, i) => (
-        <div key={i} className={i === tabsValue ? undefined : styles.hidden}>
-          {item}
-        </div>
+        <Slide key={i} in={i === tabsValue} direction={prev > i ? 'right' : 'left'}>
+          <div className={clsx(i !== tabsValue && styles.hidden)}>
+            {item}
+          </div>
+        </Slide>
       ))}
     </div>
   );

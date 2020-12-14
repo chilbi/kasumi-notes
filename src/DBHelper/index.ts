@@ -12,7 +12,7 @@ import { getQuestList, QuestData } from './quest';
 import { plus, Property } from './property';
 import ImageData from './ImageData';
 import maxUserProfile, { nullID } from './maxUserProfile';
-import { deepClone, mapQuestType, Range } from './helper';
+import { getEquipRarity, getEquipGenreID, deepClone, mapQuestType, Range } from './helper';
 import Big from 'big.js';
 
 export type PropertyData = [RarityData, PromotionStatusData, PromotionData, StoryStatusData, UniqueEquipData | undefined];
@@ -37,6 +37,8 @@ export interface EquipDetailData {
   enhanceLevel?: number;
   onChangeEnhance?: (enhanceLevel: number) => void;
 }
+
+export type EquipMaterialData = [string/*rarity*/, { equip_id: number; genre_id: string; }[]];
 
 export function getCharaProperty(userProfile: PCRStoreValue<'user_profile'>, propertyData: PropertyData): Property<Big> {
   const { level, promotion_level, equip_enhance_status, love_level_status, unique_enhance_level } = userProfile;
@@ -63,7 +65,31 @@ class DBHelper extends ImageData {
   // eslint-disable-next-line @typescript-eslint/no-useless-constructor
   constructor(db: PCRDB) {
     super(db);
+    // this._writeMapRange();
   }
+
+  // private async _writeMapRange() {
+  //   const rarities = ['11', '21', '22', '23', '24', '31', '32', '33', '34', '41', '42', '43', '44', '51', '52', '53', '54', '55', '56', '57', '61', '62'];
+  //   const types = ['N', 'H', 'VH'] as const;
+  //   const lists = await Promise.all(types.map(type => this.getQuestList(mapQuestType(type))));
+  //   const mapRange: Record<string, Range | undefined> = {};
+  //   for (let i = 0; i < types.length; i++) {
+  //     const list = lists[i];
+  //     const type = types[i];
+  //     for (let rarity of rarities) {
+  //       const questIds: number[] = [];
+  //       for (let item of list) {
+  //         if (item.drop_data.drop_reward.some(value => rarity === getEquipRarity(value.reward_id.toString()))) {
+  //           questIds.push(item.quest_id);
+  //         }
+  //       }
+  //       if (questIds.length > 0) {
+  //         mapRange[type + rarity] = [Math.min(...questIds), Math.max(...questIds)];
+  //       }
+  //     }
+  //   }
+  //   console.log(JSON.stringify(mapRange).replaceAll('"', "'"));
+  // }
 
   async getCharaDetailData(unit_id: number, user_name: string, base?: CharaBaseData): Promise<CharaDetailData | undefined> {
     const [charaData, userProfile, unitProfile, promotions, unitSkillData] = await Promise.all([
@@ -201,13 +227,22 @@ class DBHelper extends ImageData {
     return Promise.all(promiseArr);
   }
 
-  async getAllEquipMaterial(): Promise<number[]> {
-    const equipments = await this.db.transaction('equipment_data', 'readonly').store.getAll();
-    const result: number[] = [];
+  async getAllEquipMaterial(): Promise<EquipMaterialData[]> {
+    const equipments = await this.db.transaction('equipment_data', 'readonly').store.getAll(IDBKeyRange.upperBound(140000, true));
+    const result: EquipMaterialData[] = [];
     for (let item of equipments) {
       if (item.craft_flg === 0) {
-        result.push(item.equipment_id);
+        const equip_id = item.equipment_id;
+        const idStr = item.equipment_id.toString();
+        const rarity = getEquipRarity(idStr);
+        const genre_id = getEquipGenreID(idStr);
+        const findItem = result.find(value => value[0] === rarity);
+        if (findItem) findItem[1].push({ equip_id, genre_id });
+        else result.push([rarity, [{ equip_id, genre_id }]]);
       }
+    }
+    for (let item of result) {
+      item[1] = item[1].sort((a: any, b: any) => a.genre_id - b.genre_id);
     }
     return result;
   }

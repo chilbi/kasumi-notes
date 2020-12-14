@@ -1,5 +1,5 @@
 import { useContext, useState, useCallback } from 'react';
-import { makeStyles, Theme, StyleRules } from '@material-ui/core/styles';
+import { makeStyles, Theme } from '@material-ui/core/styles';
 import Checkbox from '@material-ui/core/Checkbox';
 import Radio from '@material-ui/core/Radio';
 import ButtonBase from '@material-ui/core/ButtonBase';
@@ -9,11 +9,12 @@ import { Link, useLocation } from 'react-router-dom';
 import SkeletonImage from './SkeletonImage';
 import RankBorder from './RankBorder';
 import Rarities from './Rarities';
+import LabelDivider from './LabelDivider';
 import { EquipDetailContext } from './Contexts';
 import { EquipData } from '../DBHelper/equip';
 import { PromotionData } from '../DBHelper/promotion';
 import { UniqueEquipData } from '../DBHelper/unique_equip';
-import { getPublicImageURL, getRankPoint, getValidID } from '../DBHelper/helper';
+import { getPublicImageURL, getValidID } from '../DBHelper/helper';
 import maxUserProfile, { nullID } from '../DBHelper/maxUserProfile';
 import { PCRStoreValue } from '../db';
 import localValue from '../localValue';
@@ -38,14 +39,6 @@ const useStyles = makeStyles((theme: Theme) => {
     len = iconSize.times(1.75),
     x = len.times(Math.cos(Math.PI / 4)).round(3, 0),
     y = len.times(Math.sin(Math.PI / 4)).round(3, 0);
-
-  const rankStyles = {} as StyleRules<string>;
-  const rankColorKeys = Object.keys(theme.rankColor) as any as (keyof typeof theme.rankColor)[];
-  for (let key of rankColorKeys) {
-    rankStyles['rankColor' + key] = {
-      color: theme.rankColor[key],
-    };
-  }
 
   return {
     root: {
@@ -76,27 +69,6 @@ const useStyles = makeStyles((theme: Theme) => {
       borderRadius: '0.5rem',
       border: '1px solid ' + theme.palette.grey[200],
       boxShadow: '0 1px 1px ' + theme.palette.grey[100],
-    },
-    labelBox: {
-      display: 'flex',
-      alignItems: 'flex-end',
-      marginBottom: theme.spacing(1),
-      paddingBottom: theme.spacing(0.5),
-      borderBottom: '2px solid' + theme.palette.primary.main,
-    },
-    label: {
-      display: 'inline-flex',
-      '&::before': {
-        content: '""',
-        display: 'inline-block',
-        alignSelf: 'flex-end',
-        margin: theme.spacing(0, 1, 1, 0),
-        width: '0.5rem',
-        height: '0.625rem',
-        borderRadius: '50%',
-        backgroundColor: theme.palette.primary.main,
-        clipPath: 'polygon(50% 0, 100% 50%, 50% 100%, 0 50%)',
-      },
     },
     checkbox: {
       margin: '0 0 0 auto',
@@ -208,10 +180,6 @@ const useStyles = makeStyles((theme: Theme) => {
     invalidColor: {
       color: theme.palette.grey[600],
     },
-    uniqueColor: {
-      color: '#d34bef',
-    },
-    ...rankStyles,
   };
 });
 
@@ -363,8 +331,7 @@ function CharaEquip(props: CharaEquipProps) {
 
         <div className={styles.equipList}>
           <div key="unique" className={styles.equipItem}>
-            <div className={styles.labelBox}>
-              <span className={clsx(styles.label, styles.uniqueColor)}>専用装備</span>
+            <LabelDivider label="専用装備" unique>
               <Checkbox
                 className={styles.checkbox}
                 indeterminate={!hasUnique}
@@ -372,7 +339,7 @@ function CharaEquip(props: CharaEquipProps) {
                 checked={!invalidUnique}
                 onChange={handleToggleUnique}
               />
-            </div>
+            </LabelDivider>
             <div className={styles.equipBox}>
               <ButtonBase
                 className={styles.m025}
@@ -394,16 +361,13 @@ function CharaEquip(props: CharaEquipProps) {
             const isEqual = promotionLevel === promotion_level;
             return (
               <div key={promotionLevel} className={styles.equipItem}>
-                <div className={styles.labelBox}>
-                  <span className={clsx(styles.label, styles['rankColor' + getRankPoint(promotionLevel) as keyof typeof styles])}>
-                    {'RANK' + promotionLevel}
-                  </span>
+                <LabelDivider label={'RANK' + promotionLevel} rank={promotionLevel}>
                   <Radio
                     classes={{ root: styles.checkbox }}
                     checked={isEqual}
                     onChange={() => !isEqual && onChangePromotion(promotionLevel)}
                   />
-                </div>
+                </LabelDivider>
                 <div className={styles.equipBox}>
                   {promotion.equip_slots.map((slot, i) => (
                     <ButtonBase

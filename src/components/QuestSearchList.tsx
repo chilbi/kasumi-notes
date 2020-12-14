@@ -9,8 +9,10 @@ import Checkbox from '@material-ui/core/Checkbox';
 import Search from '@material-ui/icons/Search';
 import SkeletonImage from './SkeletonImage';
 import QuestLabel from './QuestLabel';
+import LabelDivider from './LabelDivider';
 import { DBHelperContext } from './Contexts';
 import { getPublicImageURL, QuestType } from '../DBHelper/helper';
+import { EquipMaterialData } from '../DBHelper';
 import localValue from '../localValue';
 import Big from 'big.js';
 import clsx from 'clsx';
@@ -137,7 +139,12 @@ const useStyles = makeStyles((theme: Theme) => {
     items: {
       display: 'flex',
       flexWrap: 'wrap',
-      justifyContent: 'space-between',
+      justifyContent: 'flex-start',
+    },
+    labelDiv: {
+      marginRight: theme.spacing(2),
+      marginLeft: theme.spacing(2),
+      paddingTop: theme.spacing(2),
     },
     hidden: {
       display: 'none',
@@ -157,13 +164,13 @@ function QuestSearchList(props: QuestSearchListProps) {
   const styles = useStyles();
   const dbHelper = useContext(DBHelperContext);
 
-  const [items, setItmes] = useState({ equipMaterial: [] as number[], memoryPiece: [] as number[] });
+  const [items, setItmes] = useState({ equipMaterial: [] as EquipMaterialData[], memoryPiece: [] as number[] });
 
   useEffect(() => {
     if (dbHelper) Promise.all([dbHelper.getAllEquipMaterial(), dbHelper.getAllMemoryPiece()]).then(([equipMaterial, memoryPiece]) => {
       setItmes({
-        equipMaterial: equipMaterial.sort((a, b) => b - a),
-        memoryPiece: memoryPiece.sort((a, b) => b - a),
+        equipMaterial: equipMaterial.sort((a: any, b: any) => b[0] - a[0]),
+        memoryPiece: memoryPiece.sort((a, b) => a - b),
       });
     });
   }, [dbHelper]);
@@ -288,13 +295,16 @@ function QuestSearchList(props: QuestSearchListProps) {
 
   const types = sets[index].types;
 
-  const renderList = (list: number[], type: 'icon_equipment' | 'icon_item') => list.map(item => {
-    return (
-      <ButtonBase key={item} className={clsx(styles.iconButton, select === item && styles.selected)} data-item={item} onClick={handleClickItem}>
-        <SkeletonImage classes={{ root: styles.iconRoot }} src={getPublicImageURL(type, item)} save />
-      </ButtonBase>
-    );
-  });
+  const renderList = function <T>(list: T[], type: 'icon_equipment' | 'icon_item', fn: (item: T) => number) {
+    return list.map(item => {
+      const id = fn(item);
+      return (
+        <ButtonBase key={id} className={clsx(styles.iconButton, select === id && styles.selected)} data-item={id} onClick={handleClickItem}>
+          <SkeletonImage classes={{ root: styles.iconRoot }} src={getPublicImageURL(type, id)} save />
+        </ButtonBase>
+      );
+    })
+  };
 
   return (
     <>
@@ -358,22 +368,36 @@ function QuestSearchList(props: QuestSearchListProps) {
       <Fade in={open}>
         <div className={clsx(styles.material, !open && styles.hidden)}>
           <Slide in={listIndex === '0'} direction="right">
-            <div className={clsx(styles.items, listIndex !== '0' && styles.hidden)}>{renderList(items.equipMaterial, 'icon_equipment')}</div>
+            <div className={clsx(listIndex !== '0' && styles.hidden)}>
+              {items.equipMaterial.map(value => {
+                const [rarity, list] = value;
+                const r = parseInt(rarity[0]);
+                const rank = r > 5 ? 18 : r > 4 ? 11 : r > 3 ? 7 : r > 2 ? 4 : r > 1 ? 2 : 1;
+                return (
+                  <Fragment key={rarity}>
+                    <LabelDivider className={styles.labelDiv} label={'レア' + rarity} rank={rank} />
+                    <div className={styles.items}>
+                      {renderList(list, 'icon_equipment', item => item.equip_id)}
+                    </div>
+                  </Fragment>
+                );
+              })}
+            </div>
           </Slide>
           <Slide in={listIndex === '1'} direction="left">
-            <div className={clsx(styles.items, listIndex !== '1' && styles.hidden)}>{renderList(items.memoryPiece, 'icon_item')}</div>
+            <div className={clsx(styles.items, listIndex !== '1' && styles.hidden)}>
+              {renderList(items.memoryPiece, 'icon_item', item => item)}
+            </div>
           </Slide>
         </div>
       </Fade>
-      <Fade in={!open} mountOnEnter unmountOnExit>
-        <div>
-          {search.size > 0 && (
-            <QuestDropList
-              sort={sort}
-              search={search}
-              rangeTypes={types}
-            />
-          )}
+      <Fade in={!open}>
+        <div className={clsx(open && styles.hidden)}>
+          <QuestDropList
+            sort={sort}
+            search={search}
+            rangeTypes={types}
+          />
         </div>
       </Fade>
     </>

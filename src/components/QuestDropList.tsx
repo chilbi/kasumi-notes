@@ -136,6 +136,8 @@ function QuestDropList(props: QuestDropListProps) {
     );
   }, [sort, questList]);
 
+  if (!isMapMode && search.size < 1) return null;
+
   if (loading || !sortedList)
     return <LinearProgress color="secondary" />;
 

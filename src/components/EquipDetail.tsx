@@ -148,6 +148,9 @@ const useStyles = makeStyles((theme: Theme) => {
       alignItems: 'center',
       margin: '0 0 0 auto',
     },
+    hidden: {
+      display: 'none',
+    },
     selected: {
       backgroundColor: alpha(theme.palette.warning.main, 0.35),
     },
@@ -446,35 +449,31 @@ function EquipDetail() {
         </div>
       )}
       <Fade in={search.size > 0}>
-        <div>
-          {search.size > 0 && (
-            <>
-              <div className={clsx(styles.paper, styles.labelBox)}>
-                <div className={styles.label}>入手場所</div>
-                <div className={styles.types}>
-                  {(['N', 'H', 'VH', 'S'] as const).map(value => {
-                    const id = 'equip-detail-types-' + value;
-                    return (
-                      <Fragment key={value}>
-                        <QuestLabel type={value} component="label" htmlFor={id} />
-                        <Checkbox id={id} className={styles.checkbox} value={value} checked={types.indexOf(value) > -1} onChange={handleChangeTypes} />
-                      </Fragment>
-                    );
-                  })}
-                  <label className={styles.sortLabel} htmlFor="equip-detail-sort">{sort === 'asc' ? '昇順' : '降順'}</label>
-                  <IconButton
-                    id="equip-detail-sort"
-                    className={clsx(styles.sort, sort === 'asc' && styles.sortRotate)}
-                    color="secondary"
-                    onClick={handleToggleSort}
-                  >
-                    <SortRounded />
-                  </IconButton>
-                </div>
-              </div>
-              <QuestDropList sort={sort} search={search} rangeTypes={types} />
-            </>
-          )}
+        <div className={clsx(search.size < 1 && styles.hidden)}>
+          <div className={clsx(styles.paper, styles.labelBox)}>
+            <div className={styles.label}>入手場所</div>
+            <div className={styles.types}>
+              {(['N', 'H', 'VH', 'S'] as const).map(value => {
+                const id = 'equip-detail-types-' + value;
+                return (
+                  <Fragment key={value}>
+                    <QuestLabel type={value} component="label" htmlFor={id} />
+                    <Checkbox id={id} className={styles.checkbox} value={value} checked={types.indexOf(value) > -1} onChange={handleChangeTypes} />
+                  </Fragment>
+                );
+              })}
+              <label className={styles.sortLabel} htmlFor="equip-detail-sort">{sort === 'asc' ? '昇順' : '降順'}</label>
+              <IconButton
+                id="equip-detail-sort"
+                className={clsx(styles.sort, sort === 'asc' && styles.sortRotate)}
+                color="secondary"
+                onClick={handleToggleSort}
+              >
+                <SortRounded />
+              </IconButton>
+            </div>
+          </div>
+          <QuestDropList sort={sort} search={search} rangeTypes={types} />
         </div>
       </Fade>
     </>

@@ -133,28 +133,23 @@ export function getPublicImageURL(type: PublicImagePathType, name: string | numb
   return `${process.env.PUBLIC_URL}/images/${type}/${type}_${name}.png`;
 }
 
-export function getRewardRarity(rewardID: number): string  {
-  const str = rewardID.toString();
-  return str[str.length - 4];
+export function getEquipRarity(idStr: string): string {
+  return idStr.substr(2, 1) + idStr.substr(-1);
+}
+
+export function getEquipGenreID(idStr: string): string {
+  return idStr.substr(3, 2);
 }
 
 export type Range = [number, number];
 
 export type QuestType = 'N'/*Normal*/ | 'H'/*Hard*/ | 'VH'/*Very Hard*/ | 'S'/*Survey*/;
 
+// TODO N11 N21 N22 ...
 const mapRange: Record<string, Range | undefined> = {
-  'N1': [11001001, 11004013],
-  'N2': [11001008, 11008015],
-  'N3': [11004003, 11013017],
-  'N4': [11006013, 11024014],
-  'N5': [11016004, 12000000],
-  'N6': [11037004, 12000000],
-  'H1': [12001001, 13000000],
-  'H2': [12001001, 12008003],
-  'H3': [12003001, 12013003],
-  'H4': [12007001, 12024003],
-  'H5': [12016001, 13000000],
-  'H6': [12037001, 13000000],
+  'N11': [11001001, 11004013], 'N21': [11001008, 11008015], 'N22': [11002003, 11008015], 'N23': [11002011, 11008014], 'N24': [11003006, 11008015], 'N31': [11004003, 11011017], 'N32': [11004012, 11011016], 'N33': [11006003, 11013017], 'N34': [11006011, 11013016], 'N41': [11006013, 11017014], 'N42': [11009004, 11021014], 'N43': [11011004, 11024014], 'N44': [11013004, 11024014], 'N51': [11016004, 11030013], 'N52': [11019004, 11036013], 'N53': [11022004, 11040014], 'N54': [11025004, 11040012], 'N55': [11028004, 11036014], 'N56': [11031004, 11039014], 'N57': [11034004, 11040014], 'N61': [11037004, 11040014], 'N62': [11040004, 11040014],
+  'H11': [12001001, 12003001], 'H21': [12001003, 12008003], 'H22': [12002003, 12008003], 'H23': [12002003, 12008002], 'H24': [12006001, 12008003], 'H31': [12003003, 12012003], 'H32': [12004002, 12012003], 'H33': [12006002, 12013002], 'H34': [12008002, 12013003], 'H41': [12007002, 12021003], 'H42': [12009001, 12021003], 'H43': [12011001, 12024003], 'H44': [12013001, 12024003], 'H51': [12016001, 12030001], 'H52': [12019001, 12036001], 'H53': [12022001, 12040002], 'H54': [12025001, 12039001], 'H55': [12028001, 12036003], 'H56': [12031001, 12039003], 'H57': [12034001, 12040003], 'H61': [12037001, 12040003], 'H62': [12040001, 12040003],
+  'VH41': [13018001, 13024003], 'VH42': [13018001, 13024003], 'VH52': [13020002, 13021003], 'VH53': [13018001, 13023003], 'VH54': [13018001, 13023002], 'VH55': [13019002, 13021002], 'VH56': [13020002, 13022003], 'VH57': [13022002, 13024001], 'VH61': [13023002, 13024003], 'VH62': [13024003, 13024003]
 };
 
 export function mergeRanges(ranges: Range[], a = 0, b = 1, length = ranges.length): Range[] {
@@ -175,14 +170,14 @@ export function mergeRanges(ranges: Range[], a = 0, b = 1, length = ranges.lengt
 }
 
 export function getRange(type: QuestType, rewardID: number): Range | undefined {
-  if (type === 'VH' || type === 'S')
-    return mapQuestType(type);
+  if (type === 'S')
+    return mapQuestType('S');
   if (rewardID > 33000) {
     if (rewardID === 140001) {
       return mapQuestType('S');
     } else {
-      const rewardRarity = getRewardRarity(rewardID);
-      return mapRange[type + rewardRarity];
+      const rarity = getEquipRarity(rewardID.toString());
+      return mapRange[type + rarity];
     }
   } else if (rewardID > 32000) {
     return mapQuestType('VH');

@@ -476,11 +476,35 @@ function writeMaxUserProfile(sqlFilesDir, sqlRawObjs) {
   const unitProfileObj = sqlRawObjs.find(obj => obj.tableName === 'unit_profile');
   const maxChara = unitProfileObj.records.length;
 
+  const equipRateObj = sqlRawObjs.find(obj => obj.tableName === 'equipment_enhance_rate');
+  let equipGenre = [];
+  const genreSet = new Set();
+  for (let record of equipRateObj.records) {
+    const equipIDIdx = record.indexOf('equipment_id');
+    const equipID = record[equipIDIdx + 1];
+    const genreID = equipID.substr(3, 2);
+    const descIdx = record.indexOf('description');
+    const desc = record[descIdx + 1];
+    if (!genreSet.has(genreID)) {
+      genreSet.add(genreID);
+      equipGenre.push([genreID, desc]);
+    }
+  }
+  equipGenre = equipGenre.sort((a, b) => parseInt(a[0]) - parseInt(b[0]));
+  let genreStr = '';
+  for (let item of equipGenre) {
+    genreStr += `  ['${item[0]}', '${item[1]}'],\n`;
+  }
+  genreStr = genreStr.substr(0, genreStr.length - 2);
+
   let str = '';
   str += "import { PCRStoreValue } from '../db';\n\n";
   str += 'export const nullID = 999999;\n\n';
   str += `export const maxArea = ${parseInt(maxArea)};\n\n`;
   str += `export const maxChara = ${maxChara};\n\n`;
+  str += `export const equipGenre: [string, string][] = [\n`;
+  str += genreStr + '\n';
+  str += `];\n\n`;
   str += "const maxUserProfile: PCRStoreValue<'user_profile'> = {\n";
   str += "  user_name: 'MAX',\n";
   str += '  unit_id: undefined as any,\n';

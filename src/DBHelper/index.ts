@@ -40,6 +40,8 @@ export interface EquipDetailData {
 
 export type EquipMaterialData = [string/*rarity*/, { equip_id: number; genre_id: string; }[]];
 
+export type MemoryPieceData = [string/**/, number[]];
+
 export function getCharaProperty(userProfile: PCRStoreValue<'user_profile'>, propertyData: PropertyData): Property<Big> {
   const { level, promotion_level, equip_enhance_status, love_level_status, unique_enhance_level } = userProfile;
   const [rarityData, promotionStatusData, promotionData, storyStatus, uniqueEquipData] = propertyData;
@@ -244,10 +246,10 @@ class DBHelper extends ImageData {
     for (let item of result) {
       item[1] = item[1].sort((a: any, b: any) => a.genre_id - b.genre_id);
     }
-    return result;
+    return result.sort((a: any, b: any) => b[0] - a[0]);
   }
 
-  async getAllMemoryPiece(): Promise<number[]> {
+  async getAllMemoryPiece(): Promise<MemoryPieceData[]> {
     const tx = this.db.transaction('quest_data', 'readonly');
     const hRange = mapQuestType('H');
     const vhRange = mapQuestType('VH');
@@ -255,16 +257,20 @@ class DBHelper extends ImageData {
       tx.store.getAll(IDBKeyRange.bound(hRange[0], hRange[1])),
       tx.store.getAll(IDBKeyRange.bound(vhRange[0], vhRange[1]))
     ]);
-    const resultSet: Set<number> = new Set();
+    const memoryPieceSet: Set<number> = new Set();
     for (let item of hQuestList) {
-      resultSet.add(item.reward_image_1);
+      memoryPieceSet.add(item.reward_image_1);
     }
+    const purePiece: number[] = [];
     for (let item of vhQuestList) {
       if (item.reward_image_1 > 0) {
-        resultSet.add(item.reward_image_1);
+        purePiece.push(item.reward_image_1);
       }
     }
-    return [...resultSet];
+    return [
+      ['メモリーピース', [...memoryPieceSet].sort((a, b) => a - b)],
+      ['ピュアメモリーピース', purePiece.sort((a, b) => a - b)]
+    ];
   }
 
   setAllCharaData(allCharaData: PCRStoreValue<'chara_data'>[]): Promise<void> {

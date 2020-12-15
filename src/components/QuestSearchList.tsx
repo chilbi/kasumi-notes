@@ -12,7 +12,7 @@ import QuestLabel from './QuestLabel';
 import LabelDivider from './LabelDivider';
 import { DBHelperContext } from './Contexts';
 import { getPublicImageURL, QuestType } from '../DBHelper/helper';
-import { EquipMaterialData } from '../DBHelper';
+import { EquipMaterialData, MemoryPieceData } from '../DBHelper';
 import localValue from '../localValue';
 import Big from 'big.js';
 import clsx from 'clsx';
@@ -92,8 +92,8 @@ const useStyles = makeStyles((theme: Theme) => {
       alignItems: 'center',
     },
     iconButton: {
-      margin: theme.spacing(0.5),
-      padding: theme.spacing(1),
+      margin: 0,
+      padding: theme.spacing(1.5),
     },
     iconRoot: {
       width: iconSize + 'rem',
@@ -104,6 +104,7 @@ const useStyles = makeStyles((theme: Theme) => {
       padding: 0,
     },
     material: {
+      padding: theme.spacing(1),
       backgroundColor: '#fff',
     },
     mToolbar: {
@@ -142,9 +143,7 @@ const useStyles = makeStyles((theme: Theme) => {
       justifyContent: 'flex-start',
     },
     labelDiv: {
-      marginRight: theme.spacing(2),
-      marginLeft: theme.spacing(2),
-      paddingTop: theme.spacing(2),
+      paddingTop: theme.spacing(1),
     },
     hidden: {
       display: 'none',
@@ -164,14 +163,11 @@ function QuestSearchList(props: QuestSearchListProps) {
   const styles = useStyles();
   const dbHelper = useContext(DBHelperContext);
 
-  const [items, setItmes] = useState({ equipMaterial: [] as EquipMaterialData[], memoryPiece: [] as number[] });
+  const [items, setItmes] = useState({ equipMaterial: [] as EquipMaterialData[], memoryPiece: [] as MemoryPieceData[] });
 
   useEffect(() => {
     if (dbHelper) Promise.all([dbHelper.getAllEquipMaterial(), dbHelper.getAllMemoryPiece()]).then(([equipMaterial, memoryPiece]) => {
-      setItmes({
-        equipMaterial: equipMaterial.sort((a: any, b: any) => b[0] - a[0]),
-        memoryPiece: memoryPiece.sort((a, b) => a - b),
-      });
+      setItmes({ equipMaterial, memoryPiece });
     });
   }, [dbHelper]);
 
@@ -340,12 +336,8 @@ function QuestSearchList(props: QuestSearchListProps) {
                   <Search />
                 </IconButton>
                 <div className={styles.mTypes}>
-                  <ButtonBase className={clsx(styles.mType, listIndex === '0' && styles.mCheck)} data-i="0" onClick={handleChangeListIndex}>
-                    装備品
-                  </ButtonBase>
-                  <ButtonBase className={clsx(styles.mType, listIndex === '1' && styles.mCheck)} data-i="1" onClick={handleChangeListIndex}>
-                    メモリーピース
-                  </ButtonBase>
+                  <ButtonBase className={clsx(styles.mType, listIndex === '0' && styles.mCheck)} data-i="0" onClick={handleChangeListIndex}>装備品</ButtonBase>
+                  <ButtonBase className={clsx(styles.mType, listIndex === '1' && styles.mCheck)} data-i="1" onClick={handleChangeListIndex}>ピース</ButtonBase>
                 </div>
               </div>
             </Fade>
@@ -385,8 +377,19 @@ function QuestSearchList(props: QuestSearchListProps) {
             </div>
           </Slide>
           <Slide in={listIndex === '1'} direction="left">
-            <div className={clsx(styles.items, listIndex !== '1' && styles.hidden)}>
-              {renderList(items.memoryPiece, 'icon_item', item => item)}
+            <div className={clsx(listIndex !== '1' && styles.hidden)}>
+              {items.memoryPiece.map((value, i) => {
+                const [label, list] = value;
+                const rank = i === 0 ? 1 : 7;
+                return (
+                  <Fragment key={i}>
+                    <LabelDivider className={styles.labelDiv} label={label} rank={rank} />
+                    <div className={styles.items}>
+                      {renderList(list, 'icon_item', item => item)}
+                    </div>
+                  </Fragment>
+                )
+              })}
             </div>
           </Slide>
         </div>

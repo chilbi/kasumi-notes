@@ -15,6 +15,7 @@ export interface WaveGroupData {
   enemy_id_5: number;
   drop_gold_5: number;
   drop_reward_id_5: number;
+  guest_enemy_id: number;
 }
 
 declare const data: WaveGroupData[];

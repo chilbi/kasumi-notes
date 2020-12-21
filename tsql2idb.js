@@ -604,11 +604,12 @@ function main() {
     { tableName: 'equipment_data', fields: ['equipment_enhance_point', 'sale_price', 'require_level', 'enable_donation', 'display_item', 'item_type'] },
     { tableName: 'equipment_enhance_rate', fields: ['equipment_name'] },
     {
-      tableName: 'quest_data', fields: ['limit_team_level', 'position_x', 'position_y', 'stamina', 'stamina_start',
+      tableName: 'quest_data', fields: ['limit_team_level', 'position_x', 'position_y', 'icon_id', 'stamina', 'stamina_start',
         'team_exp', 'unit_exp', 'love', 'limit_time', 'daily_limit', 'clear_reward_group', 'rank_reward_group',
         'background_1', 'wave_bgm_sheet_id_1', 'wave_bgm_que_id_1', 'story_id_wavestart_1', 'story_id_waveend_1',
         'background_2', 'wave_bgm_sheet_id_2', 'wave_bgm_que_id_2', 'story_id_wavestart_2', 'story_id_waveend_2',
         'background_3', 'wave_bgm_sheet_id_3', 'wave_bgm_que_id_3', 'story_id_wavestart_3', 'story_id_waveend_3',
+        'enemy_image_1', 'enemy_image_2', 'enemy_image_3', 'enemy_image_4', 'enemy_image_5',
         'quest_detail_bg_id', 'quest_detail_bg_position', 'start_time', 'end_time', 'lv_reward_flag', 'add_treasure_num']
     },
     { tableName: 'skill_action', fields: ['level_up_disp'] },
@@ -636,7 +637,7 @@ function main() {
   }
   waveGroupObj.records = newWGRecords;
 
-  const excludeUnitID = [106701/*ホマレ*/, 110201/*ミサキ（サマー）*/, 900103/*ヒヨリ（不明）*/, 906601/*イノリ（不明）*/, 114501/*サレン（クリスマス）*/];
+  const excludeUnitID = [106701/*ホマレ*/, 110201/*ミサキ（サマー）*/, 900103/*ヒヨリ（不明）*/, 906601/*イノリ（不明）*/];
   const unitProfileObj = sqlRawObjs.find(obj => obj.tableName === 'unit_profile');
   const newUPRecords = [];
   for (let record of unitProfileObj.records) {

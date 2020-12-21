@@ -201,6 +201,12 @@ function getEffectModified(thisAction: SkillAction, targetAction: SkillAction): 
       else if (action_value_ === 3)
         formula += `×${mapStr[getAtkKey(targetAction.action_detail_1)]}`;
       break;
+    case 4:
+      if (action_value_ === 3)
+        formula += `×${mapStr['skill_level']}`;
+      else if (action_value_ === 4)
+        formula += `×${mapStr[getAtkKey(targetAction.action_detail_1)]}`;
+      break;
     case 8:
       if (action_value_ === 3)
         effect = '効果時間';
@@ -210,9 +216,15 @@ function getEffectModified(thisAction: SkillAction, targetAction: SkillAction): 
         formula += `×${mapStr['skill_level']}`;
       else if (action_value_ === 4)
         effect = '効果時間';
-    //   break;
+      break;
     // case 16: // only action_value_1
     //   break;
+    case 48:
+      if (action_value_ === 2)
+        formula += `×${mapStr['skill_level']}`;
+      else if (action_value_ === 3)
+        formula += `×${mapStr[getAtkKey(targetAction.action_detail_1)]}`;
+      break;
   }
   return [effect, formula];
 }
@@ -728,10 +740,16 @@ const actionMap: Record</*action_type*/number, /*getDescription*/(this: SkillAct
     const formula = getFormula(this.action_value_1, this.action_value_2, skillLevel);
     return ['味方全体の次の攻撃に' + formula[0], getFormulaObj(formula[1]!), 'ＨＰ吸収効果を付与する。'];
   },
-  //ルゥ Main1
   33: function (skillLevel) {
     const formula = getFormula(this.action_value_1, this.action_value_2, skillLevel);
-    const desc = `攻撃してきた敵に{0}ダメージを与えて消失するオメメちゃんを${this.action_value_3}体呼び出す。最大${this.action_detail_1}体呼び出す`;
+    let desc = '攻撃してきた敵に{0}ダメージを与えて消失する';
+    if (this.action_detail_2 === 2) { //ルゥ Main1
+      desc += `オメメちゃんを${this.action_value_3}体呼び出す。最大${this.action_detail_1}体まで呼び出される`;
+    } else if (this.action_detail_2 === 4) { // `サレン（クリスマス） UB
+      desc += `光の盾を${this.action_value_3}つ付与する。最大${this.action_detail_1}つまで付与される`;
+    } else {
+      desc = this.description;
+    }
     return insertFormula(desc, formula);
   },
   // カオリ Main2

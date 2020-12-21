@@ -1,4 +1,4 @@
-# Kasumi Notes（香澄笔记）
+# Kasumi Notes
 《Princess Connect Re:Dive》WebApp辅助工具
 
 github-pages: [https://chilbi.github.io/kasumi-notes/](https://chilbi.github.io/kasumi-notes/)

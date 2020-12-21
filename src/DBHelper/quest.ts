@@ -12,7 +12,7 @@ export interface QuestData {
   quest_id: number;
   area_id: number;
   quest_name: string;
-  icon_id: number;
+  // icon_id: number;
   // enemy_images: number[]; // 1-5
   // reward_images: number[]; // 1-5
   // wave_group_data: WaveGroupData[]; // 1-3
@@ -88,7 +88,7 @@ export async function getQuestData(db: PCRDB, questArg: number | PCRStoreValue<'
     quest_id: questData.quest_id,
     area_id: questData.area_id,
     quest_name: questData.quest_name,
-    icon_id: questData.icon_id,
+    // icon_id: questData.icon_id,
     drop_data,
     hasReward,
   };

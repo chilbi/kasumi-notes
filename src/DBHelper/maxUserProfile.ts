@@ -2,9 +2,9 @@ import { PCRStoreValue } from '../db';
 
 export const nullID = 999999;
 
-export const maxArea = 40;
+export const maxArea = 41;
 
-export const maxChara = 134;
+export const maxChara = 135;
 
 export const equipGenre: [string, string][] = [
   ['01', '剣'],
@@ -33,11 +33,11 @@ export const equipGenre: [string, string][] = [
 const maxUserProfile: PCRStoreValue<'user_profile'> = {
   user_name: 'MAX',
   unit_id: undefined as any,
-  level: 181,
+  level: 184,
   rarity: 5,
   promotion_level: 19,
   unique_enhance_level: 190,
-  skill_enhance_status: { ub: 181, 1: 181, 2: 181, ex: 181 },
+  skill_enhance_status: { ub: 184, 1: 184, 2: 184, ex: 184 },
   equip_enhance_status: {},
   love_level_status: {},
 };

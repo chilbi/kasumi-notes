@@ -4,16 +4,16 @@ import Big from 'big.js';
 import clsx from 'clsx';
 import borderIcon1Png from '../images/border_icon_1.png';
 import borderIcon2Png from '../images/border_icon_2.png';
+import borderIcon3Png from '../images/border_icon_3.png';
 import borderIcon4Png from '../images/border_icon_4.png';
-import borderIcon7Png from '../images/border_icon_7.png';
-import borderIcon11Png from '../images/border_icon_11.png';
-import borderIcon18Png from '../images/border_icon_18.png';
+import borderIcon5Png from '../images/border_icon_5.png';
+import borderIcon6Png from '../images/border_icon_6.png';
 import borderPlate1Png from '../images/border_plate_1.png';
 import borderPlate2Png from '../images/border_plate_2.png';
+import borderPlate3Png from '../images/border_plate_3.png';
 import borderPlate4Png from '../images/border_plate_4.png';
-import borderPlate7Png from '../images/border_plate_7.png';
-import borderPlate11Png from '../images/border_plate_11.png';
-import borderPlate18Png from '../images/border_plate_18.png';
+import borderPlate5Png from '../images/border_plate_5.png';
+import borderPlate6Png from '../images/border_plate_6.png';
 
 const useStyles = makeStyles((theme: Theme) => {
   const
@@ -28,10 +28,10 @@ const useStyles = makeStyles((theme: Theme) => {
   const borders = {
     1: [borderIcon1Png, borderPlate1Png],
     2: [borderIcon2Png, borderPlate2Png],
+    3: [borderIcon3Png, borderPlate3Png],
     4: [borderIcon4Png, borderPlate4Png],
-    7: [borderIcon7Png, borderPlate7Png],
-    11: [borderIcon11Png, borderPlate11Png],
-    18: [borderIcon18Png, borderPlate18Png],
+    5: [borderIcon5Png, borderPlate5Png],
+    6: [borderIcon6Png, borderPlate6Png],
   };
   const rankColorKeys = Object.keys(borders) as any as (keyof typeof borders)[];
   const borderTypes = [['icon', 0], ['plate', 1]] as const;

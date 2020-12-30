@@ -58,13 +58,13 @@ function PCRDBConnect(props: PCRDBConnectProps) {
     <Backdrop className={styles.backdrop} open={status < 1}>
       {status === -1 && (
         <Fragment>
-          <CircularProgress key={0} className={styles.m1} size="1.5em" color="inherit" />
+          <CircularProgress className={styles.m1} size="1.5em" color="inherit" />
           <span className={styles.m1}>opening...</span>
         </Fragment>
       )}
       {status === 0 && (
         <Fragment>
-          <span key={1} className={styles.m1}>{progress.times(100).round(0, 0).toString()}%</span>
+          <span className={styles.m1}>{progress.times(100).round(0, 0).toString()}%</span>
           <span className={styles.m1}>updating...</span>
         </Fragment>
       )}

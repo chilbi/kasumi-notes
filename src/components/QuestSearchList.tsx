@@ -363,11 +363,9 @@ function QuestSearchList(props: QuestSearchListProps) {
             <div className={clsx(listIndex !== '0' && styles.hidden)}>
               {items.equipMaterial.map(value => {
                 const [rarity, list] = value;
-                const r = parseInt(rarity[0]);
-                const rank = r > 5 ? 18 : r > 4 ? 11 : r > 3 ? 7 : r > 2 ? 4 : r > 1 ? 2 : 1;
                 return (
                   <Fragment key={rarity}>
-                    <LabelDivider className={styles.labelDiv} label={'レア' + rarity} rank={rank} />
+                    <LabelDivider className={styles.labelDiv} label={'レア' + rarity} point={rarity[0]} />
                     <div className={styles.items}>
                       {renderList(list, 'icon_equipment', item => item.equip_id)}
                     </div>
@@ -380,10 +378,9 @@ function QuestSearchList(props: QuestSearchListProps) {
             <div className={clsx(listIndex !== '1' && styles.hidden)}>
               {items.memoryPiece.map((value, i) => {
                 const [label, list] = value;
-                const rank = i === 0 ? 1 : 7;
                 return (
                   <Fragment key={i}>
-                    <LabelDivider className={styles.labelDiv} label={label} rank={rank} />
+                    <LabelDivider className={styles.labelDiv} label={label} point={i === 0 ? 1 : 4} />
                     <div className={styles.items}>
                       {renderList(list, 'icon_item', item => item)}
                     </div>

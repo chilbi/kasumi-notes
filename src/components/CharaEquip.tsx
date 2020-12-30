@@ -14,7 +14,7 @@ import { EquipDetailContext } from './Contexts';
 import { EquipData } from '../DBHelper/equip';
 import { PromotionData } from '../DBHelper/promotion';
 import { UniqueEquipData } from '../DBHelper/unique_equip';
-import { getPublicImageURL, getValidID } from '../DBHelper/helper';
+import { getPublicImageURL, getValidID, getRankPoint } from '../DBHelper/helper';
 import maxUserProfile, { nullID } from '../DBHelper/maxUserProfile';
 import { PCRStoreValue } from '../db';
 import localValue from '../localValue';
@@ -361,7 +361,7 @@ function CharaEquip(props: CharaEquipProps) {
             const isEqual = promotionLevel === promotion_level;
             return (
               <div key={promotionLevel} className={styles.equipItem}>
-                <LabelDivider label={'RANK' + promotionLevel} rank={promotionLevel}>
+                <LabelDivider label={'RANK' + promotionLevel} point={getRankPoint(promotionLevel)}>
                   <Radio
                     classes={{ root: styles.checkbox }}
                     checked={isEqual}

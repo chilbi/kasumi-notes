@@ -1,6 +1,5 @@
 import { makeStyles, Theme, StyleRules } from '@material-ui/core/styles';
 import clsx from 'clsx';
-import { getRankPoint } from '../DBHelper/helper';
 
 const useStyles = makeStyles((theme: Theme) => {
   const rankStyles = {} as StyleRules<string>;
@@ -42,19 +41,19 @@ const useStyles = makeStyles((theme: Theme) => {
 
 interface LabelDividerProps {
   className?: string;
-  rank?: number;
+  point?: number | string;
   unique?: boolean;
   label: string;
   children?: React.ReactNode;
 }
 
 function LabelDivider(props: LabelDividerProps) {
-  const { className, rank, unique, label, children } = props;
+  const { className, point, unique, label, children } = props;
   const styles = useStyles();
 
   return (
     <div className={clsx(styles.root, className)}>
-      <span className={clsx(styles.label, unique && styles.uniqueColor, rank && styles['rankColor' + getRankPoint(rank) as keyof typeof styles])}>{label}</span>
+      <span className={clsx(styles.label, unique && styles.uniqueColor, point && styles['rankColor' + point as keyof typeof styles])}>{label}</span>
       {children}
     </div>
   )

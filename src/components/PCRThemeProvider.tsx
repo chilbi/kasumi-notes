@@ -8,10 +8,10 @@ import HanziPenTtf from '../fonts/DF-HanziPen-W5.ttf';
 
 declare module '@material-ui/core/styles/createMuiTheme' {
   interface Theme {
-    rankColor: Record<1 | 2 | 4 | 7 | 11 | 18, string>;
+    rankColor: Record<number, string>;
   }
   interface ThemeOptions {
-    rankColor?: Record<1 | 2 | 4 | 7 | 11 | 18, string>;
+    rankColor?: Record<number, string>;
   }
 }
 
@@ -20,10 +20,10 @@ function createTheme(pcrTheme: PCRTheme) {
     rankColor: {
       1: '#94b5ee',
       2: '#f0ac8a',
-      4: '#adb5ce',
-      7: '#f4b039',
-      11: '#a14ce5',
-      18: '#d72d3e',
+      3: '#adb5ce',
+      4: '#f4b039',
+      5: '#a14ce5',
+      6: '#d72d3e',
     },
     spacing: (abs: number | string) =>
       typeof abs === 'string' ? abs

@@ -275,7 +275,6 @@ const actionMap: Record</*action_type*/number, /*getDescription*/(this: SkillAct
     }
     return insertFormula(desc, formula);
   },
-  // マツリ UB、ミミ UB
   2: function () {
     // this.target_type === 3;
     let desc = '';
@@ -289,7 +288,7 @@ const actionMap: Record</*action_type*/number, /*getDescription*/(this: SkillAct
     if (this.action_value_1 !== 0) {
       desc += this.action_value_1 + '距離';
     }
-    const arr = [100500101/*マツリ UB*/, 105200202/*リマ Main1*/,105201202/*リマ Main1+*/];
+    const arr = [100500101/*マツリ UB*/, 105200202/*リマ Main1*/, 105201202/*リマ Main1+*/, 114700202/*ムイミ（ニューイヤー） Main1*/];
     if (arr.indexOf(this.action_id) < 0) {
       desc += 'に移動し、スキル終了あと元の位置に戻る。';
     } else {

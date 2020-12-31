@@ -34,139 +34,139 @@ export async function insert(db, onProgress = () => null) {
   actualUnitBackground.forEach(record => insertTasks.push(actualUnitBackgroundTransaction.store.add(record)));
   insertTasks.push(actualUnitBackgroundTransaction.done);
   await Promise.all(insertTasks);
-  onProgress(129, 25698);
+  onProgress(131, 25976);
 
   insertTasks = [];
   const charaStoryStatusTransaction = db.transaction('chara_story_status', 'readwrite');
   charaStoryStatus.forEach(record => insertTasks.push(charaStoryStatusTransaction.store.add(record)));
   insertTasks.push(charaStoryStatusTransaction.done);
   await Promise.all(insertTasks);
-  onProgress(872, 25698);
+  onProgress(880, 25976);
 
   insertTasks = [];
   const enemyRewardDataTransaction = db.transaction('enemy_reward_data', 'readwrite');
   enemyRewardData.forEach(record => insertTasks.push(enemyRewardDataTransaction.store.add(record)));
   insertTasks.push(enemyRewardDataTransaction.done);
   await Promise.all(insertTasks);
-  onProgress(2801, 25698);
+  onProgress(2804, 25976);
 
   insertTasks = [];
   const equipmentCraftTransaction = db.transaction('equipment_craft', 'readwrite');
   equipmentCraft.forEach(record => insertTasks.push(equipmentCraftTransaction.store.add(record)));
   insertTasks.push(equipmentCraftTransaction.done);
   await Promise.all(insertTasks);
-  onProgress(290, 25698);
+  onProgress(290, 25976);
 
   insertTasks = [];
   const equipmentDataTransaction = db.transaction('equipment_data', 'readwrite');
   equipmentData.forEach(record => insertTasks.push(equipmentDataTransaction.store.add(record)));
   insertTasks.push(equipmentDataTransaction.done);
   await Promise.all(insertTasks);
-  onProgress(617, 25698);
+  onProgress(617, 25976);
 
   insertTasks = [];
   const equipmentEnhanceRateTransaction = db.transaction('equipment_enhance_rate', 'readwrite');
   equipmentEnhanceRate.forEach(record => insertTasks.push(equipmentEnhanceRateTransaction.store.add(record)));
   insertTasks.push(equipmentEnhanceRateTransaction.done);
   await Promise.all(insertTasks);
-  onProgress(327, 25698);
+  onProgress(327, 25976);
 
   insertTasks = [];
   const questDataTransaction = db.transaction('quest_data', 'readwrite');
   questData.forEach(record => insertTasks.push(questDataTransaction.store.add(record)));
   insertTasks.push(questDataTransaction.done);
   await Promise.all(insertTasks);
-  onProgress(727, 25698);
+  onProgress(727, 25976);
 
   insertTasks = [];
   const skillActionTransaction = db.transaction('skill_action', 'readwrite');
   skillAction.forEach(record => insertTasks.push(skillActionTransaction.store.add(record)));
   insertTasks.push(skillActionTransaction.done);
   await Promise.all(insertTasks);
-  onProgress(5143, 25698);
+  onProgress(5219, 25976);
 
   insertTasks = [];
   const skillDataTransaction = db.transaction('skill_data', 'readwrite');
   skillData.forEach(record => insertTasks.push(skillDataTransaction.store.add(record)));
   insertTasks.push(skillDataTransaction.done);
   await Promise.all(insertTasks);
-  onProgress(2228, 25698);
+  onProgress(2257, 25976);
 
   insertTasks = [];
   const uniqueEquipmentDataTransaction = db.transaction('unique_equipment_data', 'readwrite');
   uniqueEquipmentData.forEach(record => insertTasks.push(uniqueEquipmentDataTransaction.store.add(record)));
   insertTasks.push(uniqueEquipmentDataTransaction.done);
   await Promise.all(insertTasks);
-  onProgress(99, 25698);
+  onProgress(99, 25976);
 
   insertTasks = [];
   const uniqueEquipmentEnhanceRateTransaction = db.transaction('unique_equipment_enhance_rate', 'readwrite');
   uniqueEquipmentEnhanceRate.forEach(record => insertTasks.push(uniqueEquipmentEnhanceRateTransaction.store.add(record)));
   insertTasks.push(uniqueEquipmentEnhanceRateTransaction.done);
   await Promise.all(insertTasks);
-  onProgress(99, 25698);
+  onProgress(99, 25976);
 
   insertTasks = [];
   const unitAttackPatternTransaction = db.transaction('unit_attack_pattern', 'readwrite');
   unitAttackPattern.forEach(record => insertTasks.push(unitAttackPatternTransaction.store.add(record)));
   insertTasks.push(unitAttackPatternTransaction.done);
   await Promise.all(insertTasks);
-  onProgress(1151, 25698);
+  onProgress(1163, 25976);
 
   insertTasks = [];
   const unitDataTransaction = db.transaction('unit_data', 'readwrite');
   unitData.forEach(record => insertTasks.push(unitDataTransaction.store.add(record)));
   insertTasks.push(unitDataTransaction.done);
   await Promise.all(insertTasks);
-  onProgress(174, 25698);
+  onProgress(178, 25976);
 
   insertTasks = [];
   const unitProfileTransaction = db.transaction('unit_profile', 'readwrite');
   unitProfile.forEach(record => insertTasks.push(unitProfileTransaction.store.add(record)));
   insertTasks.push(unitProfileTransaction.done);
   await Promise.all(insertTasks);
-  onProgress(135, 25698);
+  onProgress(137, 25976);
 
   insertTasks = [];
   const unitPromotionTransaction = db.transaction('unit_promotion', 'readwrite');
   unitPromotion.forEach(record => insertTasks.push(unitPromotionTransaction.store.add(record)));
   insertTasks.push(unitPromotionTransaction.done);
   await Promise.all(insertTasks);
-  onProgress(3022, 25698);
+  onProgress(3060, 25976);
 
   insertTasks = [];
   const unitPromotionStatusTransaction = db.transaction('unit_promotion_status', 'readwrite');
   unitPromotionStatus.forEach(record => insertTasks.push(unitPromotionStatusTransaction.store.add(record)));
   insertTasks.push(unitPromotionStatusTransaction.done);
   await Promise.all(insertTasks);
-  onProgress(2574, 25698);
+  onProgress(2610, 25976);
 
   insertTasks = [];
   const unitRarityTransaction = db.transaction('unit_rarity', 'readwrite');
   unitRarity.forEach(record => insertTasks.push(unitRarityTransaction.store.add(record)));
   insertTasks.push(unitRarityTransaction.done);
   await Promise.all(insertTasks);
-  onProgress(796, 25698);
+  onProgress(806, 25976);
 
   insertTasks = [];
   const unitSkillDataTransaction = db.transaction('unit_skill_data', 'readwrite');
   unitSkillData.forEach(record => insertTasks.push(unitSkillDataTransaction.store.add(record)));
   insertTasks.push(unitSkillDataTransaction.done);
   await Promise.all(insertTasks);
-  onProgress(951, 25698);
+  onProgress(963, 25976);
 
   insertTasks = [];
   const unitUniqueEquipTransaction = db.transaction('unit_unique_equip', 'readwrite');
   unitUniqueEquip.forEach(record => insertTasks.push(unitUniqueEquipTransaction.store.add(record)));
   insertTasks.push(unitUniqueEquipTransaction.done);
   await Promise.all(insertTasks);
-  onProgress(99, 25698);
+  onProgress(99, 25976);
 
   insertTasks = [];
   const waveGroupDataTransaction = db.transaction('wave_group_data', 'readwrite');
   waveGroupData.forEach(record => insertTasks.push(waveGroupDataTransaction.store.add(record)));
   insertTasks.push(waveGroupDataTransaction.done);
   await Promise.all(insertTasks);
-  onProgress(3464, 25698);
+  onProgress(3510, 25976);
 
 }

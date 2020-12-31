@@ -637,7 +637,7 @@ function main() {
   }
   waveGroupObj.records = newWGRecords;
 
-  const excludeUnitID = [106701/*ホマレ*/, 110201/*ミサキ（サマー）*/, 900103/*ヒヨリ（不明）*/, 906601/*イノリ（不明）*/];
+  const excludeUnitID = [106701/*ホマレ*/, 110201/*ミサキ（サマー）*/, 900103/*ヒヨリ（不明）*/, 906601/*イノリ（不明）*/, 111801/*ぺコリーヌ（ニューイヤー）*/, 115001/*ネネカ（ニューイヤー）*/];
   const unitProfileObj = sqlRawObjs.find(obj => obj.tableName === 'unit_profile');
   const newUPRecords = [];
   for (let record of unitProfileObj.records) {

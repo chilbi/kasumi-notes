@@ -6,7 +6,7 @@ import { openDB } from 'idb';
  * @returns {Promise<import('.').PCRDB>}
  */
 export default function openPCRDB(options = {}) {
-  return openDB('pcr', 10024300, {
+  return openDB('pcr', 10024900, {
     upgrade(db, oldVersion, newVersion, transaction) {
       if (newVersion !== oldVersion) {
         if (db.objectStoreNames.length > 0) {

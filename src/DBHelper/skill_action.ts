@@ -169,6 +169,8 @@ function getCoefficient(thisAction: SkillAction): string {
       let range = thisAction.target_range === 2160 && thisAction.target_count === 99 ? '全体' : '範囲内';
       let target = thisAction.target_assignment === 1 ? '敵' : '味方';
       return `${range}の${target}の数`; // カスミ Main+、トモ Main+、リノ（ワンダー）
+    case 5: // スズメ（ニューイヤー）
+      return 'ダメージを与えた敵の数';
     case 6: // キャル（ニューイヤー）
       return 'ダメージの量';
     case 7: // ジュン（サマー）
@@ -706,6 +708,13 @@ const actionMap: Record</*action_type*/number, /*getDescription*/(this: SkillAct
     } else if (this.action_detail_1 === 1000) {
       // エリコ UB
       return ['敵を倒した場合', actionA, 'を使う。'];
+    } else if (this.action_detail_1 > 900) {
+      // ぺコリーヌ（ニューイヤー） UB
+      const percent = this.action_detail_1.toString().substr(-2);
+      if (this.action_detail_2 === 0) {
+        return [`自分の残りＨＰが${percent}％以上だった場合`, actionB, 'を使う。'];
+      }
+      return [`自分の残りＨＰが${percent}％以上だった場合`, actionB, 'を使う、でないと', actionA, 'を使う。'];
     } else if (this.action_detail_1 > 600) {
       const stateID = getState(this.action_detail_1);
       const stateObj = getStateObj(stateID);

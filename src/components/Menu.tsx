@@ -154,22 +154,19 @@ function Menu() {
 
   const handleChangeUser = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     const user = e.currentTarget.getAttribute('data-user')!;
-    const currUser = e.currentTarget.getAttribute('data-curr');
-    if (user !== currUser) {
-      dbHelper!.getAllCharaBaseData(user).then(data => {
-        setCharaList(data);
-        setState(prev => {
-          const newState = deepClone(prev);
-          newState.currUser = user;
-          localValue.app.user.set(user);
-          return newState;
-        });
+    dbHelper!.getAllCharaBaseData(user).then(data => {
+      setCharaList(data);
+      setState(prev => {
+        const newState = deepClone(prev);
+        newState.currUser = user;
+        localValue.app.user.set(user);
+        return newState;
       });
-    }
+    });
   }, [dbHelper, setCharaList]);
 
   const handleUserMAX = useCallback(() => {}, []);
-  
+
   const handleDelete = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
     const user = e.currentTarget.getAttribute('data-user')!;
     dbHelper!.deleteUserProfiles(user).then(() => {

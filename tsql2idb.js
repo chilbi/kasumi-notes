@@ -625,6 +625,17 @@ function main() {
   // 删除不必要的字段
   delArr.forEach(item => delField(item.tableName, item.fields));
 
+  // 删除シェフィmain1+
+  const skillDataObj = sqlRawObjs.find(obj => obj.tableName === 'unit_skill_data');
+  const [targetIndex, main1EvIndex] = (() => {
+    const temp = skillDataObj.records[0];
+    const idIdx = temp.indexOf('unit_id') + 1;
+    const main1EvIdx = temp.indexOf('main_skill_evolution_1') + 1;
+    const targetIdx = skillDataObj.records.findIndex(record => record[idIdx] === '106401');
+    return [targetIdx, main1EvIdx];
+  })();
+  skillDataObj.records[targetIndex][main1EvIndex] = '0'; 
+
   const waveGroupObj = sqlRawObjs.find(obj => obj.tableName === 'wave_group_data');
   waveGroupObj.primaryKeys = ['wave_group_id'];
   const newWGRecords = [];
@@ -637,7 +648,7 @@ function main() {
   }
   waveGroupObj.records = newWGRecords;
 
-  const excludeUnitID = [106701/*ホマレ*/, 110201/*ミサキ（サマー）*/, 900103/*ヒヨリ（不明）*/, 906601/*イノリ（不明）*/];
+  const excludeUnitID = [106701/*ホマレ*/, 110201/*ミサキ（サマー）*/, 900103/*ヒヨリ（不明）*/, 906601/*イノリ（不明）*/, 115901/*マコト（シンデレラ）*/, 116001/*マホ（シンデレラ）*/];
   const unitProfileObj = sqlRawObjs.find(obj => obj.tableName === 'unit_profile');
   const newUPRecords = [];
   for (let record of unitProfileObj.records) {

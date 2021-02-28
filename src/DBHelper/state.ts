@@ -6,4 +6,5 @@ export const state: Record<number, string> = {
   76: 'ちぇる',
   77: '風の刃',
   92: '聖夜の煌き',
+  97: '氷竜の印',
 };

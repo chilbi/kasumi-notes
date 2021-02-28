@@ -21,6 +21,7 @@ export interface UnitSkillData {
   ex_skill_evolution_4: number;
   ex_skill_5: number;
   ex_skill_evolution_5: number;
+  sp_union_burst: number;
   sp_skill_1: number;
   sp_skill_2: number;
   sp_skill_3: number;

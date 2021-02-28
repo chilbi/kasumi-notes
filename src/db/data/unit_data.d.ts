@@ -2,6 +2,7 @@ export interface UnitData {
   unit_id: number;
   unit_name: string;
   kana: string;
+  prefab_id_battle: number;
   rarity: number;
   move_speed: number;
   search_area_width: number;

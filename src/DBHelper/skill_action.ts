@@ -179,6 +179,8 @@ function getCoefficient(thisAction: SkillAction): string {
       return '自分の魔法攻撃力'; // チカ（クリスマス） Main1+
     case 12:
       return '後方にいる味方の数'; // ノゾミ（クリスマス）
+    case 21: //　シェフィ
+      return `カウンター1の数`;
     case 102:
       return 'オメメちゃんの数';
     default:
@@ -381,6 +383,8 @@ const actionMap: Record</*action_type*/number, /*getDescription*/(this: SkillAct
         target = `最もＨＰが低い${this.target_assignment === 1 ? '敵' : '味方'}`;
       } else if (this.target_type === 7) {
         target = '自分';
+      } else if (this.target_type === 14) { // ユイ（儀装束） Main1、Main2
+        target = '最も物理攻撃力が高い味方１キャラ';
       } else {
         target = this.target_count + this.target_number + '番目';
         if (this.target_assignment === 1) {
@@ -518,16 +522,27 @@ const actionMap: Record</*action_type*/number, /*getDescription*/(this: SkillAct
     //   `物理攻撃は${getOdds(100 - this.action_detail_1)}ミスする。`
     // ];
   },
-  // ムイミ UB
+  // リマ（シンデレラ） SP3
+  13: function () {
+    return '自分を沈黙状態にする' + getEffectTime(this.action_value_1);
+  },
   14: function () {
     const pattern = this.action_detail_2 % 10;
     let desc = '';
-    if (pattern === 1) {
-      desc = 'ＴＰが無くなると、';
-    } else {
-      desc = `ＴＰを毎秒${this.action_value_1}消耗し、ＴＰが無くなるまでの間天楼覇断剣を装備し、`;
+    if (this.action_value_3 === 0) { // ムイミ UB
+      if (pattern === 1) {
+        desc = 'ＴＰが無くなると、';
+      } else {
+        desc = `ＴＰを毎秒${this.action_value_1}消耗し、ＴＰが無くなるまでの間天楼覇断剣を装備し、`;
+      }
+      desc += `行動パターンを${pattern}に変化させる。`;
+    } else { // リマ（シンデレラ）
+      if (pattern === 3) {
+        desc = `効果終了後、行動パターンを${pattern}に変化させる。`;
+      } else {
+        desc = `自分を人の姿に変化させ、行動パターンを${pattern}に変化させる` + getEffectTime(this.action_value_1);
+      }
     }
-    desc += `行動パターンを${pattern}に変化させる。`;
     return desc;
   },
   // 召喚物 summoned
@@ -790,6 +805,12 @@ const actionMap: Record</*action_type*/number, /*getDescription*/(this: SkillAct
       return [stateObj, 'を纏う。纏っている間、スキルの効果値が２倍になる' + getEffectTime(this.action_value_3)];
     } else if (stateID === 90) { // マツリ（ハロウィン） UB
       return [`UBの使用回数を${this.action_value_4}回増やす。最大${this.action_value_1}回まで増やせる。`];
+    } else if (stateID === 97) { // シェフィ
+      if (this.action_value_4 > 0) {
+        return ['自分に', stateObj, `の数を${this.action_value_4}つ追加する。`, stateObj, `は最大${this.action_value_1}まで追加される` + getEffectTime(this.action_value_3)];
+      } else {
+        return ['自分に', stateObj, `の数を${-this.action_value_4}つ消費する。`];
+      }
     }
     return this.description;
   },

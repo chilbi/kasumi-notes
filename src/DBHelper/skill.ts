@@ -26,6 +26,7 @@ export interface UnitSkillData {
   attack_pattern: AttackPattern[];
   union_burst: SkillData;
   union_burst_evolution: SkillData | undefined;
+  sp_union_burst: SkillData | undefined;
   main_skill: SkillData[]; // 1-10
   main_skill_evolution: SkillData[]; // 1-2
   ex_skill: SkillData[]; // 1-5
@@ -114,6 +115,7 @@ export async function getUnitSkillData(db: PCRDB, unit_id: number): Promise<Unit
     attack_pattern,
     union_burst,
     union_burst_evolution,
+    sp_union_burst,
     main_skill,
     main_skill_evolution,
     ex_skill,
@@ -124,6 +126,7 @@ export async function getUnitSkillData(db: PCRDB, unit_id: number): Promise<Unit
     getAttackPattern(db, unit_id),
     getSkillData(db, unitSkillData.union_burst),
     unitSkillData.union_burst_evolution === 0 ? undefined : getSkillData(db, unitSkillData.union_burst_evolution),
+    unitSkillData.sp_union_burst === 0 ? undefined : getSkillData(db, unitSkillData.sp_union_burst),
     getSkillDataArr('main_skill_', 10),
     getSkillDataArr('main_skill_evolution_', 2),
     getSkillDataArr('ex_skill_', 5),
@@ -137,6 +140,7 @@ export async function getUnitSkillData(db: PCRDB, unit_id: number): Promise<Unit
     attack_pattern,
     union_burst,
     union_burst_evolution,
+    sp_union_burst,
     main_skill,
     main_skill_evolution,
     ex_skill,

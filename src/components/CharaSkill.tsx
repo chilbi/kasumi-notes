@@ -179,7 +179,7 @@ function CharaSkill(props: CharaSkillProps) {
 
   if (!unitSkillData || !atkType || !atkCastTime || !property)
     return <LinearProgress color="secondary" />;
-  // console.log(unitSkillData);
+  console.log(unitSkillData);
   const atkData = atkType === 1
     ? {
       name: '物理',
@@ -331,6 +331,9 @@ function CharaSkill(props: CharaSkillProps) {
   skillList.push({ label: 'UB', skillData: unitSkillData.union_burst, skillKey: 'ub' });
   if (unitSkillData.union_burst_evolution) {
     skillList.push({ label: 'UB+', skillData: unitSkillData.union_burst_evolution, skillKey: 'ub' });
+  }
+  if (unitSkillData.sp_union_burst) {
+    skillList.push({ label: 'SPUB', skillData: unitSkillData.sp_union_burst, skillKey: 'ub' });
   }
   const pushItem = (label: string, normal: SkillData[], evolution: SkillData[], ex?: boolean) => {
     const len = normal.length;

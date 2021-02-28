@@ -528,19 +528,19 @@ const actionMap: Record</*action_type*/number, /*getDescription*/(this: SkillAct
   },
   14: function () {
     const pattern = this.action_detail_2 % 10;
+    const actionDetail1 = this.action_detail_1;
     let desc = '';
     if (this.action_value_3 === 0) { // ムイミ UB
-      if (pattern === 1) {
-        desc = 'ＴＰが無くなると、';
+      if (actionDetail1 === 3) {
+        desc = `ＴＰが無くなると、行動パターンを${pattern}に変化させる。`;
       } else {
-        desc = `ＴＰを毎秒${this.action_value_1}消耗し、ＴＰが無くなるまでの間天楼覇断剣を装備し、`;
+        desc = `ＴＰを毎秒${this.action_value_1}消耗し、ＴＰが無くなるまでの間天楼覇断剣を装備し、行動パターンを${pattern}に変化させる。`;
       }
-      desc += `行動パターンを${pattern}に変化させる。`;
     } else { // リマ（シンデレラ）
-      if (pattern === 3) {
-        desc = `効果終了後、行動パターンを${pattern}に変化させる。`;
+      if (actionDetail1 === 3) {
+        desc = `効果終了後、行動パターンを${pattern}に変化させ、SPUBがUBに変化させる。`;
       } else {
-        desc = `自分を人の姿に変化させ、行動パターンを${pattern}に変化させる` + getEffectTime(this.action_value_1);
+        desc = `自分を人の姿に変化させ、行動パターンを${pattern}に変化させ、UBがSPUBに変化させる` + getEffectTime(this.action_value_1);
       }
     }
     return desc;

@@ -524,7 +524,7 @@ const actionMap: Record</*action_type*/number, /*getDescription*/(this: SkillAct
   },
   // リマ（シンデレラ） SP3
   13: function () {
-    return '自分を沈黙状態にする' + getEffectTime(this.action_value_1);
+    return '自分を制御無効状態にする' + getEffectTime(this.action_value_1);
   },
   14: function () {
     const pattern = this.action_detail_2 % 10;

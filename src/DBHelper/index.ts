@@ -90,7 +90,7 @@ class DBHelper extends ImageData {
   //       }
   //     }
   //   }
-  //   console.log(JSON.stringify(mapRange).replaceAll('"', "'"));
+  //   console.log(JSON.stringify(mapRange).replaceAll('"', "'").replace("'N", "\n'N").replace("'H", "\n'H").replace("'VH", "\n'VH"));
   // }
 
   async getCharaDetailData(unit_id: number, user_name: string, base?: CharaBaseData): Promise<CharaDetailData | undefined> {

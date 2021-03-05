@@ -332,17 +332,12 @@ function CharaSkill(props: CharaSkillProps) {
   if (unitSkillData.union_burst_evolution) {
     skillList.push({ label: 'UB+', skillData: unitSkillData.union_burst_evolution, skillKey: 'ub' });
   }
-  if (unitSkillData.sp_union_burst) {
-    skillList.push({ label: 'SPUB', skillData: unitSkillData.sp_union_burst, skillKey: 'ub' });
-  }
-  const pushItem = (label: string, normal: SkillData[], evolution: SkillData[], ex?: boolean) => {
+  const pushItem = (label: string, normal: SkillData[], evolution: SkillData[], key?: keyof SkillEnhanceStatus) => {
     const len = normal.length;
-    const isOneEX = ex && len === 1 && evolution.length === 1;
+    const isOneEX = key === 'ex' && len === 1 && evolution.length === 1;
     for (let i = 0; i < len; i++) {
       const n = i + 1;
-      let skillKey = n as keyof SkillEnhanceStatus;
-      if (n > 2) skillKey = 'ub';
-      if (ex) skillKey = 'ex';
+      const skillKey = key || n as keyof SkillEnhanceStatus;
       const renameLabel = label + (isOneEX ? '' : n);
       skillList.push({
         label: renameLabel,
@@ -360,8 +355,11 @@ function CharaSkill(props: CharaSkillProps) {
     }
   };
   pushItem('Main', unitSkillData.main_skill, unitSkillData.main_skill_evolution);
-  pushItem('SP', unitSkillData.sp_skill, unitSkillData.sp_skill_evolution);
-  pushItem('EX', unitSkillData.ex_skill, unitSkillData.ex_skill_evolution, true);
+  if (unitSkillData.sp_union_burst) {
+    skillList.push({ label: 'SPUB', skillData: unitSkillData.sp_union_burst, skillKey: 'ub' });
+  }
+  pushItem('SP', unitSkillData.sp_skill, unitSkillData.sp_skill_evolution, 'ub');
+  pushItem('EX', unitSkillData.ex_skill, unitSkillData.ex_skill_evolution, 'ex');
 
   return (
     <div className={styles.root}>

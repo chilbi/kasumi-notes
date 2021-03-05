@@ -4,7 +4,7 @@ export const nullID = 999999;
 
 export const maxArea = 43;
 
-export const maxChara = 145;
+export const maxChara = 146;
 
 export const equipGenre: [string, string][] = [
   ['01', '剣'],

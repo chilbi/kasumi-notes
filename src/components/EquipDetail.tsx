@@ -57,7 +57,7 @@ const useStyles = makeStyles((theme: Theme) => {
     control: {
       flexGrow: 1,
       marginRight: theme.spacing(2),
-      padding: 0,
+      padding: '0!important',
     },
     iconButton: {
       margin: theme.spacing(0, 1),

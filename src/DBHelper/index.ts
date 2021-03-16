@@ -71,7 +71,7 @@ class DBHelper extends ImageData {
   }
 
   // private async _writeMapRange() {
-  //   const rarities = ['11', '21', '22', '23', '24', '31', '32', '33', '34', '41', '42', '43', '44', '51', '52', '53', '54', '55', '56', '57', '61', '62'];
+  //   const rarities = ['11', '21', '22', '23', '24', '31', '32', '33', '34', '41', '42', '43', '44', '51', '52', '53', '54', '55', '56', '57', '61', '62', '63'];
   //   const types = ['N', 'H', 'VH'] as const;
   //   const lists = await Promise.all(types.map(type => this.getQuestList(mapQuestType(type))));
   //   const mapRange: Record<string, Range | undefined> = {};

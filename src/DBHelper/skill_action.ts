@@ -708,12 +708,12 @@ const actionMap: Record</*action_type*/number, /*getDescription*/(this: SkillAct
       const counter = 'カウンター' + this.action_detail_1.toString().substr(-2, 1);
       const count = this.action_value_1;
       if (this.action_detail_2 === 0) {
-        return [counter + `の数が${count > 0 ? count + '以下' : count}の場合`, actionB, 'を使う。'];
+        return [counter + `の数が${count + 1}以下の場合`, actionB, 'を使う。'];
       }
       if (this.action_detail_3 === 0) {
-        return [counter + `の数が${count}以上の場合`, actionA, 'を使う。'];
+        return [counter + `の数が${count - 1}以上の場合`, actionA, 'を使う。'];
       }
-      return [counter + `の数が${count}以上の場合`, actionA, 'を使う、でないと', actionB, 'を使う。'];
+      return [counter + `の数が${count - 1}以上の場合`, actionA, 'を使う、でないと', actionB, 'を使う。'];
     } else if (this.action_detail_1 === 700) { // マコト（サマー） Main1+ Main2
       const condition = '残りの攻撃対象が1つの場合';
       if (this.action_detail_3 !== 0)
@@ -733,17 +733,20 @@ const actionMap: Record</*action_type*/number, /*getDescription*/(this: SkillAct
     } else if (this.action_detail_1 > 600) {
       const stateID = getState(this.action_detail_1);
       const stateObj = getStateObj(stateID);
-      if (stateID === 50) { // アン 英霊の加護
-        return ['自分が', stateObj, 'を受けている場合', actionA, 'を使う、でないと', actionB, 'を使う。']
-      } else if (stateID === 60) { // ルナ おともだち
-        return [stateObj, `の数が${this.action_value_3}以上の場合`, actionA, 'を使う、でないと', actionB, 'を使う。'];
-      } else if (stateID === 61) { // クリスティーナ（クリスマス）
-        if (this.action_detail_3 === 0) {
-          return [stateObj, 'を持っている場合', actionA, 'を使う。'];
-        }
-        return [stateObj, 'を持っている場合', actionA, 'を使う、でないと', actionB, 'を使う。'];
-      } else if (stateID === 77) { // レイ 風の刃
-        return ['自分が', stateObj, 'を纏っていた場合', actionB, 'を使う、でないと', actionA, 'を使う。'];
+      switch (stateID) {
+        case 50: // アン 英霊の加護
+          return ['自分が', stateObj, 'を受けている場合', actionA, 'を使う、でないと', actionB, 'を使う。']
+        case 60: // ルナ おともだち
+          return [stateObj, `の数が${this.action_value_3}以上の場合`, actionA, 'を使う、でないと', actionB, 'を使う。'];
+        case 61: // クリスティーナ（クリスマス）
+          if (this.action_detail_3 === 0) {
+            return [stateObj, 'を持っている場合', actionA, 'を使う。'];
+          }
+          return [stateObj, 'を持っている場合', actionA, 'を使う、でないと', actionB, 'を使う。'];
+        case 76: //　チエル（聖学祭）
+          return [stateObj, `の数が${this.action_value_3}貯まっている場合`, actionA, 'を使う。'];
+        case 77: // レイ 風の刃
+          return ['自分が', stateObj, 'を纏っていた場合', actionB, 'を使う、でないと', actionA, 'を使う。'];
       }
     } else if (this.action_detail_1 === 100) {
       // ミフユ UB+
@@ -783,34 +786,38 @@ const actionMap: Record</*action_type*/number, /*getDescription*/(this: SkillAct
   35: function () {
     const stateID = this.action_value_2;
     const stateObj = getStateObj(stateID);
-    if (stateID === 50) { // アン
-      return [this.target_range + '範囲内の味方に', stateObj, 'を付与する' + getEffectTime(this.action_value_3)];
-    } else if (stateID === 60) { //　ルナ
-      if (this.action_value_4 > 0) {
-        return [stateObj, `を追加で${this.action_value_4}人増やす。`];
-      } else {
-        const count = -this.action_value_4;
-        if (this.action_value_4 <= -5) {
-          return [stateObj, `を最大${count}人減らす。`];
+    switch (stateID) {
+      case 50: // アン
+        return [this.target_range + '範囲内の味方に', stateObj, 'を付与する' + getEffectTime(this.action_value_3)];
+      case 60: //　ルナ
+        if (this.action_value_4 > 0) {
+          return [stateObj, `${this.action_value_4}人追加で増やす。`];
         } else {
-          return [stateObj, `が${count}人以上いる時`, stateObj, `を${count}人減らす。`];
+          const count = -this.action_value_4;
+          if (this.action_value_4 <= -5) {
+            return [stateObj, `を最大${count}人まで減らす。`];
+          } else {
+            return [stateObj, `が${count}人以上いる時`, stateObj, `を${count}人減らす。`];
+          }
         }
-      }
-    } else if (stateID === 61) { // クリスティーナ（クリスマス）
-      if (this.action_value_4 > 0)
-        return [stateObj, 'を持っていない場合、', stateObj, 'を獲得する。'];
-      else
-        return [stateObj, 'を持っている場合、', stateObj, 'を消耗する。'];
-    } else if (stateID === 77) { // レイ UB+
-      return [stateObj, 'を纏う。纏っている間、スキルの効果値が２倍になる' + getEffectTime(this.action_value_3)];
-    } else if (stateID === 90) { // マツリ（ハロウィン） UB
-      return [`UBの使用回数を${this.action_value_4}回増やす。最大${this.action_value_1}回まで増やせる。`];
-    } else if (stateID === 97) { // シェフィ
-      if (this.action_value_4 > 0) {
-        return ['自分に', stateObj, `の数を${this.action_value_4}つ追加する。`, stateObj, `は最大${this.action_value_1}まで追加される` + getEffectTime(this.action_value_3)];
-      } else {
-        return ['自分に', stateObj, `の数を${-this.action_value_4}つ消費する。`];
-      }
+      case 61: // クリスティーナ（クリスマス）
+        if (this.action_value_4 > 0) {
+          return [stateObj, 'を持っていない場合、', stateObj, 'を獲得する。'];
+        } else {
+          return [stateObj, 'を持っている場合、', stateObj, 'を消耗する。'];
+        }
+      case 76: // チエル Main1+
+        return ['自分に', stateObj, `の数を${this.action_value_4}追加する` + getEffectTime(this.action_value_3)];
+      case 77: // レイ UB+
+        return [stateObj, 'を纏う。纏っている間、スキルの効果値が２倍になる' + getEffectTime(this.action_value_3)];
+      case 90: // マツリ（ハロウィン） UB
+        return [`UBの使用回数を${this.action_value_4}回増やす。最大${this.action_value_1}回まで増やせる。`];
+      case 97: // シェフィ
+        if (this.action_value_4 > 0) {
+          return ['自分に', stateObj, `の数を${this.action_value_4}つ追加する。`, stateObj, `は最大${this.action_value_1}まで追加される` + getEffectTime(this.action_value_3)];
+        } else {
+          return ['自分に', stateObj, `の数を${-this.action_value_4}つ消費する。`];
+        }
     }
     return this.description;
   },
@@ -870,7 +877,7 @@ const actionMap: Record</*action_type*/number, /*getDescription*/(this: SkillAct
   44: function () {
     return 'バトル' + this.action_value_1 + '秒後入場する。';
   },
-  // アリサ UB、カヤ UB Main1+、スズナ（サマー）
+  // アリサ UB、カヤ UB Main1+、スズナ（サマー）、クロエ（聖学祭）
   45: function () {
     return `カウンター${this.action_detail_1}の数を${this.action_value_1}増やせる。`;
   },
@@ -936,17 +943,23 @@ const actionMap: Record</*action_type*/number, /*getDescription*/(this: SkillAct
   60: function () {
     const stateID = this.action_value_2;
     const stateObj = getStateObj(stateID);
-    if (stateID === 57) { // クロエ Main1
-      return ['敵に攻撃が当たるたびに、対象の', stateObj, 'の数を1増やせるようになる。敵一人当たり',
-        stateObj, `の数は最大${this.action_value_1}まで追加される` + getEffectTime(this.action_value_3)];
-    } else if (stateID === 60) { // ルナ SP1
-      return ['行動するたびに', stateObj, 'の数を1増やせるようになる。',
-        stateObj, `の数は最大${this.action_value_1}まで追加される` + getEffectTime(this.action_value_3)];
-    } else if (stateID === 76) {
-      return ['敵にクリティカルでダメージを与えるたびに', stateObj, 'の数を1増やせるようになる。敵一人当たり',
-        stateObj, `の数は最大${this.action_value_1}まで追加される` + getEffectTime(this.action_value_3)];
+    let desc = this.description;
+    switch (stateID) {
+      case 57: // クロエ Main1
+        desc = '敵に攻撃が当たるたびに、対象の敵に';
+        break;
+      case 60: // ルナ SP1
+        desc = 'ルナがダメージを与える度に、自分に';
+        break;
+      case 76: // チエル、チエル（聖学祭）
+        if(this.action_detail_1=== 3) {
+          desc = '相手に攻撃を命中させる度に、自分に';
+        } else { // this.action_detail_1 === 4
+          desc = '敵にクリティカルでダメージを与えるたびに、自分に'
+        }
+        break;
     }
-    return this.description;
+    return [desc, stateObj, 'の数が１つ追加されるようになる。', stateObj, `の数は最大${this.action_value_1}まで追加される` + getEffectTime(this.action_value_3)];
   },
   // 恐慌
   61: function () {

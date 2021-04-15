@@ -238,8 +238,8 @@ class DBHelper extends ImageData {
         const idStr = item.equipment_id.toString();
         const rarity = getEquipRarity(idStr);
         const genre_id = getEquipGenreID(idStr);
-        const findItem = result.find(value => value[0] === rarity);
-        if (findItem) findItem[1].push({ equip_id, genre_id });
+        const existedItem = result.find(value => value[0] === rarity);
+        if (existedItem) existedItem[1].push({ equip_id, genre_id });
         else result.push([rarity, [{ equip_id, genre_id }]]);
       }
     }

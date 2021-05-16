@@ -8,12 +8,14 @@ import borderIcon3Png from '../images/border_icon_3.png';
 import borderIcon4Png from '../images/border_icon_4.png';
 import borderIcon5Png from '../images/border_icon_5.png';
 import borderIcon6Png from '../images/border_icon_6.png';
+import borderIcon7Png from '../images/border_icon_7.png';
 import borderPlate1Png from '../images/border_plate_1.png';
 import borderPlate2Png from '../images/border_plate_2.png';
 import borderPlate3Png from '../images/border_plate_3.png';
 import borderPlate4Png from '../images/border_plate_4.png';
 import borderPlate5Png from '../images/border_plate_5.png';
 import borderPlate6Png from '../images/border_plate_6.png';
+import borderPlate7Png from '../images/border_plate_7.png';
 
 const useStyles = makeStyles((theme: Theme) => {
   const
@@ -32,6 +34,7 @@ const useStyles = makeStyles((theme: Theme) => {
     4: [borderIcon4Png, borderPlate4Png],
     5: [borderIcon5Png, borderPlate5Png],
     6: [borderIcon6Png, borderPlate6Png],
+    7: [borderIcon7Png, borderPlate7Png]
   };
   const rankColorKeys = Object.keys(borders) as any as (keyof typeof borders)[];
   const borderTypes = [['icon', 0], ['plate', 1]] as const;

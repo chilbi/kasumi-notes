@@ -24,6 +24,7 @@ function createTheme(pcrTheme: PCRTheme) {
       4: '#f4b039',
       5: '#a14ce5',
       6: '#d72d3e',
+      7: '#1f9258',
     },
     spacing: (abs: number | string) =>
       typeof abs === 'string' ? abs

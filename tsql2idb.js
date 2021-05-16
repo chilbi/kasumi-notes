@@ -9,9 +9,10 @@ const fs = require('fs');
 
 /**
  * @param {string} sqlRaw 
+ * @param {Record<string, string>} dataTypeMap
  * @returns {SQLRawObj}
  */
-function getSqlRawObj(sqlRaw) {
+function getSqlRawObj(sqlRaw, dataTypeMap) {
   // CREATE TABLE 'tableName' ('field_1' INTEGER NOT NULL, 'field_2' TEXT NOT NULL, 'field_3' REAL NOT NULL, PRIMARY KEY('field_1','field_2'));
   // INSERT INTO `tableName` VALUES (/*field_1*/1, /*field_2*/"text123", /*field_3*/0.1);
   // CREATE INDEX 'indexName' on 'tableName'('field_2','field_3');
@@ -35,17 +36,12 @@ function getSqlRawObj(sqlRaw) {
 
   let createTable = `CREATE TABLE '${tableName}' (`;
   let fieldDefineLine = createTableLine.substring(createTable.length, iPrimaryKey);
-  let types = {
-    'INTEGER': 'number',
-    'REAL': 'number',
-    'TEXT': 'string',
-  };
 
   /** @type Field[] */
   const fields = fieldDefineLine.split(',').map(value => {
     const fieldDef = value.trim().split(' ');
     const fieldName = trimQuotes(fieldDef[0]);
-    const fieldType = types[fieldDef[1]];
+    const fieldType = dataTypeMap[fieldDef[1]];
     return { fieldName, fieldType };
   });
 
@@ -90,12 +86,13 @@ function getSqlRawObj(sqlRaw) {
 }
 
 /**
+ * @param {Record<string, string>} dataTypeMap
  * @param {string} dir
  * @param {string[]} exclude
  * @param {string[]} [include]
  * @returns {SQLRawObj[]}
  */
-function getSqlRawObjs(dir, exclude, include) {
+function getSqlRawObjs(dataTypeMap, dir, exclude, include) {
   /** @type {SQLRawObj[]} */
   const objs = [];
 
@@ -104,7 +101,7 @@ function getSqlRawObjs(dir, exclude, include) {
     files.forEach(fileName => {
       if (include.indexOf(fileName) > -1) {
         const content = fs.readFileSync(dir + '/' + fileName, { encoding: 'utf-8' });
-        objs.push(getSqlRawObj(content));
+        objs.push(getSqlRawObj(content, dataTypeMap));
       }
     });
   } else {
@@ -116,7 +113,7 @@ function getSqlRawObjs(dir, exclude, include) {
         } else if (content.indexOf('CREATE TABLE') < 0) {
           console.log('no CREATE TABLE: ' + fileName);
         } else {
-          objs.push(getSqlRawObj(content));
+          objs.push(getSqlRawObj(content, dataTypeMap));
         }
       }
     });
@@ -196,33 +193,6 @@ function emptyDir(dir) {
     else fs.unlinkSync(path);
   });
 }
-
-// /**
-//  * @param {string[]} record 
-//  * @param {Field[]} fields 
-//  * @returns {string}
-//  */
-// function getRecordJSON(record, fields, quotes = '"') {
-//   let str = '{ ';
-//   let isKey = true;
-//   let tempKey = '';
-//   let len = record.length;
-//   for (let i = 0; i < len; i++) {
-//     if (isKey) {
-//       tempKey = record[i];
-//       str += `${quotes}${tempKey}${quotes}: `;
-//       isKey = false;
-//     } else {
-//       let value = record[i];
-//       if (getFieldType(fields, tempKey) === 'string') str += `${quotes}${value.replace(/\r/g, '').replace(/\n/g, '\\n')}${quotes}`;
-//       else str += value === '' ? 'undefined' : value;
-//       if (i < len - 1) str += ', ';
-//       isKey = true;
-//     }
-//   }
-//   str += ' }';
-//   return str;
-// }
 
 /**
  * @param {string[]} record
@@ -444,12 +414,13 @@ function writeOpenDB(dbDir, dbName, dbVersion, createStr) {
 }
 
 /**
+ * @param {Record<string, string>} dataTypeMap
  * @param {string} sqlFilesDir
  * @param {SQLRawObj[]} sqlRawObjs
  */
-function writeMaxUserProfile(sqlFilesDir, sqlRawObjs) {
+function writeMaxUserProfile(dataTypeMap, sqlFilesDir, sqlRawObjs) {
   const experienceTeamRaw = fs.readFileSync(sqlFilesDir + '/experience_team.sql', { encoding: 'utf-8' });
-  const experienceTeamObj = getSqlRawObj(experienceTeamRaw);
+  const experienceTeamObj = getSqlRawObj(experienceTeamRaw, dataTypeMap);
   const maxLevel = experienceTeamObj.records.length - 1;
 
   const unitPromotionObj = sqlRawObjs.find(obj => obj.tableName === 'unit_promotion');
@@ -461,7 +432,7 @@ function writeMaxUserProfile(sqlFilesDir, sqlRawObjs) {
   }
 
   const uniqueEquipmentEnhanceDataRaw = fs.readFileSync(sqlFilesDir + '/unique_equipment_enhance_data.sql', { encoding: 'utf-8' });
-  const uniqueEquipmentEnhanceDataObj = getSqlRawObj(uniqueEquipmentEnhanceDataRaw);
+  const uniqueEquipmentEnhanceDataObj = getSqlRawObj(uniqueEquipmentEnhanceDataRaw, dataTypeMap);
   const maxUniqueEnhanceLevel = uniqueEquipmentEnhanceDataObj.records.length + 1;
 
   let maxArea;
@@ -581,7 +552,13 @@ function main() {
     // 'ailment_data.sql',
   ];
 
-  const sqlRawObjs = getSqlRawObjs(sqlFilesDir, excludeFiles, includeFiles);
+  const dataTypeMap = {
+    'INTEGER': 'number',
+    'REAL': 'number',
+    'TEXT': 'string',
+  };
+
+  const sqlRawObjs = getSqlRawObjs(dataTypeMap, sqlFilesDir, excludeFiles, includeFiles);
 
   /** @type {(tableName: string, fields: string[]) => void} */
   const delField = (tableName, fields) => {
@@ -648,7 +625,7 @@ function main() {
   }
   waveGroupObj.records = newWGRecords;
 
-  const excludeUnitID = [106701/*ホマレ*/, 110201/*ミサキ（サマー）*/, 900103/*ヒヨリ（不明）*/, 906601/*イノリ（不明）*/];
+  const excludeUnitID = [106701/*ホマレ*/, 110201/*ミサキ（サマー）*/, 900103/*ヒヨリ（不明）*/, 906601/*イノリ（不明）*/, 116601/*カヤ（タイムトラベル）*/];
   const unitProfileObj = sqlRawObjs.find(obj => obj.tableName === 'unit_profile');
   const newUPRecords = [];
   for (let record of unitProfileObj.records) {
@@ -670,7 +647,7 @@ function main() {
   actualUnitObj.records = newAURecords;
 
   const storyDetailRaw = fs.readFileSync(sqlFilesDir + '/story_detail.sql', { encoding: 'utf-8' });
-  const storyDetailObj = getSqlRawObj(storyDetailRaw);
+  const storyDetailObj = getSqlRawObj(storyDetailRaw, dataTypeMap);
   const charaStoryStatusObj = sqlRawObjs.find(obj => obj.tableName === 'chara_story_status');
   charaStoryStatusObj.primaryKeys = ['chara_id', 'story_id'];
   charaStoryStatusObj.fields.unshift({ fieldName: 'chara_id', fieldType: 'number' });
@@ -788,7 +765,7 @@ function main() {
   if (!fs.existsSync(dbDir)) fs.mkdirSync(dbDir);
   const createStr = writeData(sqlRawObjs, dbDir + '/data/');
   writeOpenDB(dbDir + '/', dbName, dbVersion, createStr);
-  writeMaxUserProfile(sqlFilesDir, sqlRawObjs);
+  writeMaxUserProfile(dataTypeMap, sqlFilesDir, sqlRawObjs);
 }
 
 main();

@@ -2,6 +2,7 @@ export interface SkillData {
   skill_id: number;
   name: string;
   skill_cast_time: number;
+  boss_ub_cool_time: number;
   action_1: number;
   action_2: number;
   action_3: number;
